@@ -1,0 +1,9 @@
+{
+  "methode": "manifold3d, pas de 1°, fourche pleine (sans trous) contre bras + bride ; servo non compté (il tourne avec, contrôlé dans verify_coude.py)",
+  "plage_libre_deg": [
+    -109,
+    109
+  ],
+  "marge_plaque_basse_socle_mm": 2,
+  "validation_physique": false
+}

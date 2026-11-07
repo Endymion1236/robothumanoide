@@ -8,11 +8,11 @@ capteurs et voix) viendra ensuite.
 
 | # | Étape | État |
 |---|---|---|
-| 1 | Berceau de banc V4 imprimé, essai à sec (entrée, stabilité, reliefs libres, câbles, hauteur côté bossage) | impression en cours (07/11/2026) |
+| 1 | Berceau de banc V4 imprimé, essai à sec (entrée, stabilité, reliefs libres, câbles) | **fait le 07/11/2026** : entre sans forcer, stable, câbles OK (hauteur côté bossage non mesurée) |
 | 2 | Berceau V4.1 + bride (inserts M3, vis M3 × 10, patin 1 mm) — `berceau-sts3215/` | modèle prêt, non imprimé |
 | 3 | Premier mouvement : carte Waveshare Bus Servo Adapter (A), cavaliers B, alim 12 V, logiciel FD 1.9.8.2 (COM3, 1000000) | **fait le 07/11/2026** : servo trouvé, 12,3 V, 35 °C, mouvement de 17° à vitesse 300 |
 | 4 | Essai sous charge sur le banc : facultatif pour un bras de table (le servo a une grande marge) | reporté |
-| 5 | Coude : fourche en deux moitiés tenant l'avant-bras des deux côtés (palonnier + disque libre du dessous) — `coude-sts3215/` | **V1 dessinée** (avant-bras 120 mm, rotation complète vérifiée hors Fusion), non imprimée ; pièce « bras » qui tient le servo à concevoir |
+| 5 | Coude : fourche en deux moitiés tenant l'avant-bras des deux côtés (palonnier + disque libre du dessous) — `coude-sts3215/` | **V1 dessinée** (avant-bras 120 mm, rotation complète vérifiée hors Fusion), non imprimée ; **bras V1** (support du servo, repris du berceau V4 validé à sec) dessiné : rotation de l'avant-bras ± 109° vérifiée hors Fusion, non imprimé |
 | 6 | Pince au bout de l'avant-bras | à concevoir |
 
 ## Repères sur le servo (STS3215-C018)
