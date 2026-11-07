@@ -20,6 +20,8 @@ capteurs et voix) viendra ensuite.
 - Boîtier mesuré : 45,2 × 24,4 × 32,9 mm (hauteur à recontrôler côté bossage).
 - Dessous : cylindre Ø5,5 (centre à 8,1 mm du petit côté X−) et bossage 11,9 × 18,3 côté X+,
   reliefs de 2 mm ; connecteurs entre les deux.
+- Étiquette : **STS3215-12V** (alimentation 12 V confirmée).
+- Palonnier : **disque aluminium Ø19,7 mm** (mesuré le 07/11/2026), 4 trous taraudés + vis centrale ; entraxe des trous, filetage et hauteur au-dessus du boîtier à mesurer.
 - **Axe de sortie au-dessus du cylindre** (côté X−) : le cylindre est probablement coaxial à la
   sortie, à confirmer, et servirait de second pivot au coude.
 - Servo « bus série » : jamais branché directement sur une broche de l'ESP32 ; carte d'interface
