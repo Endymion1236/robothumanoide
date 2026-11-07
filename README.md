@@ -21,7 +21,10 @@ capteurs et voix) viendra ensuite.
 - Dessous : cylindre Ø5,5 (centre à 8,1 mm du petit côté X−) et bossage 11,9 × 18,3 côté X+,
   reliefs de 2 mm ; connecteurs entre les deux.
 - Étiquette : **STS3215-12V** (alimentation 12 V confirmée).
-- Palonnier : **disque aluminium Ø19,7 mm** (mesuré le 07/11/2026), 4 trous taraudés + vis centrale ; entraxe des trous, filetage et hauteur au-dessus du boîtier à mesurer.
+- Palonnier : **disque aluminium Ø19,7 mm**, dépasse de **4,3 mm** au-dessus du boîtier, centre à **10,5 mm** du petit côté (mesures du 07/11/2026).
+  4 trous taraudés sur un cercle de **≈ 13,45 mm** de diamètre (bords intérieurs 10,3, extérieurs 16,6), petites vis fournies (taille à confirmer, probablement M3), vis centrale.
+  Un **second disque** est fourni (probablement le palonnier libre du dessous).
+- ⚠️ Écart à éclaircir : centre du palonnier à 10,5 mm du bout, centre du cylindre du dessous à 8,1 mm → 2,4 mm de différence alors qu'ils devraient être alignés.
 - **Axe de sortie au-dessus du cylindre** (côté X−) : le cylindre est probablement coaxial à la
   sortie, à confirmer, et servirait de second pivot au coude.
 - Servo « bus série » : jamais branché directement sur une broche de l'ESP32 ; carte d'interface
