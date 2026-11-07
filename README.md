@@ -15,6 +15,15 @@ capteurs et voix) viendra ensuite.
 | 5 | Coude : fourche en deux moitiés tenant l'avant-bras des deux côtés (palonnier + disque libre du dessous) — `coude-sts3215/` | **V1 dessinée** (avant-bras 120 mm, rotation complète vérifiée hors Fusion), non imprimée ; **bras V1** (support du servo, repris du berceau V4 validé à sec) dessiné : rotation de l'avant-bras ± 109° vérifiée hors Fusion, non imprimé |
 | 6 | Pince au bout de l'avant-bras | à concevoir |
 
+## Matériel (décisions du 07/11/2026)
+
+- **Servos** : 8 STS3215-12V (C018, 30 kg·cm, 1/345) de plus, chez Feetech (Shenzhen Feite Model, Alibaba) →
+  9 en tout : bras de table complet à 6 axes + rechanges. Vérifier que disques, vis et câble sont inclus.
+- **Carte** : la Waveshare Bus Servo Adapter (A) suffit pour tous les servos (en chaîne, un ID par servo).
+- **Alimentation** : prévoir 12 V, 5 A minimum (6 à 10 A conseillé) pour 6 servos.
+- **Socle tournant** : roulements **6807-2RS** (35 × 47 × 7), lot de 4 ; **deux roulements empilés et
+  espacés** dans le socle pour que le bras ne bascule pas, le servo ne fait que tourner.
+
 ## Repères sur le servo (STS3215-C018)
 
 - Boîtier mesuré : 45,2 × 24,4 × 32,9 mm (hauteur à recontrôler côté bossage).
