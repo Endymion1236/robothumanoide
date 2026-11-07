@@ -10,7 +10,7 @@ capteurs et voix) viendra ensuite.
 |---|---|---|
 | 1 | Berceau de banc V4 imprimé, essai à sec (entrée, stabilité, reliefs libres, câbles, hauteur côté bossage) | impression en cours (07/11/2026) |
 | 2 | Berceau V4.1 + bride (inserts M3, vis M3 × 10, patin 1 mm) — `berceau-sts3215/` | modèle prêt, non imprimé |
-| 3 | Premier mouvement : carte d'interface bus servo + alimentation à la tension de la C018, logiciel Feetech | à faire |
+| 3 | Premier mouvement : carte Waveshare Bus Servo Adapter (A), cavaliers B, alim 12 V, logiciel FD 1.9.8.2 (COM3, 1000000) | **fait le 07/11/2026** : servo trouvé, 12,3 V, 35 °C, mouvement de 17° à vitesse 300 |
 | 4 | Essai sous charge sur le banc : barre ≈ 15 cm, 100-200 g au palonnier (position tenue, charge, température) | à faire |
 | 5 | Coude : fourche tenant l'avant-bras des deux côtés (palonnier + cylindre Ø5,5 du dessous comme pivot) | à concevoir |
 | 6 | Pince au bout de l'avant-bras | à concevoir |
