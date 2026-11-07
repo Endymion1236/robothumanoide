@@ -1,0 +1,141 @@
+{
+  "method": "Independent manifold mesh booleans, from Fusion parameter expressions; Fusion execution recorded separately",
+  "parameters_mm": {
+    "base_L": 80,
+    "base_W": 60,
+    "base_T": 5,
+    "servo_L": 45.2,
+    "servo_W": 24.4,
+    "servo_H": 32.9,
+    "jeu": 0.2,
+    "relief_H": 2,
+    "cyl_D": 5.5,
+    "cyl_offset": 8.1,
+    "boss_L": 11.9,
+    "boss_W": 18.3,
+    "boss_edge": 5,
+    "boss_shift_Y": 0,
+    "rail_H": 7,
+    "rail_W": 2,
+    "wall_T": 3,
+    "wall_H": 17,
+    "cable_x_REF": 18,
+    "cable_L_REF": 8,
+    "cable_W_REF": 20,
+    "cable_H_REF": 5,
+    "cable_margin": 1,
+    "brace_x_REF": 33,
+    "brace_L": 8,
+    "brace_T": 4,
+    "post_W": 8,
+    "screw_D": 3.4,
+    "insert_D": 4,
+    "insert_depth": 7,
+    "brace_gap_REF": 1,
+    "mount_D": 4.5,
+    "mount_offset": 8,
+    "sx": 17.4,
+    "sy": 17.8,
+    "cx": 17.2,
+    "cy": 17.6,
+    "cavity_L": 45.6,
+    "cavity_W": 24.799999999999997,
+    "support_Z": 12,
+    "top_Z": 45.9,
+    "boss_x": 45.7,
+    "boss_y": 20.85,
+    "brace_x": 46.4,
+    "post_y0": 6.600000000000001,
+    "post_y1": 45.4
+  },
+  "physical_validation": false,
+  "parts": {
+    "berceau_V4_1_TEST": {
+      "watertight": true,
+      "winding_consistent": true,
+      "connected_bodies": 1,
+      "extents_mm": [
+        80.0,
+        60.0,
+        45.900001525878906
+      ],
+      "volume_mm3": 36610.81989209184,
+      "assembly_z_offset_mm": 0.0
+    },
+    "bride_V4_1_TEST": {
+      "watertight": true,
+      "winding_consistent": true,
+      "connected_bodies": 1,
+      "extents_mm": [
+        8.0,
+        46.80000162124634,
+        4.0
+      ],
+      "volume_mm3": 1425.0182887590854,
+      "assembly_z_offset_mm": 45.900001525878906
+    }
+  },
+  "intersection_mm3": {
+    "base_servo": 0.0,
+    "base_bride": 0.0,
+    "base_cable": 0.0,
+    "bride_servo": 0.0,
+    "bride_cable": 0.0
+  },
+  "recompute_trials": [
+    {
+      "override": {
+        "base_L": "82 mm"
+      },
+      "base_extents_mm": [
+        82.0,
+        60.0,
+        45.900001525878906
+      ],
+      "cavity_mm": [
+        45.6,
+        24.799999999999997
+      ],
+      "servo_intersection_mm3": 0.0
+    },
+    {
+      "override": {
+        "jeu": "0.3 mm"
+      },
+      "base_extents_mm": [
+        80.0,
+        60.0,
+        45.900001525878906
+      ],
+      "cavity_mm": [
+        45.800000000000004,
+        25.0
+      ],
+      "servo_intersection_mm3": 0.0
+    },
+    {
+      "override": {
+        "boss_shift_Y": "0.5 mm"
+      },
+      "base_extents_mm": [
+        80.0,
+        60.0,
+        45.900001525878906
+      ],
+      "cavity_mm": [
+        45.6,
+        24.799999999999997
+      ],
+      "servo_intersection_mm3": 0.0
+    }
+  ],
+  "clearances_mm": {
+    "below_reliefs": 5,
+    "boss_to_rail_centered": 1.049999999999999,
+    "lateral_per_side": 0.2,
+    "below_plug_envelope": 2,
+    "brace_gap": 1,
+    "insert_wall": 2.0
+  },
+  "support_area_mm2": 140.8
+}
