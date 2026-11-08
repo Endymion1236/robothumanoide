@@ -1,0 +1,96 @@
+{
+  "methode": "manifold3d, memes expressions que CoudeV1.py ; Fusion non execute",
+  "validation_physique": false,
+  "parametres_mm": {
+    "ecart_mesure": 36.4,
+    "servo_L": 45.2,
+    "servo_W": 24.4,
+    "axe_bout": 8.1,
+    "disque_D": 19.7,
+    "disque_haut_H": 4.3,
+    "servo_H": 28.8,
+    "haut_H": 33,
+    "haut_debut": 15.6,
+    "haut_arc_R": 10,
+    "jeu_dessus": 1,
+    "disque_bas_H": 3.3,
+    "cercle_trous": 13.45,
+    "bossage_H": 2,
+    "bossage_L": 11.9,
+    "bossage_W": 18.3,
+    "bossage_bord": 5,
+    "avant_bras_L": 120,
+    "plaque_W": 24,
+    "plaque_T": 4,
+    "bout_R": 12,
+    "vis_disque_D": 2.9,
+    "lamage_D": 5.2,
+    "lamage_P": 1.5,
+    "centre_D": 7,
+    "entretoise_A_X": 50,
+    "entretoise_A_L": 12,
+    "entretoise_B_L": 15,
+    "jeu_serrage": 0.4,
+    "vis_M3_D": 3.4,
+    "vis_M3_Y": 6,
+    "insert_D": 4,
+    "insert_P": 9,
+    "axe_X": 40,
+    "axe_Y": 15,
+    "surelev": 0.9,
+    "patin_R": 9,
+    "ecart": 37.3,
+    "demi_H": 18.45,
+    "z_haut": 41.3,
+    "trou_d": 4.7553,
+    "pl_y": 3.0,
+    "ent_B_X": 105
+  },
+  "pieces": {
+    "fourche_haute_V1_2": {
+      "fermee": true,
+      "orientation_coherente": true,
+      "volumes": 1,
+      "encombrement_mm": [
+        132.0,
+        24.0,
+        22.45
+      ],
+      "volume_cm3": 23.4
+    },
+    "fourche_basse_V1_2": {
+      "fermee": true,
+      "orientation_coherente": true,
+      "volumes": 1,
+      "encombrement_mm": [
+        132.0,
+        24.0,
+        22.45
+      ],
+      "volume_cm3": 23.6
+    }
+  },
+  "collisions_mm3": {
+    "haute_basse": 0.0,
+    "haute_servo": 0.0,
+    "basse_servo": 0.0,
+    "haute_disques": 5.551115123125783e-17,
+    "basse_disques": -5.26804438838948e-16
+  },
+  "rotation": {
+    "pas_deg": 2,
+    "angles_en_collision": [],
+    "tour_complet_libre": true,
+    "rayon_coin_servo_le_plus_loin_mm": 39.05444917035702,
+    "entretoise_A_debut_mm": 50
+  },
+  "marges_mm": {
+    "bossage_plaque_basse": 1.299999999999998,
+    "partie_haute_plaque_haute": 1.0,
+    "boitier_cote_palonnier_plaque_haute": 5.199999999999996,
+    "boitier_plaque_basse": 3.299999999999998,
+    "paroi_sous_tete_M2_5": 2.5,
+    "vis_M3x30_dans_bloc_bas": 7.150000000000002,
+    "profondeur_trou_insert": 9
+  }
+}

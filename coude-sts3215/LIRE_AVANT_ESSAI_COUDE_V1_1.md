@@ -1,4 +1,8 @@
-# Coude STS3215 — V1.1 (remplace la V1)
+# Coude STS3215 — V1.1 : REMPLACÉE par la V1.2 (`LIRE_AVANT_ESSAI_COUDE_V1_2.md`), ne pas imprimer
+
+La V1.1 ignorait que le dessus du servo est plus haut côté étiquette (33) : sa plaque haute y serait passée à 0,1 mm.
+
+---
 
 **Pourquoi :** la V1 calculait l'écart entre les deux disques (3 + 32,9 + 4,3 = 40,2). Mesuré sur le
 servo monté le 08/11/2026 : **36,4**. Les plaques de la V1 se retrouvaient pincées en V (44,3 au

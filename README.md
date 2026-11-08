@@ -9,10 +9,10 @@ capteurs et voix) viendra ensuite.
 | # | Étape | État |
 |---|---|---|
 | 1 | Berceau de banc V4 imprimé, essai à sec (entrée, stabilité, reliefs libres, câbles) | **fait le 07/11/2026** : entre sans forcer, stable, câbles OK (hauteur côté bossage non mesurée) |
-| 2 | Berceau V4.1 + bride (inserts M3, vis M3 × 10, patin 1 mm) — `berceau-sts3215/` | abandonné au profit du bras V1 ; **sa bride est réglée sur 32,9 (faux)** |
+| 2 | Berceau V4.1 + bride (inserts M3, vis M3 × 10, patin 1 mm) — `berceau-sts3215/` | abandonné au profit du bras V1 |
 | 3 | Premier mouvement : carte Waveshare Bus Servo Adapter (A), cavaliers B, alim 12 V, logiciel FD 1.9.8.2 (COM3, 1000000) | **fait le 07/11/2026** : servo trouvé, 12,3 V, 35 °C, mouvement de 17° à vitesse 300 |
 | 4 | Essai sous charge sur le banc : facultatif pour un bras de table (le servo a une grande marge) | reporté |
-| 5 | Coude : fourche en deux moitiés tenant l'avant-bras des deux côtés (palonnier + disque libre du dessous) — `coude-sts3215/` | **V1 imprimée (08/11/2026) : écart entre plaques faux** (40,2 calculé, 36,4 mesuré) → **V1.1** à réimprimer ; **bras V1** imprimé ; **bride V1.1** avec un pied de 4,1 mm (boîtier de 28,8 et non 32,9) à imprimer ; rotation de l'avant-bras ± 109° vérifiée hors Fusion |
+| 5 | Coude : fourche en deux moitiés tenant l'avant-bras des deux côtés (palonnier + disque libre du dessous) — `coude-sts3215/` | V1 imprimée : écart faux (40,2 calculé, 36,4 mesuré) ; V1.1 aurait frotté sur la partie haute → **V1.2 à imprimer** ; **bras V1** imprimé, **bride d'origine** (le dessus fait bien 33 sous la bride) ; rotation de l'avant-bras ± 109° vérifiée hors Fusion |
 | 6 | Pince au bout de l'avant-bras | à concevoir |
 
 ## Matériel (décisions du 07/11/2026)
@@ -26,7 +26,8 @@ capteurs et voix) viendra ensuite.
 
 ## Repères sur le servo (STS3215-C018)
 
-- Boîtier mesuré : 45,2 × 24,4 × **28,8 mm** (hauteur mesurée le 08/11/2026 ; les anciennes notes disaient 32,9, faux).
+- Boîtier mesuré : 45,2 × 24,4. **Hauteur variable** (08/11/2026) : **28,8** côté palonnier, **33** à partir de 15,6 mm
+  du bout côté palonnier (partie haute, plaque de l'étiquette).
 - Dessous : cylindre Ø5,5 (centre à 8,1 mm du petit côté X−) et bossage 11,9 × 18,3 côté X+,
   reliefs de 2 mm ; connecteurs entre les deux.
 - Étiquette : **STS3215-12V** (alimentation 12 V confirmée).
@@ -35,7 +36,7 @@ capteurs et voix) viendra ensuite.
   Vis fournies : **≈ 2,5 mm de diamètre → M2,5** (trou de passage à prévoir ≈ 2,9 mm dans les pièces imprimées).
   **Second disque** fourni (palonnier libre du dessous) : 4 trous taraudés, alésage central avec collerette côté servo ; monté sur le cylindre, il **tourne librement** (pas de cannelures) et dépasse de **3 mm** sous le boîtier.
   Entre les faces extérieures des deux disques : **36,4 mm mesurés** le 08/11/2026 = 3,3 (disque bas) + 28,8 (boîtier) + 4,3 (palonnier).
-  ⚠️ Toute pièce dessinée avant le 08/11/2026 avec 32,9 de hauteur (berceaux V4/V4.1, bras V1, coude V1) est à vérifier.
+  Leçon : une cote de hauteur se prend **à l'endroit précis** où la pièce appuie.
 - **Axe de sortie au-dessus du cylindre** (côté X−) : le cylindre est **coaxial** à la sortie
   (confirmé) et sert de second pivot au coude.
 - Servo « bus série » : jamais branché directement sur une broche de l'ESP32 ; carte d'interface
