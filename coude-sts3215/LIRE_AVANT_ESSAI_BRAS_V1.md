@@ -30,9 +30,18 @@ bossage avec inserts M3 et vis M3 × 10, 1 mm de jeu pour le patin, 4 trous de f
 **Dans FD, ne jamais commander l'avant-bras au-delà de ± 100°** autour de sa position dans l'axe
 (environ ± 1140 pas de part et d'autre) tant que des butées logicielles ne sont pas réglées.
 
+## Bride V1.1 (08/11/2026) : à imprimer à la place de la première bride
+
+Le boîtier mesure **28,8** et non 32,9 : la première bride serait passée à 5,1 mm au-dessus du
+servo. Les colonnes déjà imprimées ne changent pas ; la **bride V1.1** a un **pied de 4,1 mm**
+dessous (20,4 de large, au-dessus du servo seulement), ce qui remet le jeu à **1 mm** pour le patin.
+`outputs/bras_v1/bride_bras_V1_1_TEST.stl` est posé **dessus de la bride sur le plateau, pied vers le
+haut** : pas de support nécessaire. Le bras `bras_V1_TEST.stl` est inchangé (même pièce).
+Rotation recontrôlée avec la bride V1.1 et la fourche V1.1 : toujours −109° à +109°.
+
 ## Impression et montage
 
-1. Imprimer `bras_V1_TEST.stl` (socle sur le plateau) et `bride_bras_V1_TEST.stl` (à plat), PETG,
+1. Imprimer `bras_V1_TEST.stl` (socle sur le plateau) et `bride_bras_V1_1_TEST.stl` (tel quel), PETG,
    4 périmètres.
 2. Poser les 2 inserts M3 en haut des colonnes.
 3. Glisser le servo dans le bras, bossage derrière la nervure, câble couché dans sa rainure et sorti

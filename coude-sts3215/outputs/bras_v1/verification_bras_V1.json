@@ -6,7 +6,8 @@
     "base_T": 5,
     "servo_L": 45.2,
     "servo_W": 24.4,
-    "servo_H": 32.9,
+    "servo_H": 28.8,
+    "bride_pied_H": 4.1,
     "jeu": 0.2,
     "relief_H": 2,
     "cyl_D": 5.5,
@@ -65,17 +66,17 @@
       "volume_mm3": 33722.17955761917,
       "assembly_z_offset_mm": 0.0
     },
-    "bride_bras_V1_TEST": {
+    "bride_bras_V1_1_TEST": {
       "watertight": true,
       "winding_consistent": true,
       "connected_bodies": 1,
       "extents_mm": [
         8.0,
         46.80000162124634,
-        4.0
+        8.10000228881836
       ],
-      "volume_mm3": 1425.0182887590854,
-      "assembly_z_offset_mm": 47.900001525878906
+      "volume_mm3": 2094.1387123430964,
+      "assembly_z_offset_mm": 43.79999923706055
     }
   },
   "intersection_mm3": {

@@ -8,8 +8,8 @@
     "axe_bout": 8.1,
     "disque_D": 19.7,
     "disque_haut_H": 4.3,
-    "disque_bas_H": 3,
-    "servo_H": 29.1,
+    "servo_H": 28.8,
+    "disque_bas_H": 3.3,
     "cercle_trous": 13.45,
     "bossage_H": 2,
     "bossage_L": 11.9,
@@ -79,9 +79,9 @@
     "entretoise_A_debut_mm": 50
   },
   "marges_mm": {
-    "bossage_plaque_basse": 1,
+    "bossage_plaque_basse": 1.299999999999998,
     "boitier_plaque_haute": 4.3,
-    "boitier_plaque_basse": 3,
+    "boitier_plaque_basse": 3.299999999999998,
     "paroi_sous_tete_M2_5": 2.5,
     "vis_M3x30_dans_bloc_bas": 7.600000000000001,
     "profondeur_trou_insert": 9

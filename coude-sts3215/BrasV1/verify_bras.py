@@ -44,6 +44,7 @@ def build(overrides=None):
     for x in (mount_offset,base_L-mount_offset):
         for y in (mount_offset,base_W-mount_offset):b-=cyl(x,y,0,mount_D,base_T)
     brace=box(brace_x,post_y0,top_Z,brace_L,post_y1+post_W-post_y0,brace_T)
+    brace+=box(brace_x,sy+2,top_Z-bride_pied_H,brace_L,servo_W-4,bride_pied_H)
     for y in (post_y0,post_y1):brace-=cyl(sx+brace_x_REF,y+post_W/2,top_Z,screw_D,brace_T)
     servo=box(sx,sy,support_Z,servo_L,servo_W,servo_H)+cyl(sx+cyl_offset,base_W/2,support_Z-relief_H,cyl_D,relief_H)+box(boss_x,boss_y,support_Z-relief_H,boss_L,boss_W,relief_H)
     cable=box(sx+cable_x_REF,base_W/2-cable_W_REF/2,support_Z-cable_H_REF,cable_L_REF,cable_W_REF,cable_H_REF)+box(sx+cable_x_REF,2,base_T+1,cable_L_REF,base_W-4,3)
@@ -53,10 +54,13 @@ p,b,brace,servo,cable=build()
 report={'method':'Independent manifold mesh booleans, from Fusion parameter expressions; Fusion execution recorded separately','parameters_mm':p,'physical_validation':False,'parts':{},'intersection_mm3':{}}
 for label,a,c in [('base_servo',b,servo),('base_bride',b,brace),('base_cable',b,cable),('bride_servo',brace,servo),('bride_cable',brace,cable)]:
     vol=(a^c).volume();report['intersection_mm3'][label]=vol;assert abs(vol)<1e-6,(label,vol)
-for name,m in [('bras_V1_TEST',b),('bride_bras_V1_TEST',brace)]:
+for name,m in [('bras_V1_TEST',b),('bride_bras_V1_1_TEST',brace)]:
     t=mesh(m)
     # Place exported meshes on z=0 for printing. XY retained for faithful assembly alignment.
-    zmin=float(t.bounds[0,2]);t.apply_translation((0,0,-zmin))
+    zmin=float(t.bounds[0,2])
+    if name.startswith('bride'):  # bride V1.1 : dessus sur le plateau, pied vers le haut (pas de surplomb)
+        t.apply_transform(tm.transformations.rotation_matrix(np.pi,(1,0,0)))
+    t.apply_translation((0,0,-float(t.bounds[0,2])))
     t.export(OUT/(name+'.stl'))
     t=tm.load_mesh(OUT/(name+'.stl'))
     data={'watertight':bool(t.is_watertight),'winding_consistent':bool(t.is_winding_consistent),'connected_bodies':body_count(t),'extents_mm':t.extents.tolist(),'volume_mm3':float(t.volume),'assembly_z_offset_mm':zmin}
@@ -74,7 +78,7 @@ report['clearances_mm']={'below_reliefs':rail_H-relief_H,'boss_to_rail_centered'
 report['support_area_mm2']=2*rail_W*(servo_L-cable_x_REF-cable_L_REF-cable_margin)
 (OUT/'verification_bras_V1.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
 fig=plt.figure(figsize=(13,6));fig.patch.set_facecolor('#f5f5f2')
-for k,title in enumerate(['Bras V1 — côté axe dégagé, nervure du bossage','Bras V1 — avec la bride']):
+for k,title in enumerate(['Bras V1 — côté axe dégagé, nervure du bossage','Bras V1 — avec la bride V1.1 (pied de 4,1)']):
     ax=fig.add_subplot(1,2,k+1,projection='3d')
     for solid,color,alpha in [(b,'#397c92',1)]+([(brace,'#e1a64a',1)] if k else []):
         t=mesh(solid);coll=Poly3DCollection(t.vertices[t.faces],facecolor=color,edgecolor='#23424b',linewidth=.12,alpha=alpha);ax.add_collection3d(coll)

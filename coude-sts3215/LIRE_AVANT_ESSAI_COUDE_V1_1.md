@@ -15,10 +15,11 @@ Tout le reste est identique à la V1 (voir `LIRE_AVANT_ESSAI_COUDE_V1.md` : impr
 montage). Contrôles hors Fusion refaits : pièces fermées, aucune collision au montage, tour complet
 libre autour du servo ; sur le bras V1, l'avant-bras va toujours de −109° à +109°.
 
-## Ce qui reste à éclaircir : la hauteur du boîtier
+## D'où venait l'erreur
 
-L'erreur de 3,8 mm vient d'une des trois cotes. Le modèle en **déduit** un boîtier de 29,1
-(36,4 − 4,3 − 3) au lieu de 32,9 : **à mesurer**, servo sans disques, du dessous plat au dessus.
-Cette cote compte pour la **bride du bras V1**, réglée sur 32,9 : si le boîtier fait vraiment 29,1,
-la bride passera environ 4,8 mm au-dessus du servo au lieu de 1 mm. Il faudra alors une cale
-(ou un patin plus épais) sous la bride, ou une bride corrigée.
+Boîtier mesuré le 08/11/2026 : **28,8** (les anciennes notes disaient 32,9). D'où
+36,4 = 3,3 (disque du bas) + 28,8 + 4,3 (palonnier). Le modèle porte maintenant ces valeurs ; la
+géométrie de la fourche V1.1 ne change pas (elle dépend seulement de l'écart mesuré). Marges :
+1,3 entre le bossage et la plaque basse, 1,7 entre la plaque basse et le socle du bras V1.
+
+La **bride du bras V1** était réglée sur 32,9 : voir `LIRE_AVANT_ESSAI_BRAS_V1.md` (bride V1.1).

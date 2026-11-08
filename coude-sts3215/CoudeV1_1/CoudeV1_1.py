@@ -22,8 +22,8 @@ SPECS = [
     ('axe_bout', '8.1 mm'),          # centre palonnier / cylindre depuis le petit côté
     ('disque_D', '19.7 mm'),
     ('disque_haut_H', '4.3 mm'),     # palonnier au-dessus du boîtier
-    ('disque_bas_H', '3 mm'),        # disque libre sous le boîtier
-    ('servo_H', 'ecart_mesure-disque_haut_H-disque_bas_H'),  # DÉDUIT (29,1) : hauteur du boîtier à mesurer
+    ('servo_H', '28.8 mm'),          # boîtier mesuré le 08/11/2026 (les anciennes notes disaient 32,9)
+    ('disque_bas_H', 'ecart_mesure-servo_H-disque_haut_H'),  # = 3,3 (3 mesuré à l'œil)
     ('cercle_trous', '13.45 mm'),    # diamètre du cercle des 4 trous M2,5 des disques
     ('bossage_H', '2 mm'), ('bossage_L', '11.9 mm'), ('bossage_W', '18.3 mm'), ('bossage_bord', '5 mm'),
     # Fourche (choix de conception)

@@ -66,7 +66,7 @@ def run(context):
         D=adsk.fusion.Design.cast(app.activeProduct)
         D.designType=adsk.fusion.DesignTypes.ParametricDesignType
         specs=[('base_L','80 mm'),('base_W','60 mm'),('base_T','5 mm'),
-          ('servo_L','45.2 mm'),('servo_W','24.4 mm'),('servo_H','32.9 mm'),
+          ('servo_L','45.2 mm'),('servo_W','24.4 mm'),('servo_H','28.8 mm'),('bride_pied_H','4.1 mm'),
           ('jeu','0.2 mm'),('relief_H','2 mm'),('cyl_D','5.5 mm'),('cyl_offset','8.1 mm'),
           ('boss_L','11.9 mm'),('boss_W','18.3 mm'),('boss_edge','5 mm'),('boss_shift_Y','0 mm'),
           ('rail_H','9 mm'),('rail_W','2 mm'),('wall_T','3 mm'),('wall_H','19 mm'),('nervure_T','1.2 mm'),('nervure_W','14 mm'),('nervure_jeu','0.5 mm'),
@@ -76,7 +76,7 @@ def run(context):
           ('brace_gap_REF','1 mm'),('mount_D','4.5 mm'),('mount_offset','8 mm'),
           ('sx','(base_L-servo_L)/2'),('sy','(base_W-servo_W)/2'),
           ('cx','sx-jeu'),('cy','sy-jeu'),('cavity_L','servo_L+2*jeu'),('cavity_W','servo_W+2*jeu'),
-          ('support_Z','base_T+rail_H'),('top_Z','support_Z+servo_H+brace_gap_REF'),
+          ('support_Z','base_T+rail_H'),('top_Z','support_Z+servo_H+brace_gap_REF+bride_pied_H'),
           ('boss_x','sx+servo_L-boss_edge-boss_L'),('boss_y','sy+(servo_W-boss_W)/2+boss_shift_Y'),
           ('brace_x','sx+brace_x_REF-brace_L/2'),('post_y0','cy-wall_T-post_W'),('post_y1','cy+cavity_W+wall_T')]
         confirmed={'jeu','cyl_D','cyl_offset','boss_L','boss_W','boss_edge','relief_H'}
@@ -109,6 +109,9 @@ def run(context):
                 s=sketch(b,'0 mm','Fixation_socle');circle(s,x,y,'mount_D');ext(b,s,'base_T',C,'Trou_fixation')
         brace=component(root,'Bride_bras_V1_TEST');bc=brace.component
         box(bc,'brace_x','post_y0','brace_L','post_y1+post_W-post_y0','top_Z','brace_T','Bride_demontable')
+        # Bride V1.1 : boitier mesure 28,8 (et non 32,9). Les colonnes deja imprimees restent a la
+        # meme hauteur ; un pied sous la bride descend jusqu'a 1 mm (patin) au-dessus du servo.
+        box(bc,'brace_x','sy+2 mm','brace_L','servo_W-4 mm','top_Z-bride_pied_H','bride_pied_H','Pied_bride',J)
         for y in ('post_y0','post_y1'):
             s=sketch(bc,'top_Z','Vis_bride');circle(s,'sx+brace_x_REF',y+'+post_W/2','screw_D');ext(bc,s,'brace_T',C,'Passage_M3_bride')
         servo=component(root,'Servo_REFERENCE_non_imprimable');sc=servo.component
@@ -149,7 +152,7 @@ def run(context):
         assert not checks,checks
         assert b.bRepBodies.count==1 and bc.bRepBodies.count==1
         assert v('rail_H-relief_H')>0 and v('(servo_W-boss_W)/2-rail_W')>0
-        for oc,filename in [(base,'bras_V1_TEST.stl'),(brace,'bride_bras_V1_TEST.stl')]:
+        for oc,filename in [(base,'bras_V1_TEST.stl'),(brace,'bride_bras_V1_1_TEST.stl')]:
             opt=D.exportManager.createSTLExportOptions(oc.component.bRepBodies.item(0),os.path.join(OUT,filename));opt.meshRefinement=adsk.fusion.MeshRefinementSettings.MeshRefinementHigh
             assert D.exportManager.execute(opt)
         servo.isLightBulbOn=False;cable.isLightBulbOn=False
