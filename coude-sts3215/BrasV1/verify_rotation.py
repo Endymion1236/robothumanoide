@@ -16,7 +16,7 @@ with contextlib.redirect_stdout(io.StringIO()):
     V = runpy.run_path(str(ICI/'verify_bras.py'))
 pb, bras, bride, servo_ref = V['p'], V['b'], V['brace'], V['servo']
 
-tree = ast.parse((ICI.parent/'CoudeV1'/'CoudeV1.py').read_text(encoding='utf-8'))
+tree = ast.parse((ICI.parent/'CoudeV1_1'/'CoudeV1_1.py').read_text(encoding='utf-8'))
 SPECS = next(ast.literal_eval(n.value) for n in ast.walk(tree) if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'SPECS' for t in n.targets))
 pc = {}
 for n, e in SPECS: pc[n] = eval(e.replace(' mm', ''), {'__builtins__': {}}, pc)
@@ -63,7 +63,7 @@ for k, ang in enumerate([0, r[1] if r else 90]):
     axp = fig.add_subplot(1, 2, k+1, projection='3d')
     for solide, c in [(bras, '#9ccc8c'), (bride, '#e1a64a'), (servo_ref, '#444444'), (fourche_a(ang), '#397c92')]:
         t = mesh(solide); axp.add_collection3d(Poly3DCollection(t.vertices[t.faces], facecolor=c, edgecolor='#222', linewidth=.06, alpha=.8))
-    axp.set(xlim=(-110, 90), ylim=(-70, 130), zlim=(0, 80), title=f'Coude sur bras V1 — avant-bras à {ang}°')
+    axp.set(xlim=(-110, 90), ylim=(-70, 130), zlim=(0, 80), title=f'Coude V1.1 sur bras V1 — avant-bras à {ang}°')
     axp.set_box_aspect((200, 200, 80)); axp.view_init(elev=35, azim=-60)
 fig.text(.5, .02, 'Vert : bras · orange : bride · gris : servo · bleu : fourche du coude · Prototype non validé', ha='center')
 fig.tight_layout(rect=(0, .05, 1, 1)); fig.savefig(OUT/'apercu_coude_sur_bras_V1.png', dpi=140)
