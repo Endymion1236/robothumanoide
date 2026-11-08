@@ -15,11 +15,29 @@ capteurs et voix) viendra ensuite.
 | 5 | Coude : fourche en deux moitiés tenant l'avant-bras des deux côtés (palonnier + disque libre du dessous) — `coude-sts3215/` | V1 imprimée : écart faux (40,2 calculé, 36,4 mesuré) ; V1.1 aurait frotté sur la partie haute → **V1.2 à imprimer** ; **bras V1** imprimé et monté ; le servo basculait vers l'axe → **bride V1.2 avec cale de 1,4 mm** (serrage 0,5) à imprimer ; rotation de l'avant-bras ± 109° vérifiée hors Fusion |
 | 6 | Pince au bout de l'avant-bras | à concevoir |
 
+## Incident du 08/11/2026 et règles de sécurité
+
+Premier branchement avec la fourche du coude montée : **odeur de brûlé**, puis plus rien. La carte
+Waveshare n'apparaît plus du tout sur l'ordinateur (ni COM, ni périphérique inconnu, deux câbles USB
+essayés) : sa partie USB est morte. Câble du servo intact, aucune trace visible sur la carte.
+Cause **non établie** ; hypothèse la plus probable : servo bloqué contre une colonne (butées pas
+encore réglées), forçant en continu. Servo d'origine **suspect** : ne le rebrancher qu'en dernier.
+
+Reprise : carte neuve testée seule (port COM) → avec un servo neuf seul, sans rien dessus → enfin
+l'ancien servo, seul, sans fourche, prêt à tout débrancher.
+
+Règles désormais :
+1. **Butées réglées dans le servo (Min/Max Angle Limit) AVANT de monter quoi que ce soit dessus.**
+2. **Protection de couple et de courant** réglée dans FD.
+3. **Interrupteur sur le 12 V** pour tout couper d'un geste.
+4. **Jamais brancher ou débrancher un servo sous tension.**
+
 ## Matériel (décisions du 07/11/2026)
 
 - **Servos** : 8 STS3215-12V (C018, 30 kg·cm, 1/345) de plus, chez Feetech (Shenzhen Feite Model, Alibaba) →
   9 en tout : bras de table complet à 6 axes + rechanges. Vérifier que disques, vis et câble sont inclus.
 - **Carte** : la Waveshare Bus Servo Adapter (A) suffit pour tous les servos (en chaîne, un ID par servo).
+  **À racheter** (USB de la première carte mort le 08/11/2026).
 - **Alimentation** : prévoir 12 V, 5 A minimum (6 à 10 A conseillé) pour 6 servos.
 - **Socle tournant** : roulements **6807-2RS** (35 × 47 × 7), lot de 4 ; **deux roulements empilés et
   espacés** dans le socle pour que le bras ne bascule pas, le servo ne fait que tourner.
