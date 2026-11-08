@@ -35,6 +35,8 @@
     "insert_D": 4,
     "insert_depth": 7,
     "brace_gap_REF": 0.9,
+    "serrage_bride": 0.5,
+    "cale_bride": 1.4,
     "mount_D": 4.5,
     "mount_offset": 8,
     "sx": 17.4,
@@ -65,26 +67,26 @@
       "volume_mm3": 33722.17955761917,
       "assembly_z_offset_mm": 0.0
     },
-    "bride_bras_V1_TEST": {
+    "bride_bras_V1_2_TEST": {
       "watertight": true,
       "winding_consistent": true,
       "connected_bodies": 1,
       "extents_mm": [
         8.0,
         46.80000162124634,
-        4.0
+        5.400001525878906
       ],
-      "volume_mm3": 1425.0182887590854,
-      "assembly_z_offset_mm": 47.900001525878906
+      "volume_mm3": 1653.498554872385,
+      "assembly_z_offset_mm": 46.5
     }
   },
   "intersection_mm3": {
     "base_servo": 0.0,
     "base_bride": 0.0,
     "base_cable": 0.0,
-    "bride_servo": 0.0,
     "bride_cable": 0.0
   },
+  "serrage_bride_sur_servo_mm": 0.5,
   "recompute_trials": [
     {
       "override": {

@@ -30,20 +30,25 @@ bossage avec inserts M3 et vis M3 × 10, 1 mm de jeu pour le patin, 4 trous de f
 **Dans FD, ne jamais commander l'avant-bras au-delà de ± 100°** autour de sa position dans l'axe
 (environ ± 1140 pas de part et d'autre) tant que des butées logicielles ne sont pas réglées.
 
-## Bride : la bride d'origine est la bonne (08/11/2026)
+## Bride V1.2 avec cale (08/11/2026) : à imprimer
 
-Le dessus du servo est à **33** sous la bride (partie haute, côté étiquette) : la bride d'origine,
-réglée sur 32,9, laisse **0,9 mm** pour le patin. La « bride V1.1 » avec un pied, proposée un moment
-d'après une mesure prise côté palonnier (28,8), était fausse et a été retirée.
-Rotation recontrôlée avec la fourche V1.2 : toujours −109° à +109°.
+Monté sans patin, le servo **bascule vers l'axe** : il n'est tenu que sur sa moitié arrière et le poids
+de la fourche fait levier. Les 0,9 mm de jeu sous la bride deviennent environ 4 mm au bout côté palonnier.
+
+La bride V1.2 a une **cale de 1,4 mm** dessous (au-dessus du servo seulement, 20,4 de large) :
+0,9 pour combler le jeu + **0,5 de serrage**. Pas 2 mm : la bride serait tordue de 1,1 mm au serrage,
+trop pour du PLA (risque de casse ou de déformation avec le temps).
+`outputs/bras_v1/bride_bras_V1_2_TEST.stl` : dessus sur le plateau, cale vers le haut, sans support.
+Serrer les deux vis **à tour de rôle**, jusqu'au contact avec les colonnes, sans forcer.
+Rotation recontrôlée : toujours −109° à +109°. Plus besoin de patin caoutchouc.
 
 ## Impression et montage
 
-1. Imprimer `bras_V1_TEST.stl` (socle sur le plateau) et `bride_bras_V1_TEST.stl` (à plat), PETG,
+1. Imprimer `bras_V1_TEST.stl` (socle sur le plateau) et `bride_bras_V1_2_TEST.stl` (tel quel), PETG,
    4 périmètres.
 2. Poser les 2 inserts M3 en haut des colonnes.
 3. Glisser le servo dans le bras, bossage derrière la nervure, câble couché dans sa rainure et sorti
    par la fenêtre.
 4. Monter la fourche du coude (fourche **V1.2** : voir `LIRE_AVANT_ESSAI_COUDE_V1_2.md`).
-5. Patin caoutchouc de 1 à 1,5 mm sur le servo, bride, vis M3 × 10 serrées doucement.
+5. Bride V1.2 (avec cale), vis M3 × 10 serrées doucement, à tour de rôle.
 6. Hors tension : tourner l'avant-bras à la main de butée à butée, sans forcer.

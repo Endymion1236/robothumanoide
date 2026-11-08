@@ -75,7 +75,7 @@ def run(context):
           ('cable_x_REF','18 mm'),('cable_L_REF','8 mm'),('cable_W_REF','20 mm'),('cable_H_REF','5 mm'),
           ('cable_margin','1 mm'),('brace_x_REF','33 mm'),('brace_L','8 mm'),('brace_T','4 mm'),
           ('post_W','8 mm'),('screw_D','3.4 mm'),('insert_D','4 mm'),('insert_depth','7 mm'),
-          ('brace_gap_REF','0.9 mm'),('mount_D','4.5 mm'),('mount_offset','8 mm'),
+          ('brace_gap_REF','0.9 mm'),('serrage_bride','0.5 mm'),('cale_bride','brace_gap_REF+serrage_bride'),('mount_D','4.5 mm'),('mount_offset','8 mm'),
           ('sx','(base_L-servo_L)/2'),('sy','(base_W-servo_W)/2'),
           ('cx','sx-jeu'),('cy','sy-jeu'),('cavity_L','servo_L+2*jeu'),('cavity_W','servo_W+2*jeu'),
           ('support_Z','base_T+rail_H'),('top_Z','support_Z+servo_H+brace_gap_REF'),
@@ -111,6 +111,9 @@ def run(context):
                 s=sketch(b,'0 mm','Fixation_socle');circle(s,x,y,'mount_D');ext(b,s,'base_T',C,'Trou_fixation')
         brace=component(root,'Bride_bras_V1_TEST');bc=brace.component
         box(bc,'brace_x','post_y0','brace_L','post_y1+post_W-post_y0','top_Z','brace_T','Bride_demontable')
+        # Bride V1.2 (08/11/2026) : cale sous la bride, au-dessus du servo seulement. Elle comble le jeu
+        # (0,9) et serre de 0,5 : le servo ne bascule plus vers l'axe sous le poids de la fourche.
+        box(bc,'brace_x','sy+2 mm','brace_L','servo_W-4 mm','top_Z-cale_bride','cale_bride','Cale_bride',J)
         for y in ('post_y0','post_y1'):
             s=sketch(bc,'top_Z','Vis_bride');circle(s,'sx+brace_x_REF',y+'+post_W/2','screw_D');ext(bc,s,'brace_T',C,'Passage_M3_bride')
         servo=component(root,'Servo_REFERENCE_non_imprimable');sc=servo.component
@@ -135,7 +138,8 @@ def run(context):
         report['feature_warnings']=[{'feature':f.name,'message':f.errorOrWarningMessage} for oc in root.occurrences for f in oc.component.features if f.healthState!=adsk.fusion.FeatureHealthStates.HealthyFeatureHealthState]
         # Only pair printable parts against references: reference cable overlaps its plug intentionally.
         checks=[]
-        for a,z in [(base,brace),(base,servo),(base,cable),(brace,servo),(brace,cable)]:
+        # bride/servo : contact voulu (serrage de la cale), donc hors controle de collision
+        for a,z in [(base,brace),(base,servo),(base,cable),(brace,cable)]:
             for ba in a.component.bRepBodies:
                 for bz in z.component.bRepBodies:
                     objs=adsk.core.ObjectCollection.create()
@@ -151,7 +155,7 @@ def run(context):
         assert not checks,checks
         assert b.bRepBodies.count==1 and bc.bRepBodies.count==1
         assert v('rail_H-relief_H')>0 and v('(servo_W-boss_W)/2-rail_W')>0
-        for oc,filename in [(base,'bras_V1_TEST.stl'),(brace,'bride_bras_V1_TEST.stl')]:
+        for oc,filename in [(base,'bras_V1_TEST.stl'),(brace,'bride_bras_V1_2_TEST.stl')]:
             opt=D.exportManager.createSTLExportOptions(oc.component.bRepBodies.item(0),os.path.join(OUT,filename));opt.meshRefinement=adsk.fusion.MeshRefinementSettings.MeshRefinementHigh
             assert D.exportManager.execute(opt)
         servo.isLightBulbOn=False;cable.isLightBulbOn=False

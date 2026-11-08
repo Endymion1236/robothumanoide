@@ -12,7 +12,7 @@ capteurs et voix) viendra ensuite.
 | 2 | Berceau V4.1 + bride (inserts M3, vis M3 × 10, patin 1 mm) — `berceau-sts3215/` | abandonné au profit du bras V1 |
 | 3 | Premier mouvement : carte Waveshare Bus Servo Adapter (A), cavaliers B, alim 12 V, logiciel FD 1.9.8.2 (COM3, 1000000) | **fait le 07/11/2026** : servo trouvé, 12,3 V, 35 °C, mouvement de 17° à vitesse 300 |
 | 4 | Essai sous charge sur le banc : facultatif pour un bras de table (le servo a une grande marge) | reporté |
-| 5 | Coude : fourche en deux moitiés tenant l'avant-bras des deux côtés (palonnier + disque libre du dessous) — `coude-sts3215/` | V1 imprimée : écart faux (40,2 calculé, 36,4 mesuré) ; V1.1 aurait frotté sur la partie haute → **V1.2 à imprimer** ; **bras V1** imprimé, **bride d'origine** (le dessus fait bien 33 sous la bride) ; rotation de l'avant-bras ± 109° vérifiée hors Fusion |
+| 5 | Coude : fourche en deux moitiés tenant l'avant-bras des deux côtés (palonnier + disque libre du dessous) — `coude-sts3215/` | V1 imprimée : écart faux (40,2 calculé, 36,4 mesuré) ; V1.1 aurait frotté sur la partie haute → **V1.2 à imprimer** ; **bras V1** imprimé et monté ; le servo basculait vers l'axe → **bride V1.2 avec cale de 1,4 mm** (serrage 0,5) à imprimer ; rotation de l'avant-bras ± 109° vérifiée hors Fusion |
 | 6 | Pince au bout de l'avant-bras | à concevoir |
 
 ## Matériel (décisions du 07/11/2026)
