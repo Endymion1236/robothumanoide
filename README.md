@@ -4,7 +4,32 @@ Premier objectif : **un petit bras de table** avec un coude en servo Feetech STS
 **pince** au bout. La main robotique (ESP32, servos MG90S, gestes préenregistrés, puis gant à
 capteurs et voix) viendra ensuite.
 
-## Feuille de route
+## Vision d'ensemble (09/11/2026)
+
+À terme : **deux bras à 6 axes et une tête**, avec **reconnaissance vocale**, une **IA qui répond**
+et **reconnaissance d'objets** (« prends la balle rouge »).
+
+| Partie | Matériel | Difficulté |
+|---|---|---|
+| 2 bras à 6 axes | 12 STS3215 | ⭐⭐ (le même bras, en double, symétrique) |
+| Tête qui bouge | 2 servos (tourner, hocher), caméra, micro, haut-parleur | ⭐⭐ |
+| Voix + IA qui répond | micro, IA de conversation, voix de synthèse (expérience de la borne du club) | ⭐⭐ |
+| Reconnaissance d'objets | caméra + logiciel de détection | ⭐⭐ |
+| Attraper l'objet vu | position de l'objet → pince ; piste : **LeRobot** (Hugging Face), fait pour les bras SO-100/SO-101 à servos Feetech : on montre le geste, le robot apprend à le refaire | ⭐⭐⭐⭐ |
+
+**Cerveau** : l'ESP32 ne suffit pas pour la vision et la voix → d'abord l'**ordinateur**, puis un
+mini-ordinateur embarqué (**Raspberry Pi 5**, ou **NVIDIA Jetson** pour la vision dans le robot) ;
+l'ESP32 reste pour les petites tâches (LED, capteurs, boutons).
+**Électricité** : 14 servos → alimentation 12 V de 10 à 15 A, probablement une carte servos par bras.
+
+Ordre prévu :
+1. Finir **un bras complet** (en cours).
+2. **La tête en parallèle**, sur l'ordinateur : vision et voix, sans moteur, donc sans risque.
+3. **Le 2e bras**, copie symétrique du premier.
+4. **Tout relier** : la tête trouve l'objet, le bras va le chercher.
+5. **Tout embarquer** dans le robot (Raspberry Pi ou Jetson).
+
+## Feuille de route du premier bras
 
 | # | Étape | État |
 |---|---|---|
