@@ -64,11 +64,13 @@ Règles désormais :
 - **Carte** : la Waveshare Bus Servo Adapter (A) suffit pour tous les servos (en chaîne, un ID par servo).
   **À racheter** (USB de la première carte mort le 08/11/2026).
 - **Alimentation** : prévoir 12 V, 5 A minimum (6 à 10 A conseillé) pour 6 servos.
-- **Socle tournant** : roulements **6807-2RS** (35 × 47 × 7), lot de 4 ; **deux roulements empilés et
+- **Socle tournant** : roulements **6807-2RS** (35 × 47 × 7) ; **deux roulements empilés et
   espacés** dans le socle pour que le bras ne bascule pas, le servo ne fait que tourner.
-- **Roulements pour tout le projet** (commande groupée, 10/11/2026) : 6807-2RS générique (123roulement)
-  × 7 = 2 par socle de bras × 2 bras + 2 pour la rotation de la tête + 1 de rechange ;
-  623-2RS ou 623ZZ (3 × 10 × 4, axe = vis M3) × 10 pour les petits pivots (doigts de pince, tête).
+- **Roulements commandés le 10/11/2026** (123roulement, commande C 81156268, 75,84 € TTC) :
+  **6807-2RS × 8** (35 × 47 × 7) = 2 par socle de bras × 2 bras + 2 pour la rotation de la tête
+  + 2 de rechange ; **623ZZ × 10** (3 × 10 × 4, axe = vis M3) pour les petits pivots (doigts de
+  pince, tête). À réception : mesurer un roulement de chaque au pied à coulisse avant de dessiner
+  les logements.
   Coude, épaule et poignet n'en ont pas besoin : chaque servo est tenu des deux côtés par ses deux disques.
 
 ## Repères sur le servo (STS3215-C018)
