@@ -66,6 +66,10 @@ Règles désormais :
 - **Alimentation** : prévoir 12 V, 5 A minimum (6 à 10 A conseillé) pour 6 servos.
 - **Socle tournant** : roulements **6807-2RS** (35 × 47 × 7), lot de 4 ; **deux roulements empilés et
   espacés** dans le socle pour que le bras ne bascule pas, le servo ne fait que tourner.
+- **Roulements pour tout le projet** (commande groupée, 10/11/2026) : 6807-2RS générique (123roulement)
+  × 7 = 2 par socle de bras × 2 bras + 2 pour la rotation de la tête + 1 de rechange ;
+  623-2RS ou 623ZZ (3 × 10 × 4, axe = vis M3) × 10 pour les petits pivots (doigts de pince, tête).
+  Coude, épaule et poignet n'en ont pas besoin : chaque servo est tenu des deux côtés par ses deux disques.
 
 ## Repères sur le servo (STS3215-C018)
 
