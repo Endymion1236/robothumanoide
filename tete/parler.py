@@ -81,9 +81,12 @@ class Cerveau:
     """Envoie la phrase à Claude et renvoie la réponse PHRASE PAR PHRASE, au fur et à mesure qu'elle s'écrit.
     L'historique ne garde que le TEXTE des échanges : on peut alors le raccourcir et y retirer les photos
     sans que l'API refuse la conversation (la réflexion interne du modèle n'y est pas rejouée)."""
-    def __init__(self, cle, modele='claude-opus-5-5', personnalite=PERSONNALITE):
+    def __init__(self, cle, modele='claude-opus-5-5', personnalite=PERSONNALITE, outils=None, sur_outil=None):
+        """outils : outils que Claude peut déclencher (liste de définitions) ; sur_outil(nom, entrées) les exécute
+        et renvoie une phrase à dire, ou None."""
         import anthropic
         self.anthropic, self.modele, self.personnalite = anthropic, modele, personnalite
+        self.outils, self.sur_outil = outils or [], sur_outil
         self.client = anthropic.Anthropic(api_key=cle)
         self.messages = []
         self.duree_premier_mot = None
@@ -105,8 +108,10 @@ class Cerveau:
                 morceaux.append(texte)
                 if sur_phrase:
                     sur_phrase(texte)
+        options = {'tools': self.outils} if self.outils else {}
         try:
             with self.client.beta.messages.stream(
+                **options,
                 model=self.modele,
                 max_tokens=4000,
                 system=self.personnalite,
@@ -125,6 +130,7 @@ class Cerveau:
                         phrase_finie(f)
                 reponse = flux.get_final_message()
             phrase_finie(tampon)
+            notes = self._executer_outils(reponse, phrase_finie)
         except self.anthropic.AuthenticationError:
             return self._echec('Ma clé Anthropic ne marche pas. Vérifiez le fichier des clés.', sur_phrase)
         except self.anthropic.RateLimitError:
@@ -135,7 +141,7 @@ class Cerveau:
             return self._echec(f'Mon cerveau a un souci technique, erreur {e.status_code}.', sur_phrase)
         if reponse.stop_reason == 'refusal' and not morceaux:
             return self._echec('Je préfère ne pas répondre à ça.', sur_phrase)
-        texte = ' '.join(morceaux)
+        texte = ' '.join(morceaux + notes)
         # photo remplacée par une mention dans l'historique (sinon chaque tour la renverrait)
         self.messages[-1]['content'] = [b if b['type'] != 'image' else {'type': 'text', 'text': '[photo de la caméra]'}
                                         for b in contenu]
@@ -145,6 +151,26 @@ class Cerveau:
             while self.messages and self.messages[0]['role'] != 'user':
                 self.messages.pop(0)
         return texte
+
+    def _executer_outils(self, reponse, phrase_finie):
+        """Exécute les outils demandés par Claude. On ne renvoie pas le résultat à Claude (pas de 2e appel, donc
+        pas d'attente en plus) : ce qui doit être dit l'est tout de suite, et une note reste dans l'historique."""
+        notes = []
+        for bloc in reponse.content:
+            if bloc.type != 'tool_use' or not self.sur_outil:
+                continue
+            entree = bloc.input if isinstance(bloc.input, dict) else {}
+            # les entrées arrivent en flux sans vérification par l'API : on les vérifie ici
+            if not all(isinstance(v, str) for v in entree.values()):
+                continue
+            try:
+                a_dire = self.sur_outil(bloc.name, entree)
+            except Exception as e:
+                a_dire = None; print(f'   (outil {bloc.name} en échec : {e})')
+            notes.append(f'[{bloc.name} : {", ".join(entree.values())}]')
+            if a_dire:
+                phrase_finie(a_dire)
+        return notes
 
     def _echec(self, texte, sur_phrase):
         self.messages.pop()

@@ -36,7 +36,9 @@ fixes, ou sa propre liste avec YOLO-World). Étape 2 **entendre** : `ecouter.py`
 sur le PC), **validé le 11/11/2026**. Étape 3 **répondre** : `parler.py`, conversation
 à voix haute avec **Câlin** (même personnage que la borne d'accueil, fusion prévue), Claude + voix ElevenLabs,
 **validé le 11/11/2026** (puis accéléré). Étape 4 **tout relier** : `robot.py` (caméra en continu, photo envoyée
-à Claude sur une question visuelle), à essayer. Puis bouger (2 servos).
+à Claude sur une question visuelle), à essayer. Étape 5 **mémoire et visages** (outils de Claude, données
+biométriques apprises seulement à la demande de la personne, jamais pour un enfant, rangées hors du projet), à essayer.
+Puis bouger (2 servos).
 
 ## Feuille de route du premier bras
 

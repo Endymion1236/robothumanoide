@@ -8,7 +8,8 @@ Construite par étapes, d'abord **sur l'ordinateur** (sans moteur, sans risque),
 | 2 | **Entendre** : comprendre ce qu'on lui dit (reconnaissance vocale) | **validé sur le PC le 11/11/2026** : il comprend bien (modèle « small ») |
 | 3 | **Répondre** : une IA qui répond (Claude), et une voix (ElevenLabs) | **validé sur le PC le 11/11/2026** (un peu lent → accéléré le même jour) |
 | 4 | **Tout relier** : voir + entendre + répondre | `robot.py` / `lancer_robot.bat`, testé ici sans clés, à essayer sur le PC |
-| 5 | **Bouger** : 2 servos (tourner, hocher) pour regarder vers ce qu'on lui montre | à faire |
+| 5 | **Se souvenir et reconnaître les visages** | `robot.py`, testé ici sans clés, à essayer sur le PC |
+| 6 | **Bouger** : 2 servos (tourner, hocher) pour regarder vers ce qu'on lui montre | à faire |
 
 ## Étape 1 : voir
 
@@ -120,6 +121,36 @@ Testé ici sans les clés, avec une photo à la place de la webcam et un faux Cl
 seulement sur une question visuelle, les phrases sont dites une à une, l'historique reste borné
 (20 messages après 32 tours) et sans photo. **Pas encore testé** : avec la vraie webcam, la vraie IA
 et la vraie voix.
+
+## Étape 5 : mémoire et visages (dans `lancer_robot.bat`)
+
+Claude a maintenant 4 **outils** qu'il déclenche lui-même pendant la conversation :
+
+| Ce qu'on lui dit | Ce qu'il fait |
+|---|---|
+| « Je m'appelle Paul, j'adore les Pony Games » | **retenir** : garde « (Paul) aime les Pony Games » pour les prochaines fois |
+| « Oublie tout ce que tu sais sur moi » | **oublier_souvenirs** : efface les souvenirs de la personne |
+| « Retiens mon visage, je m'appelle Paul » | **apprendre_visage** : prend 5 images du plus grand visage en 2,5 s (rester face à la caméra, de près) |
+| « Oublie mon visage » | **oublier_visage** : efface le visage appris |
+
+Ensuite, la fenêtre de la caméra encadre les visages en **vert avec le prénom** (gris : inconnu), et
+Câlin appelle les gens par leur prénom. Au démarrage, il relit ses souvenirs.
+
+**Données personnelles (RGPD) — règles écrites dans la personnalité de Câlin :**
+- un visage est une donnée **biométrique** : Câlin ne l'apprend **que si la personne le demande
+  elle-même**, jamais pour quelqu'un d'autre, jamais de sa propre initiative, **jamais pour un enfant** ;
+- il ne retient **ni santé, ni adresse, ni téléphone, ni argent, ni secret** ;
+- tout est rangé **sur le PC, hors du projet** : `C:\projet robot\calin_donnees\` (souvenirs dans
+  `memoire.json`, visages dans `visages\` — des nombres, pas de photo). Jamais sur GitHub.
+  **Supprimer ce dossier efface tout.**
+- **Au club**, avant de mettre Câlin devant le public : couper la reconnaissance des visages
+  (`--sans-visages`) et revoir la mémoire avec un conseil juridique.
+
+Modèles de visages (OpenCV YuNet + SFace, environ 38 Mo) téléchargés au premier lancement dans
+`tete\modeles\`. Testé ici avec une fausse IA et des photos : visage appris puis reconnu (l'autre
+visage reste inconnu), fait retenu puis relu au démarrage suivant, visage oublié et fichier effacé.
+**Pas encore testé** : avec la vraie webcam (lumière, distance) et la vraie IA, qui doit décider
+seule d'utiliser ses outils.
 
 ### Installation sur le PC (une seule fois)
 

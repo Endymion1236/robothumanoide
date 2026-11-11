@@ -1,5 +1,8 @@
 .venv/
 *.pt
+modeles/
 # cles d API (ElevenLabs, Anthropic...) : jamais sur GitHub
 cles.txt
 .env
+# souvenirs et visages : jamais sur GitHub
+calin_donnees/
