@@ -153,7 +153,9 @@ Z_BASE = -7.0                      # dessous de la base
 P_LIBRE = [(AX - DECAL, AY), (AX - DECAL, -AY)]
 ZC = 15.0                          # axe de l'avant-bras dans la hauteur de la pince
 XF = X0S - JEU - 3                 # le bout de l'avant-bras bute contre le mur arrière du logement du servo
-BRIDE_X0, BRIDE_X1, BRIDE_Z = 6.0, 22.0, H_HAUT + 0.3
+# Bride à dessous plat : les piliers s'arrêtent 0,5 mm SOUS le dessus du servo ; en vissant, la bride
+# appuie sur le servo avec 0,5 mm de serrage. Elle s'imprime à plat, sans support.
+BRIDE_X0, BRIDE_X1, BRIDE_Z = 6.0, 22.0, H_HAUT - 0.5
 
 def base():
     b = box(XF - ENT_B, -22, Z_BASE, 55, 39, Z_BASE + 4)                       # plaque
@@ -181,14 +183,13 @@ def base():
     return b
 
 def bride():
-    """Bride sur la partie haute du servo (cale de 0,8 : 0,5 mm de serrage), porte le pivot du bras libre +Y."""
+    """Bride posée sur la partie haute du servo (0,5 mm de serrage au vissage), porte le pivot du bras libre +Y."""
     y0, y1 = SY0 - JEU - 3 - 8, SY1 + JEU + 3 + 8
-    m = box(BRIDE_X0, y0, BRIDE_Z, BRIDE_X1, y1, BRIDE_Z + 4)
-    m += box(BRIDE_X0, SY0 + 2, H_HAUT - 0.5, BRIDE_X1, SY1 - 2, BRIDE_Z)          # cale
+    m = box(BRIDE_X0, y0, H_HAUT, BRIDE_X1, y1, H_HAUT + 4)
     for yc in (y0 + 4, y1 - 4):
-        m -= cyl(BRIDE_X0 + 5, yc, BRIDE_Z - 0.1, BRIDE_Z + 4.1, M3, 24)
+        m -= cyl(BRIDE_X0 + 5, yc, H_HAUT - 0.1, H_HAUT + 4.1, M3, 24)
     x, y = P_LIBRE[0]
-    m += cyl(x, y, BRIDE_Z + 4, Z_LIBRE - 0.6, 12) + cyl(x, y, Z_LIBRE - 0.6, Z_LIBRE, 6.5, 32)
+    m += cyl(x, y, H_HAUT + 4, Z_LIBRE - 0.6, 12) + cyl(x, y, Z_LIBRE - 0.6, Z_LIBRE, 6.5, 32)
     m -= cyl(x, y, Z_LIBRE - 9, Z_LIBRE + 0.1, M3_INSERT, 24)
     return m
 
@@ -226,6 +227,7 @@ if __name__ == '__main__':
     for nom, a, b in (('base/servo', BASE, SERVO), ('base/avant-bras', BASE, AVB), ('base/bride', BASE, BRIDE)):
         assert (a ^ b).volume() < 0.01, (nom, (a ^ b).volume())
     rapport['bride_sur_servo_mm3 (serrage voulu)'] = round((BRIDE ^ SERVO).volume(), 1)
+    rapport['jeu_bride_piliers_mm (fermé au vissage)'] = round(H_HAUT - BRIDE_Z, 2)
     ouvertures = []
     angles = list(np.linspace(TH_FERME, TH_OUVERT, 24))
     for th in angles:
@@ -252,7 +254,9 @@ if __name__ == '__main__':
     masse = 0
     for nom, m in pieces.items():
         t = mesh(m); assert t.is_watertight and len(t.split(only_watertight=False)) == 1, nom
-        if nom == 'pince_bride': t.apply_transform(tm.transformations.rotation_matrix(math.pi, (1, 0, 0)))   # dessus sur le plateau
+        # orientation d'impression : face plane la plus large sur le plateau, sans surplomb
+        if nom in ('pince_engrenage_A', 'pince_doigt_+Y', 'pince_doigt_-Y'):
+            t.apply_transform(tm.transformations.rotation_matrix(math.pi, (1, 0, 0)))   # retourné : dessus sur le plateau
         t.apply_translation(-t.bounds[0]); t.export(OUT / f'{nom}.stl')
         g = t.volume / 1000 * 1.24 * 0.6                                       # PLA, ~60 % plein
         masse += g; rapport['pieces'][nom] = {'encombrement_mm': [round(v, 1) for v in t.extents], 'masse_g_environ': round(g)}

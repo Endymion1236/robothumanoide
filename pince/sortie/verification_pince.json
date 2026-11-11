@@ -20,7 +20,7 @@
    "encombrement_mm": [
     16.0,
     46.8,
-    12.6
+    12.1
    ],
    "masse_g_environ": 3
   },
@@ -73,7 +73,8 @@
    "masse_g_environ": 16
   }
  },
- "bride_sur_servo_mm3 (serrage voulu)": 163.2,
+ "bride_sur_servo_mm3 (serrage voulu)": -0.0,
+ "jeu_bride_piliers_mm (fermé au vissage)": 0.5,
  "ouverture_mm (angle → écart des mâchoires)": [
   [
    -3.4,
@@ -94,6 +95,6 @@
   "butee_max": 2433,
   "sens": "à vérifier au premier essai : le sens « ouvrir » peut être vers la butée min ou max"
  },
- "masse_pieces_imprimees_g": 88,
- "masse_avec_servo_g": 143
+ "masse_pieces_imprimees_g": 87,
+ "masse_avec_servo_g": 142
 }

@@ -44,7 +44,23 @@ une main qui glisse le long du gobelet. C'est le prix d'une pince simple à bras
 | Bras libres | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
 | Doigts | `pince_doigt_+Y.stl`, `pince_doigt_-Y.stl` |
 
-Les doigts s'impriment debout (plaque sur le plateau, mâchoire vers le haut).
+**Toutes les pièces sont déjà orientées pour l'impression, sans support** (vérifié : chaque pièce repose à
+plat sur le plateau). Corrigé le 11/11/2026 : les doigts, l'engrenage A et la bride étaient mal posés dans
+la première version des fichiers. Les doigts s'impriment debout (plaque sur le plateau, mâchoire vers le
+haut) ; la bride a maintenant un dessous plat : ses piliers s'arrêtent 0,5 mm sous le dessus du servo, et
+c'est le vissage qui serre.
+
+### Conseils pour les engrenages
+
+- Couches fines : **0,12 à 0,16 mm** (dents plus régulières) ; buse 0,4 : très bien pour ce module 1,5.
+- **4 périmètres** au moins, ou remplissage 100 % : les dents sont petites.
+- Vitesse lente sur les parois extérieures ; pas de « ironing ».
+- Si la première couche est écrasée (« pied d'éléphant »), les dents frottent : activer la compensation
+  dans le trancheur, ou ébavurer au cutter.
+- **Essai rapide** : imprimer d'abord les deux engrenages seuls et vérifier, posés sur une table l'un
+  contre l'autre (entraxe 30 mm), qu'ils tournent sans accrocher.
+- **Roulements** : logement de 10,1 mm pour des roulements de 10 mm. Ils doivent entrer en forçant un peu
+  au doigt. Trop dur : passer un coup de foret de 10 à la main ; trop lâche : une goutte de colle.
 
 ## Visserie
 
