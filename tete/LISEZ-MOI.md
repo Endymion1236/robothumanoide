@@ -5,7 +5,7 @@ Construite par étapes, d'abord **sur l'ordinateur** (sans moteur, sans risque),
 | Étape | Ce que fait la tête | État |
 |---|---|---|
 | 1 | **Voir** : la webcam encadre les objets et les nomme en français | essayé sur le PC le 11/11/2026 : marche, mais 80 objets seulement → ajout de **sa propre liste** (`objets.txt`) et de la **webcam externe** |
-| 2 | **Entendre** : comprendre ce qu'on lui dit (reconnaissance vocale) | programme prêt (`ecouter.py`), testé sur un enregistrement, à essayer avec le micro du PC |
+| 2 | **Entendre** : comprendre ce qu'on lui dit (reconnaissance vocale) | **validé sur le PC le 11/11/2026** : il comprend bien (modèle « small ») |
 | 3 | **Répondre** : une IA qui répond, et une voix | à faire |
 | 4 | **Tout relier** : « qu'est-ce que tu vois ? » → réponse à voix haute | à faire |
 | 5 | **Bouger** : 2 servos (tourner, hocher) pour regarder vers ce qu'on lui montre | à faire |
