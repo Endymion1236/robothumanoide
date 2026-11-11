@@ -19,7 +19,8 @@ from PIL import Image, ImageDraw
 import parler
 from donnees_perso import dossier_perso
 from memoire import Memoire
-from parler import Cerveau, Bouche, creer_voix, options_communes, cles_ou_quitter, afficher_durees, MODELES_IA, MOTS_FIN
+from parler import Cerveau, Bouche, creer_voix, creer_oreille, options_communes, cles_ou_quitter, afficher_durees, MODELES_IA, MOTS_FIN
+import ecouter
 
 PERSONNALITE_ROBOT = parler.PERSONNALITE + """
 
@@ -97,7 +98,8 @@ class Oeil(threading.Thread):
                 ok, image = lire()
                 if not ok:
                     raise RuntimeError('la webcam ne renvoie plus d\'image')
-                calculer = not parler.PAROLE.is_set()     # pendant que Câlin parle, le processeur va au son
+                # pendant que Câlin parle ou que Whisper transcrit, le processeur leur est laissé
+                calculer = not (parler.PAROLE.is_set() or ecouter.TRANSCRIPTION.is_set())
                 if calculer and time.time() - t_detection > 0.33:   # ~3 détections par seconde : laisse du calcul à l'écoute
                     resultat, t_detection = modele(image, verbose=False)[0], time.time()
                 if calculer and self.visages and time.time() - t_visages > 0.5:   # visages 2 fois par seconde
@@ -224,10 +226,7 @@ def main():
     cerveau = Cerveau(cles['ANTHROPIC_API_KEY'], MODELES_IA[a.ia], PERSONNALITE_ROBOT + '\n\n' + memoire.texte(),
                       outils=OUTILS, sur_outil=sur_outil)
     bouche = Bouche(creer_voix(a, cles))
-    oreille = None
-    if not a.clavier:
-        from ecouter import charger_modele, Oreille
-        oreille = Oreille(charger_modele(a.modele), a.micro)
+    oreille = None if a.clavier else creer_oreille(a, cles)
 
     bouche.dire('Bonjour, je suis Câlin. Je vous vois et je vous écoute !' if oeil else 'Bonjour, je suis Câlin. Je vous écoute !')
     bouche.finir()

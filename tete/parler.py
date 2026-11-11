@@ -303,7 +303,9 @@ def options_communes(ap):
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs')
     ap.add_argument('--voix-rapide', action='store_true', help='ElevenLabs v4 turbo : démarre plus vite')
     ap.add_argument('--micro', type=int, help='numéro du micro (voir lister_micros.bat)')
-    ap.add_argument('--modele', default='small', choices=['base', 'small', 'medium'], help='reconnaissance vocale')
+    ap.add_argument('--ecoute', default='elevenlabs', choices=['elevenlabs', 'whisper'],
+                    help='transcription : elevenlabs (Scribe, rapide, en ligne, défaut) ou whisper (sur le PC, gratuit)')
+    ap.add_argument('--modele', default='small', choices=['base', 'small', 'medium'], help='modèle Whisper (avec --ecoute whisper)')
     ap.add_argument('--ia', default='sonnet', choices=list(MODELES_IA), help='sonnet (défaut, rapide) ou opus (plus puissant)')
 
 def cles_ou_quitter():
@@ -313,6 +315,16 @@ def cles_ou_quitter():
         print('Clé Anthropic introuvable. Endroits cherchés :'); [print('  ', p) for p in ENDROITS_CLES]
         sys.exit('Ajouter une ligne ANTHROPIC_API_KEY=... dans un de ces fichiers (voir cles_exemple.txt).')
     return cles
+
+def creer_oreille(a, cles):
+    """Le micro, avec la transcription choisie (ElevenLabs si la clé est là, sinon Whisper sur le PC)."""
+    from ecouter import charger_modele, Oreille, ScribeElevenLabs
+    if a.ecoute == 'elevenlabs' and 'ELEVENLABS_API_KEY' in cles:
+        print('Transcription : ElevenLabs Scribe v2 (en ligne)')
+        return Oreille(ScribeElevenLabs(cles['ELEVENLABS_API_KEY']), a.micro)
+    if a.ecoute == 'elevenlabs':
+        print('Pas de clé ElevenLabs : transcription Whisper sur le PC.')
+    return Oreille(charger_modele(a.modele), a.micro)
 
 def afficher_durees(d_ecoute, cerveau, bouche, d_total):
     morceaux = []
@@ -333,10 +345,7 @@ def main():
     cles = cles_ou_quitter()
     cerveau = Cerveau(cles['ANTHROPIC_API_KEY'], MODELES_IA[a.ia])
     bouche = Bouche(creer_voix(a, cles))
-    oreille = None
-    if not a.clavier:
-        from ecouter import charger_modele, Oreille
-        oreille = Oreille(charger_modele(a.modele), a.micro)
+    oreille = None if a.clavier else creer_oreille(a, cles)
 
     def tour(texte_dit):
         bouche.dire(texte_dit); bouche.finir()

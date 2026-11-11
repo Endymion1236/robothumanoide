@@ -11,7 +11,7 @@ Utilisation :  python ecouter.py                 (micro par défaut, modèle « 
                python ecouter.py --fichier a.wav (comprendre un enregistrement au lieu du micro)
 Ctrl + C pour arrêter.
 """
-import argparse, queue, sys, time, wave
+import argparse, queue, sys, threading, time, wave
 import numpy as np
 
 FREQ = 16000                 # Whisper travaille à 16 000 échantillons par seconde
@@ -49,9 +49,33 @@ def charger_modele(taille):
     return WhisperModel(taille, device='cpu', compute_type='int8')
 
 def comprendre(modele, son):
-    """Son (16 kHz, nombres entre -1 et 1) → texte français."""
-    segments, _ = modele.transcribe(son.astype(np.float32), language='fr', vad_filter=True, beam_size=5)
+    """Son (16 kHz, nombres entre -1 et 1) → texte français.
+    modele : un modèle Whisper local, ou un objet qui a sa propre méthode comprendre() (ElevenLabs)."""
+    if hasattr(modele, 'comprendre'):
+        return modele.comprendre(son)
+    # beam_size=1 : nettement plus rapide sur le processeur ; le découpage en phrases est déjà fait avant
+    segments, _ = modele.transcribe(son.astype(np.float32), language='fr', vad_filter=False, beam_size=1)
     return ' '.join(s.text.strip() for s in segments).strip()
+
+# Levé pendant la transcription locale : la caméra suspend ses calculs pour laisser le processeur à Whisper.
+TRANSCRIPTION = threading.Event()
+
+class ScribeElevenLabs:
+    """Transcription par ElevenLabs (Scribe v2), dans le nuage : rapide, n'occupe pas le processeur du PC.
+    Le son est envoyé brut (16 bits, 16 kHz, mono), la façon la plus rapide d'après ElevenLabs."""
+    MODELE = 'scribe_v2'
+    def __init__(self, cle):
+        from elevenlabs.client import ElevenLabs
+        self.client = ElevenLabs(api_key=cle)
+
+    def comprendre(self, son):
+        brut = (np.clip(son, -1, 1) * 32767).astype('<i2').tobytes()
+        try:
+            r = self.client.speech_to_text.convert(model_id=self.MODELE, file=brut, file_format='pcm_s16le_16',
+                                                   language_code='fr', tag_audio_events=False)
+        except Exception as e:
+            print(f'   (transcription ElevenLabs impossible : {e})'); return ''
+        return (getattr(r, 'text', '') or '').strip()
 
 def lire_wav(chemin):
     w = wave.open(chemin)
@@ -104,7 +128,15 @@ class Oreille:
         while True:
             son = self.decoupeur.ajouter(self.file.get())
             if son is not None:
-                t = time.time(); texte = comprendre(self.modele, son); self.duree_comprehension = time.time() - t
+                t = time.time()
+                local = not hasattr(self.modele, 'comprendre')
+                if local:
+                    TRANSCRIPTION.set()
+                try:
+                    texte = comprendre(self.modele, son)
+                finally:
+                    TRANSCRIPTION.clear()
+                self.duree_comprehension = time.time() - t
                 if phrase_valable(texte):
                     return texte
 

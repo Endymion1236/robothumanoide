@@ -113,6 +113,14 @@ ElevenLabs.
   ses calculs pendant que Câlin parle**. Autre voix : ligne `ELEVENLABS_VOICE_ID=...` dans le fichier
   des clés (identifiant copié dans la bibliothèque de voix du site ElevenLabs).
 - Fin de phrase détectée après **0,6 s** de silence au lieu de 0,8 s.
+- **Transcription (11/11/2026, trop longue entre la fin de la phrase et le texte)** : par défaut
+  **ElevenLabs Scribe v2**, dans le nuage, avec la même clé que la voix ; le son est envoyé brut
+  (16 bits, 16 kHz), le format le plus rapide d'après ElevenLabs, et le processeur du PC reste libre.
+  `--ecoute whisper` pour revenir à Whisper sur le PC (gratuit, hors ligne), désormais plus rapide
+  (recherche simple au lieu de 5 pistes : 2,2 s → 1,7 s ici, même phrase comprise) et avec la caméra
+  en pause pendant qu'il transcrit. Anthropic ne propose pas de transcription de la voix, à ma
+  connaissance ; OpenAI en propose une, mais il faudrait un compte de plus. `lancer_ecoute.bat` (étape 2)
+  reste sur Whisper.
 - **IA par défaut : Claude Sonnet 5.5** (choix de Nicolas, 11/11/2026), celle de la borne : plus rapide et
   moins chère. `--ia opus` pour Claude Opus 5.5, plus puissant mais plus lent.
 - Après chaque réponse, une ligne donne les temps : *compris en … s · 1er mot de l'IA … s ·
