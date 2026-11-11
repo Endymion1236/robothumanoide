@@ -68,25 +68,21 @@ c'est le vissage qui serre.
 |---|---|---|
 | Roulements 623ZZ (commandés) | 7 | engrenage B (1), bras libres (2), doigts (4) |
 | Inserts M3 à chaud | 5 | piliers de la bride (2), poteau de l'engrenage B, poteau du bras libre -Y, pivot sur la bride |
-| Vis M3 × 10 | 5 | bride (2), pivots engrenage B et bras libres (3) |
-| Vis M3 × 12 + écrou frein | 4 | axes des doigts |
-| Vis M2,5 × 8 | 4 | engrenage A sur le palonnier |
-| Rondelles M3 fines | une dizaine | entre les couches qui tournent |
+| Vis M3 × 10 | 7 | bride (2), engrenage B (1), pivots des bras libres (2), bout des bras libres (2, vissées dans le plastique) |
+| Vis M3 × 16 (14 à 20 conviennent) + écrou frein | 2 | doigt sur le bras de l'engrenage |
+| Rondelles M3 (DIN 125, 0,5 mm) | 4 | entre doigt et bras d'engrenage (2), entre bras libre et doigt (2) |
+| Vis M2,5 × 8 (fournies avec le servo) | 4 | engrenage A sur le palonnier |
 | Les 2 vis M3 × 30 de l'entretoise du bout de l'avant-bras | (déjà là) | traversent le manchon de la pince |
 
-## Montage (servo réglé AVANT, comme pour le coude)
+Correction du 11/11/2026 : au bout des bras libres, un écrou sous le doigt aurait tapé dans le bras de
+l'engrenage pince presque fermée. La vis M3 × 10 s'y visse maintenant directement dans le bras (trou de 2,8).
+Les passages de tête au-dessus des roulements font 6,5 mm : la vis n'appuie que sur la bague intérieure, sans rondelle.
+**Pièces à réimprimer si elles l'ont déjà été : les 2 bras libres et l'engrenage B.**
 
-**Plan illustré** : `sortie/plan_montage_1.png` (étapes 1 à 4) et `sortie/plan_montage_2.png` (étapes 5 à 8),
-refaits par `python plan_montage.py` après `generer_pince.py`. Les inserts (rouge vif), roulements (bleu) et vis (noir)
-y sont dessinés juste au-dessus de leur trou.
+## Montage
 
-1. **Servo seul sur la carte** : numéro **4**, butées **1663 et 2433**, puis le mettre à **2048**.
-2. Servo dans la base, câble par une des fenêtres, bride vissée.
-3. Engrenage A sur le palonnier **avec les mâchoires écartées de 71 mm** (mi-course) quand le servo est à 2048.
-4. Engrenage B sur son poteau, dents engagées pour que les deux bras soient symétriques.
-5. Bras libres, puis doigts.
-6. **Hors tension**, ouvrir et fermer à la main : ça doit glisser sans point dur.
-7. Enfiler le manchon sur le bout de l'avant-bras et le fixer avec les 2 vis M3 × 30 de l'entretoise.
+**Plan illustré, une page par étape : `sortie/plan_montage.pdf`** (aussi en images `sortie/plan_montage_00.png` à `_09.png`),
+refait par `python plan_montage.py` après `generer_pince.py`. Il remplace l'ancienne liste d'étapes.
 
 ## Limites à connaître
 

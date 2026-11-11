@@ -51,6 +51,8 @@ PAD_FLECHE = PAD_R - math.sqrt(PAD_R**2 - (PAD_LONG / 2) ** 2)   # les bouts ava
 ECART_MAX = 110.0
 ROUL_D, ROUL_EP = 10.1, 4.0        # logement de roulement 623 (10 mm, serré 0,1)
 M3, M3_INSERT, M2_5 = 3.4, 4.0, 2.9
+M3_TARAUD = 2.8                    # la vis M3 se visse directement dans le plastique (bout des bras libres)
+PASSAGE_TETE = 6.5                 # au-dessus d'un roulement : la tête de vis (5,5) n'appuie que sur la bague intérieure
 
 # angles du bras moteur (depuis +X vers +Y) : fermé = doigts qui se touchent, ouvert = 95 mm
 # Écarts mesurés au CREUX des mâchoires. Fermée : 14 mm au creux, soit 4,6 mm entre les bouts des mâchoires.
@@ -114,7 +116,7 @@ def engrenage_b():
     m = extruder(prof, Z0, Z0 + EP_ENG).rotate((0, 0, 180 / DENTS)).translate((AX, -AY, 0))
     m += extruder(barre((AX, -AY), (AX + L_BRAS, -AY), 11), Z0, Z0 + EP_ENG)
     m -= cyl(AX, -AY, Z0 - 0.1, Z0 + ROUL_EP, ROUL_D, 48)                  # logement du roulement (par-dessous)
-    m -= cyl(AX, -AY, Z0 - 0.1, Z0 + EP_ENG + 0.1, 5.5, 24)                # passage de la vis
+    m -= cyl(AX, -AY, Z0 - 0.1, Z0 + EP_ENG + 0.1, PASSAGE_TETE, 32)       # passage de la tête de vis
     m -= cyl(AX + L_BRAS, -AY, Z0 - 0.1, Z0 + EP_ENG + 0.1, M3, 24)
     return m
 
@@ -122,8 +124,10 @@ def bras_libre(s):
     """Bras libre (s = +1 côté +Y, -1 côté -Y) : roulement au pivot, trou M3 au doigt."""
     p, q = (AX - DECAL, s * AY), (AX - DECAL + L_BRAS, s * AY)
     m = extruder(barre(p, q, 12), Z_LIBRE, Z_LIBRE + EP_LIBRE)
-    m -= cyl(p[0], p[1], Z_LIBRE - 0.1, Z_LIBRE + ROUL_EP, ROUL_D, 48); m -= cyl(p[0], p[1], Z_LIBRE - 0.1, Z_LIBRE + EP_LIBRE + 0.1, 5.5, 24)
-    m -= cyl(q[0], q[1], Z_LIBRE - 0.1, Z_LIBRE + EP_LIBRE + 0.1, M3, 24)
+    m -= cyl(p[0], p[1], Z_LIBRE - 0.1, Z_LIBRE + ROUL_EP, ROUL_D, 48); m -= cyl(p[0], p[1], Z_LIBRE - 0.1, Z_LIBRE + EP_LIBRE + 0.1, PASSAGE_TETE, 32)
+    # bout du bras : la vis M3 x 10 se visse DANS le bras (rien sous le doigt : le bras de l'engrenage passe
+    # juste dessous quand la pince est presque fermée, un écrou y taperait)
+    m -= cyl(q[0], q[1], Z_LIBRE - 0.1, Z_LIBRE + EP_LIBRE + 0.1, M3_TARAUD, 24)
     return m
 
 def doigt(s):
