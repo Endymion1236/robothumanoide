@@ -1,2 +1,5 @@
 .venv/
 *.pt
+# cles d API (ElevenLabs, Anthropic...) : jamais sur GitHub
+cles.txt
+.env

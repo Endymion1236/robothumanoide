@@ -3,3 +3,6 @@ opencv-python
 pillow
 # pour chercher sa propre liste d objets (lancer_objets.bat), sans avoir besoin de git :
 clip @ https://github.com/ultralytics/CLIP/archive/refs/heads/main.zip
+# entendre (ecouter.py) :
+faster-whisper
+sounddevice

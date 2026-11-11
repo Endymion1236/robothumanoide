@@ -31,8 +31,9 @@ Ordre prévu :
 
 ## La tête (commencée le 11/11/2026)
 
-Dossier `tete/`, voir `tete/LISEZ-MOI.md`. Étape 1 **voir** : `vision.py` (webcam + YOLO11n, noms en
-français), testé sur une photo, **à essayer sur le PC**. Puis entendre, répondre, tout relier, bouger.
+Dossier `tete/`, voir `tete/LISEZ-MOI.md`. Étape 1 **voir** : `vision.py`, essayé sur le PC (80 objets
+fixes, ou sa propre liste avec YOLO-World). Étape 2 **entendre** : `ecouter.py` (Whisper, en français,
+sur le PC), à essayer avec le micro. Puis répondre (voix ElevenLabs, Nicolas a des clés), tout relier, bouger.
 
 ## Feuille de route du premier bras
 
