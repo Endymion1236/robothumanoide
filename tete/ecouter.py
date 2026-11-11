@@ -68,27 +68,58 @@ def lister_micros():
         if d['max_input_channels'] > 0:
             print(f"  {i} : {d['name']}" + ('   <- micro par défaut' if i == sd.default.device[0] else ''))
 
-def ecouter_micro(modele, micro=None, seuil=None):
-    """Écoute en continu et affiche chaque phrase comprise (générateur : renvoie les textes un par un)."""
-    import sounddevice as sd
-    file = queue.Queue()
-    def rappel(donnees, n, t, statut):
-        file.put(donnees[:, 0].copy())
-    with sd.InputStream(samplerate=FREQ, channels=1, blocksize=BLOC, dtype='float32', device=micro, callback=rappel):
+# Phrases que Whisper « entend » parfois dans le silence ou le bruit (il a appris sur des vidéos sous-titrées).
+HALLUCINATIONS = ('sous-titres', 'amara.org', 'merci d\'avoir regardé', 'abonnez-vous', 'sous-titrage')
+
+def phrase_valable(texte):
+    t = texte.lower().strip(' .!?…')
+    return len(t) >= 2 and not any(h in t for h in HALLUCINATIONS)
+
+class Oreille:
+    """Le micro, ouvert en continu, avec une pause possible (quand le robot parle, il ne doit pas s'entendre)."""
+    def __init__(self, modele, micro=None, seuil=None):
+        import sounddevice as sd
+        self.modele, self.file = modele, queue.Queue()
+        self.flux = sd.InputStream(samplerate=FREQ, channels=1, blocksize=BLOC, dtype='float32', device=micro,
+                                   callback=lambda d, n, t, s: self.file.put(d[:, 0].copy()))
+        self.flux.start()
         if seuil is None:
             print('Silence 2 secondes : je mesure le bruit de fond...')
-            fond = [file.get() for _ in range(int(2*FREQ/BLOC))]
+            fond = [self.file.get() for _ in range(int(2*FREQ/BLOC))]
             bruit = float(np.sqrt(np.mean(np.concatenate(fond)**2)))
             seuil = max(bruit*3, 0.01)
             print(f'Bruit de fond {bruit:.4f} → seuil {seuil:.4f}')
-        d = Decoupeur(seuil)
-        print('Je t\'écoute. Parle normalement ; Ctrl + C pour arrêter.')
+        self.seuil = seuil
+        self.decoupeur = Decoupeur(seuil)
+
+    def vider(self):
+        """Oublie tout ce que le micro a capté jusqu'ici (à appeler après que le robot a parlé)."""
+        while not self.file.empty():
+            self.file.get_nowait()
+        self.decoupeur = Decoupeur(self.seuil)
+
+    def phrase(self):
+        """Attend la prochaine phrase et la renvoie en texte (ignore le bruit et les phrases fantômes)."""
         while True:
-            phrase = d.ajouter(file.get())
-            if phrase is not None:
-                t = time.time(); texte = comprendre(modele, phrase)
-                if texte:
-                    yield texte, time.time() - t
+            son = self.decoupeur.ajouter(self.file.get())
+            if son is not None:
+                texte = comprendre(self.modele, son)
+                if phrase_valable(texte):
+                    return texte
+
+    def fermer(self):
+        self.flux.stop(); self.flux.close()
+
+def ecouter_micro(modele, micro=None, seuil=None):
+    """Écoute en continu et renvoie les phrases comprises une par une, avec le temps de calcul."""
+    oreille = Oreille(modele, micro, seuil)
+    print('Je t\'écoute. Parle normalement ; Ctrl + C pour arrêter.')
+    try:
+        while True:
+            t = time.time(); texte = oreille.phrase()
+            yield texte, time.time() - t
+    finally:
+        oreille.fermer()
 
 def main():
     ap = argparse.ArgumentParser(description='Tête du robot : reconnaissance vocale')

@@ -33,7 +33,9 @@ Ordre prévu :
 
 Dossier `tete/`, voir `tete/LISEZ-MOI.md`. Étape 1 **voir** : `vision.py`, essayé sur le PC (80 objets
 fixes, ou sa propre liste avec YOLO-World). Étape 2 **entendre** : `ecouter.py` (Whisper, en français,
-sur le PC), **validé le 11/11/2026**. Puis répondre (voix ElevenLabs, Nicolas a des clés), tout relier, bouger.
+sur le PC), **validé le 11/11/2026**. Étape 3 **répondre** : `parler.py`, conversation
+à voix haute avec **Câlin** (même personnage que la borne d'accueil, fusion prévue), Claude + voix ElevenLabs,
+à essayer avec les clés. Puis « qu'est-ce que tu vois ? » (caméra) et bouger.
 
 ## Feuille de route du premier bras
 

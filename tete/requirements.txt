@@ -6,3 +6,7 @@ clip @ https://github.com/ultralytics/CLIP/archive/refs/heads/main.zip
 # entendre (ecouter.py) :
 faster-whisper
 sounddevice
+# repondre (parler.py) :
+anthropic
+elevenlabs
+pyttsx3

@@ -6,8 +6,8 @@ Construite par étapes, d'abord **sur l'ordinateur** (sans moteur, sans risque),
 |---|---|---|
 | 1 | **Voir** : la webcam encadre les objets et les nomme en français | essayé sur le PC le 11/11/2026 : marche, mais 80 objets seulement → ajout de **sa propre liste** (`objets.txt`) et de la **webcam externe** |
 | 2 | **Entendre** : comprendre ce qu'on lui dit (reconnaissance vocale) | **validé sur le PC le 11/11/2026** : il comprend bien (modèle « small ») |
-| 3 | **Répondre** : une IA qui répond, et une voix | à faire |
-| 4 | **Tout relier** : « qu'est-ce que tu vois ? » → réponse à voix haute | à faire |
+| 3 | **Répondre** : une IA qui répond (Claude), et une voix (ElevenLabs) | programme prêt (`parler.py`), à essayer avec les clés sur le PC |
+| 4 | **Tout relier** : écouter → répondre → parler, en boucle | fait dans `parler.py` ; reste « qu'est-ce que tu vois ? » (la caméra) |
 | 5 | **Bouger** : 2 servos (tourner, hocher) pour regarder vers ce qu'on lui montre | à faire |
 
 ## Étape 1 : voir
@@ -54,6 +54,36 @@ séparées par un silence bien découpées en deux. Pas encore essayé avec un v
 
 **Clés d'API** (ElevenLabs pour la voix à l'étape 3, Anthropic pour l'IA) : elles iront dans un fichier
 `cles.txt` **sur le PC seulement**, jamais dans une conversation ni sur GitHub (le fichier est exclu).
+
+## Étape 3 : répondre — parler avec Câlin
+
+Le robot s'appelle **Câlin**, comme la borne d'accueil du club : même caractère (chaleureux, phrases
+courtes, adapté aux enfants, uniquement en français). Il sait qu'il est un robot en construction au
+club, qu'il ne peut encore rien attraper, et renvoie vers l'accueil pour les tarifs et le planning.
+On réunira la borne et le robot plus tard.
+
+**Double-cliquer `lancer_conversation.bat`.** Il charge l'écoute, mesure le bruit de fond (rester
+silencieux 2 secondes), dit bonjour, puis : **tu parles → il écrit ta phrase → Claude répond → la voix
+la dit**. Pendant qu'il parle, il n'écoute pas (sinon il s'entendrait). **« Au revoir »** ou
+**Ctrl + C** pour arrêter.
+
+- **Clés** : le programme cherche, dans l'ordre, `C:\projet robot\cles_robot.txt`,
+  `C:\projet robot\cles.txt`, `C:\projet robot\cles.env`, `C:\projet robot\.env`, puis
+  `C:\Users\nicol\cles_robot.txt`. Il écrit au démarrage lequel il a trouvé. Format : voir
+  `cles_exemple.txt` (une clé seule sur une ligne est aussi reconnue).
+- **Voix** : ElevenLabs si la clé est là, sinon la voix gratuite de Windows. Pour forcer la voix de
+  Windows : ajouter `--voix-pc`. Pour une autre voix ElevenLabs : ajouter une ligne
+  `ELEVENLABS_VOICE_ID=...` dans le fichier des clés (l'identifiant se copie dans la bibliothèque de
+  voix du site ElevenLabs).
+- **Sans micro** : `--clavier` pour taper ses phrases.
+- **IA** : Claude Opus 5.5, réflexion courte (`EFFORT = 'low'`), réglages en tête de `parler.py`. La
+  borne du club utilise Claude Sonnet 5.5, plus rapide et moins cher : changer `MODELE_IA` pour
+  l'essayer. Si une demande est refusée par le modèle, l'API passe la main à un autre modèle dans le
+  même appel (« fallbacks »).
+
+Testé ici sans les clés : lecture du fichier des clés, filtre des phrases fantômes de Whisper,
+message clair si la clé est fausse. **Pas encore testé** : une vraie réponse de Claude et la voix
+ElevenLabs.
 
 ### Installation sur le PC (une seule fois)
 
