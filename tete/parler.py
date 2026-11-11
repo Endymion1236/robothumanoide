@@ -82,6 +82,9 @@ def lire_cles():
 
 # --- Cerveau : Claude ---------------------------------------------------------------------------
 FIN_DE_PHRASE = re.compile(r'(?<=[.!?…])\s+')
+# Pour le TOUT PREMIER morceau d'une réponse, on n'attend pas la fin de la phrase : dès une virgule après
+# au moins 20 caractères, il part à la voix (« Oui, je vois une petite fille aux longs cheveux, »).
+PREMIER_MORCEAU = re.compile(r'^(.{20,}?[,;:])\s+', re.S)
 
 class Cerveau:
     """Envoie la phrase à Claude et renvoie la réponse PHRASE PAR PHRASE, au fur et à mesure qu'elle s'écrit.
@@ -135,6 +138,10 @@ class Cerveau:
                     if sur_morceau:
                         sur_morceau(bout)             # la voix en direct reçoit le texte mot par mot
                     tampon += bout
+                    if not morceaux:                      # rien dit encore : partir dès la 1re virgule
+                        m = PREMIER_MORCEAU.match(tampon)
+                        if m and not FIN_DE_PHRASE.search(m.group(1)):
+                            phrase_finie(m.group(1)); tampon = tampon[m.end():]
                     *finies, tampon = FIN_DE_PHRASE.split(tampon)
                     for f in finies:
                         phrase_finie(f)
@@ -196,7 +203,7 @@ PAROLE = threading.Event()
 
 class VoixElevenLabs:
     FREQ = 22050
-    AVANCE = 0.8          # secondes de son reçues AVANT de commencer à jouer : plus de trous si le réseau ralentit
+    AVANCE = 0.4          # secondes de son reçues AVANT de commencer à jouer (0,8 au début ; la voix hachée venait du modèle)
     AVANCE_DIRECT = 0.3   # en direct, la voix arrive en continu : petite réserve
 
     def __init__(self, cle, voix, modele=None):

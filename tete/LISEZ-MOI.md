@@ -115,6 +115,16 @@ ignorée, reconnexion, texte transmis à la voix 0,4 s avant la fin de Claude, r
 est refusée. **Pas encore testé avec les vrais serveurs ElevenLabs** (non joignables d'ici) : c'est
 l'essai sur le PC qui dira si la v4 accepte la voix en direct.
 
+### Mesures chez Nicolas (11/11/2026) et réglages qui ont suivi
+
+« Et là, tu vois quelqu'un ? » → *compris en 1,2 s · 1er mot de l'IA 4,7 s (photo) · 1er son 7,2 s · voix : phrases* ;
+« C'est Ambre. » → *1,1 s · 2,4 s · 5,0 s*. Le plus long : entre le 1er mot de Claude et le 1er son.
+- Le **premier morceau** de chaque réponse part à la voix **dès la première virgule** (après 20 caractères),
+  sans attendre la fin de la phrase.
+- Réserve de son réduite de **0,8 à 0,4 s** (la voix hachée venait du modèle, pas du réseau).
+- « voix : phrases » : la voix en direct n'a pas servi (la v4 l'a probablement refusée) ; à essayer :
+  `--voix-rapide` (v4 turbo).
+
 ### Plus rapide (11/11/2026)
 
 - La réponse est **dite phrase par phrase pendant que Claude écrit la suite** : la première phrase
