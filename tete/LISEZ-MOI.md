@@ -32,8 +32,8 @@ on pourra entraîner un modèle avec quelques dizaines de photos de chaque objet
 1. Brancher la webcam sur un port USB de l'ordinateur ; attendre quelques secondes.
 2. **Double-cliquer `lister_cameras.bat`** : il affiche les webcams trouvées (en général 0 = celle
    du portable, 1 = la webcam USB).
-3. Ouvrir `lancer_vision.bat` ou `lancer_objets.bat` avec le **Bloc-notes** (clic droit → Modifier
-   ou Ouvrir avec), remplacer **`--camera 0`** par **`--camera 1`**, enregistrer, relancer.
+3. Les lanceurs utilisent **`--camera 1`** (webcam USB) depuis le 11/11/2026. Pour une autre webcam :
+   ouvrir le lanceur avec le **Bloc-notes** (clic droit → Modifier), changer le numéro, enregistrer.
 
 ## Étape 2 : entendre
 
@@ -77,9 +77,8 @@ la dit**. Pendant qu'il parle, il n'écoute pas (sinon il s'entendrait). **« Au
   `ELEVENLABS_VOICE_ID=...` dans le fichier des clés (l'identifiant se copie dans la bibliothèque de
   voix du site ElevenLabs).
 - **Sans micro** : `--clavier` pour taper ses phrases.
-- **IA** : Claude Opus 5.5, réflexion courte (`EFFORT = 'low'`), réglages en tête de `parler.py`. La
-  borne du club utilise Claude Sonnet 5.5, plus rapide et moins cher : ajouter `--ia sonnet` pour
-  l'essayer. Si une demande est refusée par le modèle, l'API passe la main à un autre modèle dans le
+- **IA** : Claude Sonnet 5.5 par défaut (comme la borne), réflexion courte (`EFFORT = 'low'`), réglages en
+  tête de `parler.py` ; `--ia opus` pour Claude Opus 5.5, plus puissant mais plus lent. Si une demande est refusée par le modèle, l'API passe la main à un autre modèle dans le
   même appel (« fallbacks »).
 
 Testé ici sans les clés : lecture du fichier des clés, filtre des phrases fantômes de Whisper,
@@ -97,7 +96,8 @@ ElevenLabs.
   « regarde ce que je tiens », « combien… », « quelle couleur… »), il envoie aussi **la photo** à
   Claude, qui reconnaît presque n'importe quel objet : bien plus juste que le petit modèle de
   détection (le rouleau de scotch ne sera plus un frisbee). La fenêtre noire indique « + photo envoyée ».
-- Webcam USB : `--camera 1` dans le lanceur ; sa propre liste d'objets : `--objets objets.txt`.
+- **Webcam USB (n° 1) par défaut** dans tous les lanceurs et programmes ; celle du portable : `--camera 0`.
+  Sa propre liste d'objets : `--objets objets.txt`.
 
 ### Plus rapide (11/11/2026)
 
@@ -107,8 +107,8 @@ ElevenLabs.
   octets** au lieu d'attendre le fichier entier. (Plus beau mais plus lent : `MODELE_VOIX =
   'eleven_multilingual_v2'` dans `parler.py`.)
 - Fin de phrase détectée après **0,6 s** de silence au lieu de 0,8 s.
-- **`--ia sonnet`** : Claude Sonnet 5.5, l'IA de la borne, plus rapide et moins chère qu'Opus 5.5
-  (par défaut). À essayer : c'est le réglage qui gagne le plus de temps.
+- **IA par défaut : Claude Sonnet 5.5** (choix de Nicolas, 11/11/2026), celle de la borne : plus rapide et
+  moins chère. `--ia opus` pour Claude Opus 5.5, plus puissant mais plus lent.
 - Après chaque réponse, une ligne donne les temps : *compris en … s · 1er mot de l'IA … s ·
   1re phrase dite à … s · réponse complète … s*. Elle dit où le temps se perd.
 

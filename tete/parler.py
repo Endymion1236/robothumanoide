@@ -7,7 +7,7 @@ Utilisation :  python parler.py              (micro + voix ElevenLabs)
                python parler.py --clavier    (taper ses phrases au lieu de parler)
                python parler.py --muet       (réponses écrites seulement, sans voix)
                python parler.py --voix-pc    (voix de Windows, gratuite, au lieu d'ElevenLabs)
-               python parler.py --ia sonnet  (IA plus rapide et moins chère, celle de la borne)
+               python parler.py --ia opus    (IA plus puissante, plus lente)
 Dire « au revoir » ou Ctrl + C pour arrêter.
 
 Clés : fichier texte hors du projet (voir cles_exemple.txt), lignes ANTHROPIC_API_KEY=... et
@@ -18,8 +18,8 @@ from pathlib import Path
 import numpy as np
 
 # --- Réglages -------------------------------------------------------------------------------
-MODELES_IA = {'opus': 'claude-opus-5-5',        # par défaut
-              'sonnet': 'claude-sonnet-5-5'}   # celui de la borne du club : plus rapide, moins cher (--ia sonnet)
+MODELES_IA = {'sonnet': 'claude-sonnet-5-5',   # par défaut (choix de Nicolas, 11/11/2026) : rapide, celui de la borne
+              'opus': 'claude-opus-5-5'}       # plus puissant, plus lent et plus cher (--ia opus)
 EFFORT = 'low'                         # conversation simple : réflexion courte, réponse plus rapide
 VOIX_ELEVENLABS = 'JBFqnCBsd6RMkjVDRZzb'   # voix par défaut (multilingue) ; remplaçable dans le fichier des clés
 MODELE_VOIX = 'eleven_flash_v2_5'         # modèle rapide d'ElevenLabs, parle français (eleven_multilingual_v2 : plus beau, plus lent)
@@ -257,7 +257,7 @@ def options_communes(ap):
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs')
     ap.add_argument('--micro', type=int, help='numéro du micro (voir lister_micros.bat)')
     ap.add_argument('--modele', default='small', choices=['base', 'small', 'medium'], help='reconnaissance vocale')
-    ap.add_argument('--ia', default='opus', choices=list(MODELES_IA), help='opus (défaut) ou sonnet (plus rapide)')
+    ap.add_argument('--ia', default='sonnet', choices=list(MODELES_IA), help='sonnet (défaut, rapide) ou opus (plus puissant)')
 
 def cles_ou_quitter():
     cles, fichier = lire_cles()

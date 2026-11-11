@@ -91,7 +91,7 @@ def annoter(image_bgr, resultat, seuil, fonte, noms=NOMS_FR):
 
 def main():
     ap = argparse.ArgumentParser(description='Tête du robot : reconnaissance d\'objets')
-    ap.add_argument('--camera', type=int, default=0, help='numéro de la webcam (0 = celle du portable)')
+    ap.add_argument('--camera', type=int, default=1, help='numéro de la webcam : 1 = webcam USB (défaut), 0 = celle du portable')
     ap.add_argument('--image', help='analyser une photo au lieu de la webcam')
     ap.add_argument('--seuil', type=float, help='confiance minimale (0 à 1) ; 0.5 par défaut, 0.15 avec --objets')
     ap.add_argument('--objets', help="fichier de SA liste d'objets à chercher (voir objets.txt)")

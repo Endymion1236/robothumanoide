@@ -173,7 +173,7 @@ class Oeil(threading.Thread):
 def main():
     ap = argparse.ArgumentParser(description='Tête du robot : voir, entendre, répondre')
     options_communes(ap)
-    ap.add_argument('--camera', type=int, default=0, help='numéro de la webcam (voir lister_cameras.bat)')
+    ap.add_argument('--camera', type=int, default=1, help='numéro de la webcam : 1 = webcam USB (défaut), 0 = celle du portable')
     ap.add_argument('--objets', help='détecter sa propre liste d\'objets (objets.txt)')
     ap.add_argument('--image', help='une photo fixe à la place de la webcam (pour essayer)')
     ap.add_argument('--sans-fenetre', action='store_true', help='ne pas afficher la fenêtre de la caméra')
