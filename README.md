@@ -40,6 +40,25 @@ sur le PC), **validé le 11/11/2026**. Étape 3 **répondre** : `parler.py`, con
 biométriques apprises seulement à la demande de la personne, jamais pour un enfant, rangées hors du projet), à essayer.
 Puis bouger (2 servos).
 
+## Objectif : Câlin sert le café (11/11/2026)
+
+**But** : « Câlin, un café s'il te plaît » → il reconnaît la personne → prend un gobelet → lance la machine
+→ **pose le gobelet couvert devant la personne, sur la table** → « Voilà ton café ! ».
+
+**Sécurité (café brûlant, enfants au club) — conditions pour servir une boisson chaude :**
+- gobelets **avec couvercle** ; petits gobelets (expresso, environ 100 g : le bras porte 200 à 300 g au mieux) ;
+- **posé sur la table devant la personne, jamais tendu dans les mains, jamais au-dessus de quelqu'un** ;
+- trajet **lent, bas et à plat** quand il porte ; **force limitée** dans les servos ;
+- la caméra surveille la zone : **une main trop près → arrêt** ; **interrupteur d'arrêt d'urgence** à portée ;
+- au club : **boissons froides pour les enfants**, service chaud réservé aux adultes.
+
+**Étapes :**
+1. Bras complet (socle, épaule, coude, pince) et gestes enregistrés en montrant le bras à la main.
+2. **Station café** : pile de gobelets, machine **déclenchée par l'ESP32 avec un relais** (pas par le bras), zone de service.
+3. Premiers essais avec des **gobelets vides**, puis d'eau froide, puis seulement le café.
+4. Outil `servir_cafe` pour Câlin (enchaîne les gestes, vérifie que la zone est libre).
+5. Plus tard, peut-être : une **base à roulettes** pour servir plus loin que la portée du bras.
+
 ## Feuille de route du premier bras
 
 | # | Étape | État |
