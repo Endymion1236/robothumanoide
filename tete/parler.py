@@ -259,6 +259,23 @@ class VoixElevenLabs:
             if sortie is not None:
                 sortie.stop(); sortie.close()             # stop() attend la fin du son déjà envoyé
 
+    FICHIER_REFUS = None   # fichier où l'on note les modèles qui refusent la voix en direct (donné par le programme)
+
+    @property
+    def direct_refuse(self):
+        import json
+        f = VoixElevenLabs.FICHIER_REFUS
+        return bool(f and f.is_file() and self.modele in json.loads(f.read_text(encoding='utf-8')))
+
+    def noter_refus_direct(self, raison):
+        import json
+        f = VoixElevenLabs.FICHIER_REFUS
+        if not f:
+            return
+        refus = json.loads(f.read_text(encoding='utf-8')) if f.is_file() else {}
+        refus[self.modele] = {'date': time.strftime('%d/%m/%Y'), 'raison': raison[:200]}
+        f.write_text(json.dumps(refus, ensure_ascii=False, indent=1), encoding='utf-8')
+
     def dire_en_direct(self, morceaux):
         """Envoie le texte au fil de l'eau (connexion directe d'ElevenLabs) et joue le son dès qu'il arrive.
         Lève une exception si la connexion est refusée avant le premier son (l'appelant repasse en phrases)."""
@@ -365,6 +382,9 @@ class Bouche:
     def repondre_en_direct(self, cerveau, phrase, **options):
         """Fait répondre le cerveau en envoyant le texte à la voix MOT PAR MOT (voix ElevenLabs en direct).
         Repli : si la voix en direct n'est pas possible, réponse dite phrase par phrase comme avant."""
+        if self.direct_possible and self.voix is not None and getattr(self.voix, 'direct_refuse', False):
+            self.direct_possible = False
+            print(f'   (voix en direct non tentée : le modèle {self.voix.modele} l\'a déjà refusée)')
         if not (self.voix and hasattr(self.voix, 'dire_en_direct') and self.direct_possible):
             self.mode_dernier_tour = 'phrases'
             return cerveau.repondre(phrase, sur_phrase=self.dire, **options)
@@ -388,6 +408,8 @@ class Bouche:
         if echec:
             print(f'   (voix en direct impossible : {echec[0]} ; retour à la voix phrase par phrase)')
             self.direct_possible = False; self.mode_dernier_tour = 'phrases (repli)'
+            if hasattr(self.voix, 'noter_refus_direct'):
+                self.voix.noter_refus_direct(str(echec[0]))
             self.dire(texte.split(' [')[0]); self.finir()
         return texte
 
@@ -416,7 +438,7 @@ def options_communes(ap):
     ap.add_argument('--modele', default='small', choices=['base', 'small', 'medium'], help='modèle Whisper (avec --ecoute whisper)')
     ap.add_argument('--ia', default='sonnet', choices=list(MODELES_IA), help='sonnet (défaut, rapide) ou opus (plus puissant)')
 
-VERSION = '11/11/2026 · voix QynjFzqBt96iEuetB1Tq'
+VERSION = 'n° 12 du 11/11/2026'   # À AUGMENTER à chaque modification : Nicolas voit ainsi quelle version tourne
 
 def cles_ou_quitter():
     print(f'Câlin — version du {VERSION} — programme : {Path(__file__).resolve().parent}')

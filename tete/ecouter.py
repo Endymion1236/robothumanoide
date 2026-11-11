@@ -215,8 +215,10 @@ class OreilleTempsReel:
     def envoyer(self, bloc):
         """Appelé par le micro (bloc de son 16 kHz) : envoie au serveur, sauf quand le robot parle."""
         self.blocs_micro = getattr(self, 'blocs_micro', 0) + 1
-        if self.muet() or self.connexion is None:
+        if self.connexion is None:
             return
+        if self.muet():
+            bloc = np.zeros_like(bloc)       # silence : le serveur garde la connexion sans rien transcrire
         self.blocs_envoyes = getattr(self, 'blocs_envoyes', 0) + 1
         if float(np.sqrt(np.mean(bloc**2))) > 0.01:
             self.t_dernier_son = time.time()

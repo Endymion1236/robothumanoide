@@ -115,6 +115,22 @@ ignorée, reconnexion, texte transmis à la voix 0,4 s avant la fin de Claude, r
 est refusée. **Pas encore testé avec les vrais serveurs ElevenLabs** (non joignables d'ici) : c'est
 l'essai sur le PC qui dira si la v4 accepte la voix en direct.
 
+### Version affichée au démarrage
+
+« Câlin — version n° 12 du 11/11/2026 » : le numéro augmente à chaque modification. S'il ne correspond
+pas à la dernière version sur GitHub, c'est qu'une ancienne copie du programme tourne.
+
+### Essai d'Aïka et Raphaël (11/11/2026, version antérieure) et corrections (n° 12)
+
+- **Voix en direct refusée** par ElevenLabs avec `eleven_v4_turbo` (« HTTP 400 ») : les modèles v4
+  n'acceptent pas l'envoi du texte mot par mot. Le refus est noté dans
+  `calin_donnees\voix_direct_refusee.json` et la voix en direct n'est plus tentée avec ce modèle
+  (supprimer ce fichier pour réessayer, par exemple avec un autre modèle).
+- **Photo de suivi** : après une question sur ce qu'il voit, la question suivante reçoit aussi la photo
+  (« Et là, c'est mieux ? ») ; mots déclencheurs ajoutés (mieux, maintenant, et là, net, flou…).
+- **Écoute en direct** : pendant que Câlin parle, du silence est envoyé au lieu de rien, pour que la
+  connexion ne se coupe plus (elle se rouvrait à chaque échange, au risque de manquer le premier mot).
+
 ### Mesures chez Nicolas (11/11/2026) et réglages qui ont suivi
 
 « Et là, tu vois quelqu'un ? » → *compris en 1,2 s · 1er mot de l'IA 4,7 s (photo) · 1er son 7,2 s · voix : phrases* ;

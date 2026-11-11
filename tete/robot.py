@@ -62,7 +62,8 @@ for o in OUTILS:                       # réponses en flux : entrées vérifiée
 # Mots qui déclenchent l'envoi de la photo à l'IA
 QUESTION_VISUELLE = re.compile(
     r"\b(vois|voir|voit|regarde|regarder|montre|caméra|photo|devant toi|reconnais|c'est quoi|qu'est-ce que c'est|"
-    r"qu'est ce que c'est|combien|couleur|tiens|je tiens|dans ma main|comment je suis|qui est là)\b", re.I)
+    r"qu'est ce que c'est|combien|couleur|tiens|je tiens|dans ma main|comment je suis|qui est là|"
+    r"mieux|maintenant|et là|et ici|ça c'est|celui-là|celle-là|recule|approche|zoom|net|flou)\b", re.I)
 
 class Oeil(threading.Thread):
     """Caméra en tâche de fond : affiche la fenêtre, détecte les objets ~3 fois par seconde."""
@@ -187,6 +188,7 @@ def main():
     donnees = dossier_perso()
     print('Souvenirs et visages rangés dans :', donnees)
     memoire = Memoire(donnees / 'memoire.json')
+    parler.VoixElevenLabs.FICHIER_REFUS = donnees / 'voix_direct_refusee.json'
     visages = None
     if not a.sans_visages:
         try:
@@ -232,6 +234,7 @@ def main():
     bouche.finir()
     if oreille:
         oreille.vider()
+    photo_au_tour_precedent = False
     try:
         while True:
             d_ecoute = None
@@ -245,8 +248,10 @@ def main():
             contexte, photo = None, None
             if oeil:
                 contexte = oeil.resume()
-                if QUESTION_VISUELLE.search(phrase):
+                # photo si la question parle de ce qu'il voit, ou si l'échange précédent en parlait déjà
+                if QUESTION_VISUELLE.search(phrase) or photo_au_tour_precedent:
                     photo = oeil.photo_jpeg()
+                photo_au_tour_precedent = photo is not None and QUESTION_VISUELLE.search(phrase) is not None
                 print(f'   {contexte}' + ('  + photo envoyée' if photo else ''))
             t = time.time(); bouche.debut_tour()
             bouche.repondre_en_direct(cerveau, phrase, image_jpeg=photo, contexte=contexte)
