@@ -1,0 +1,68 @@
+# Pince à mâchoires parallèles (V1)
+
+Pour le bras de Câlin : prendre un **gobelet moyen** (jusqu'à 95 mm d'écart), avec un servo STS3215.
+Fichiers à imprimer dans `sortie/` (déjà posés pour l'impression). Programme : `generer_pince.py`
+(toutes les cotes en tête de fichier), images : `apercu_pince.py`. **Prototype : aucune validation physique.**
+
+## Principe
+
+Le servo tourne l'**engrenage A** ; l'**engrenage B**, identique, tourne en sens inverse. Chaque engrenage
+porte un **bras moteur**, doublé d'un **bras libre** parallèle : chaque **doigt** reste parallèle à l'autre
+et ils se rapprochent ensemble, gobelet au centre. Les doigts descendent pour prendre un gobelet debout.
+
+À savoir : en se fermant, les doigts **avancent un peu** (environ 19 mm entre ouvert et fermé), comme une
+main qui glisse le long du gobelet. C'est le prix d'une pince simple à bras pivotants.
+
+## Contrôles faits (hors impression)
+
+- Mouvement complet de **6 à 95 mm** d'écart, vérifié en **24 positions** : **aucune collision** entre les
+  pièces mobiles, ni avec la base, la bride, le servo ou l'avant-bras.
+- Engrenages : module 1,5, 20 dents, jeu entre dents de 0,35 mm (une impression n'est jamais parfaite).
+- En dessous de **6 mm**, doigts et bras libres se toucheraient : c'est la butée du servo.
+- La pince passe **1 mm au-dessus de la partie haute** du servo (même leçon que le coude), bride à cale
+  (0,5 mm de serrage) sur la partie haute.
+- Masse : environ **70 g** de pièces imprimées + 55 g de servo = **125 g**.
+
+## À imprimer (PLA ou PETG, 4 périmètres, remplissage 40 %)
+
+| Pièce | Fichier |
+|---|---|
+| Base (logement du servo + manchon sur l'avant-bras + poteaux) | `pince_base.stl` |
+| Bride (porte aussi un pivot) | `pince_bride.stl` |
+| Engrenage A (sur le palonnier) | `pince_engrenage_A.stl` |
+| Engrenage B | `pince_engrenage_B.stl` |
+| Bras libres | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
+| Doigts | `pince_doigt_+Y.stl`, `pince_doigt_-Y.stl` |
+
+Les doigts s'impriment debout (plaque sur le plateau, mâchoire vers le haut).
+
+## Visserie
+
+| Quoi | Combien | Où |
+|---|---|---|
+| Roulements 623ZZ (commandés) | 7 | engrenage B (1), bras libres (2), doigts (4) |
+| Inserts M3 à chaud | 5 | piliers de la bride (2), poteau de l'engrenage B, poteau du bras libre -Y, pivot sur la bride |
+| Vis M3 × 10 | 5 | bride (2), pivots engrenage B et bras libres (3) |
+| Vis M3 × 12 + écrou frein | 4 | axes des doigts |
+| Vis M2,5 × 8 | 4 | engrenage A sur le palonnier |
+| Rondelles M3 fines | une dizaine | entre les couches qui tournent |
+| Les 2 vis M3 × 30 de l'entretoise du bout de l'avant-bras | (déjà là) | traversent le manchon de la pince |
+
+## Montage (servo réglé AVANT, comme pour le coude)
+
+1. **Servo seul sur la carte** : numéro **4**, butées **1676 et 2420**, puis le mettre à **2048**.
+2. Servo dans la base, câble par une des fenêtres, bride vissée.
+3. Engrenage A sur le palonnier **avec les mâchoires écartées de 56 mm** (mi-course) quand le servo est à 2048.
+4. Engrenage B sur son poteau, dents engagées pour que les deux bras soient symétriques.
+5. Bras libres, puis doigts.
+6. **Hors tension**, ouvrir et fermer à la main : ça doit glisser sans point dur.
+7. Enfiler le manchon sur le bout de l'avant-bras et le fixer avec les 2 vis M3 × 30 de l'entretoise.
+
+## Limites à connaître
+
+- **Poids au bout du bras** : pince 125 g + un gobelet moyen plein (300 g environ) = plus de 400 g à
+  25 cm de l'épaule. C'est beaucoup pour un STS3215 en continu : servir d'abord des **gobelets vides ou
+  petits**, et prévoir peut-être un servo plus fort pour l'épaule.
+- **Force de serrage** : le servo peut écraser un gobelet en carton. Il faudra limiter son couple
+  (réglage dans le servo) avant les essais avec de vrais gobelets.
+- Le sens « ouvrir » (vers la butée min ou max) se vérifie au premier essai.
