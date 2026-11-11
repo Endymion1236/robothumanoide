@@ -1,0 +1,19 @@
+# Liste des objets que la tête doit chercher (avec lancer_objets.bat).
+# Une ligne par objet :  nom affiché en français = nom en anglais (le modèle comprend l'anglais).
+# Ajouter, enlever ou modifier des lignes avec le Bloc-notes, puis relancer.
+# Astuce : plus le nom anglais est précis, mieux c'est (« roll of tape » plutôt que « tape »).
+personne = person
+rouleau de scotch = roll of adhesive tape
+tube de colle = glue tube
+tournevis = screwdriver
+pied à coulisse = caliper
+ciseaux = scissors
+servomoteur = small black servo motor
+tasse = mug
+bouteille = bottle
+téléphone = smartphone
+balle = ball
+plot = traffic cone
+cheval = horse
+brosse = brush
+casque d'équitation = riding helmet

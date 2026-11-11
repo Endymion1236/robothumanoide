@@ -4,7 +4,7 @@ Construite par étapes, d'abord **sur l'ordinateur** (sans moteur, sans risque),
 
 | Étape | Ce que fait la tête | État |
 |---|---|---|
-| 1 | **Voir** : la webcam encadre les objets et les nomme en français | programme prêt (`vision.py`), testé sur une photo, à essayer sur le PC |
+| 1 | **Voir** : la webcam encadre les objets et les nomme en français | essayé sur le PC le 11/11/2026 : marche, mais 80 objets seulement → ajout de **sa propre liste** (`objets.txt`) et de la **webcam externe** |
 | 2 | **Entendre** : comprendre ce qu'on lui dit (reconnaissance vocale) | à faire |
 | 3 | **Répondre** : une IA qui répond, et une voix | à faire |
 | 4 | **Tout relier** : « qu'est-ce que tu vois ? » → réponse à voix haute | à faire |
@@ -12,10 +12,27 @@ Construite par étapes, d'abord **sur l'ordinateur** (sans moteur, sans risque),
 
 ## Étape 1 : voir
 
-Modèle **YOLO11n** (Ultralytics) : il reconnaît 80 sortes d'objets courants (personne, chat, chien,
-cheval, bouteille, tasse, ballon, téléphone, livre…), téléchargé tout seul au premier lancement
-(environ 6 Mo). Il ne connaît pas encore les objets propres au club (poney, licol, plot de Pony
-Games…) : on pourra lui apprendre plus tard avec des photos.
+Deux façons de reconnaître les objets :
+
+| Lanceur | Modèle | Ce qu'il reconnaît | Vitesse |
+|---|---|---|---|
+| `lancer_vision.bat` | YOLO11n (6 Mo) | **80 objets fixes** (personne, chat, cheval, bouteille, tasse, ballon, téléphone, livre…). Un objet hors liste est confondu avec le plus proche : un rouleau de scotch devient un « frisbee », un tube de colle un « téléphone ». | rapide |
+| `lancer_objets.bat` | YOLO-World (environ 360 Mo au premier lancement) | **la liste qu'on lui donne** dans `objets.txt` : rouleau de scotch, tube de colle, tournevis, plot, cheval… | plus lent, moins sûr de lui (seuil 0,15 par défaut) |
+
+**`objets.txt`** : une ligne par objet, `nom français = nom anglais` (le modèle comprend l'anglais).
+L'ouvrir avec le Bloc-notes pour ajouter ou enlever des objets, puis relancer. Plus le nom anglais
+est précis, mieux c'est : « roll of adhesive tape » plutôt que « tape ».
+
+Plus tard, pour **reconnaître à coup sûr** les objets du club (poney, licol, plot de Pony Games…),
+on pourra entraîner un modèle avec quelques dizaines de photos de chaque objet.
+
+## Brancher une webcam externe (USB)
+
+1. Brancher la webcam sur un port USB de l'ordinateur ; attendre quelques secondes.
+2. **Double-cliquer `lister_cameras.bat`** : il affiche les webcams trouvées (en général 0 = celle
+   du portable, 1 = la webcam USB).
+3. Ouvrir `lancer_vision.bat` ou `lancer_objets.bat` avec le **Bloc-notes** (clic droit → Modifier
+   ou Ouvrir avec), remplacer **`--camera 0`** par **`--camera 1`**, enregistrer, relancer.
 
 ### Installation sur le PC (une seule fois)
 
@@ -28,10 +45,9 @@ Games…) : on pourra lui apprendre plus tard avec des photos.
 
 ### Lancer
 
-**Double-cliquer `lancer_vision.bat`.** Une fenêtre montre la webcam avec des cadres et des noms ;
+**Double-cliquer `lancer_vision.bat`** (ou `lancer_objets.bat`). Une fenêtre montre la webcam avec des cadres et des noms ;
 la fenêtre noire écrit « Je vois : … » chaque fois que ça change. **Touche Q** pour quitter.
 
-- Autre webcam (par exemple une webcam USB branchée en plus) : `lancer_vision.bat --camera 1`
 - Plus ou moins prudent : `--seuil 0.3` (voit plus de choses, se trompe plus) à `--seuil 0.7`
 - Analyser une photo : `lancer_vision.bat --image chemin\de\la\photo.jpg`
 
