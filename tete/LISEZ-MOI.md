@@ -103,8 +103,11 @@ ElevenLabs.
 
 - La réponse est **dite phrase par phrase pendant que Claude écrit la suite** : la première phrase
   arrive bien plus tôt.
-- Voix ElevenLabs (11/11/2026, la voix rapide sonnait mal et hachée) : modèle **eleven_multilingual_v2**,
-  le plus naturel (`--voix-rapide` pour le modèle rapide eleven_flash_v2_5) ; le son commence après
+- Voix ElevenLabs (11/11/2026, la voix rapide sonnait mal et hachée) : modèle **ElevenLabs v4**
+  (`eleven_v4`, choix de Nicolas), `--voix-rapide` pour **v4 turbo** (`eleven_v4_turbo`, faite pour la
+  conversation). Si le modèle refuse le contexte d'intonation ou la langue, le programme le dit une fois
+  et continue sans (non vérifié dans la documentation d'ElevenLabs, inaccessible d'ici). Autres modèles
+  possibles dans `parler.py` : `eleven_multilingual_v2`, `eleven_flash_v2_5` ; le son commence après
   **0,8 s de réserve** (plus de trous si internet ralentit) ; la 1re phrase part seule, **les suivantes
   sont regroupées** et le texte déjà dit sert de contexte (intonation continue) ; **la caméra suspend
   ses calculs pendant que Câlin parle**. Autre voix : ligne `ELEVENLABS_VOICE_ID=...` dans le fichier

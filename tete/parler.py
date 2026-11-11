@@ -13,7 +13,7 @@ Dire « au revoir » ou Ctrl + C pour arrêter.
 Clés : fichier texte hors du projet (voir cles_exemple.txt), lignes ANTHROPIC_API_KEY=... et
 ELEVENLABS_API_KEY=... ; facultatif : ELEVENLABS_VOICE_ID=... pour choisir une autre voix.
 """
-import argparse, base64, os, queue, re, sys, threading, time
+import argparse, base64, itertools, os, queue, re, sys, threading, time
 from pathlib import Path
 import numpy as np
 
@@ -22,8 +22,9 @@ MODELES_IA = {'sonnet': 'claude-sonnet-5-5',   # par défaut (choix de Nicolas, 
               'opus': 'claude-opus-5-5'}       # plus puissant, plus lent et plus cher (--ia opus)
 EFFORT = 'low'                         # conversation simple : réflexion courte, réponse plus rapide
 VOIX_ELEVENLABS = 'JBFqnCBsd6RMkjVDRZzb'   # voix par défaut (multilingue) ; remplaçable dans le fichier des clés
-MODELE_VOIX = 'eleven_multilingual_v2'    # le plus naturel d'ElevenLabs (choix de Nicolas : le modèle rapide sonnait mal)
-MODELE_VOIX_RAPIDE = 'eleven_flash_v2_5'  # démarre plus vite, moins naturel (--voix-rapide)
+MODELE_VOIX = 'eleven_v4'                 # ElevenLabs v4, choix de Nicolas (11/11/2026)
+MODELE_VOIX_RAPIDE = 'eleven_v4_turbo'    # v4 rapide, prévue pour la conversation (--voix-rapide)
+# Autres : 'eleven_multilingual_v2' (naturel, éprouvé), 'eleven_flash_v2_5' (très rapide, jugé mauvais)
 HISTORIQUE_MAX = 20                    # nombre de messages gardés en mémoire pendant la conversation
 
 PERSONNALITE = """Tu es Câlin, la tête d'un robot humanoïde en construction au centre équestre d'Agon-Coutainville, \
@@ -191,13 +192,28 @@ class VoixElevenLabs:
         from elevenlabs.client import ElevenLabs
         self.client, self.voix, self.modele = ElevenLabs(api_key=cle), voix, modele or MODELE_VOIX
         self.dernier_texte = ''
+        self.options_en_plus = True     # contexte d'intonation + langue ; retirées si le modèle les refuse
 
     def dire(self, texte):
         import sounddevice as sd
-        flux = self.client.text_to_speech.stream(
-            self.voix, text=texte, model_id=self.modele, language_code='fr', output_format=f'pcm_{self.FREQ}',
-            # le texte déjà dit sert de contexte : l'intonation continue d'une phrase à l'autre
-            previous_text=self.dernier_texte[-300:] or None)
+        from elevenlabs.core.api_error import ApiError
+        def demander():
+            extra = {}
+            if self.options_en_plus:
+                # le texte déjà dit sert de contexte : l'intonation continue d'une phrase à l'autre
+                extra = {'language_code': 'fr', 'previous_text': self.dernier_texte[-300:] or None}
+            flux = self.client.text_to_speech.stream(self.voix, text=texte, model_id=self.modele,
+                                                     output_format=f'pcm_{self.FREQ}', **extra)
+            return flux, next(iter(flux), b'')       # le 1er morceau déclenche l'appel : une erreur arrive ici
+        try:
+            flux, premier = demander()
+        except ApiError as e:
+            if not (self.options_en_plus and e.status_code in (400, 422)):
+                raise
+            print(f'   (le modèle de voix {self.modele} refuse le contexte ou la langue : nouvel essai sans)')
+            self.options_en_plus = False
+            flux, premier = demander()
+        flux = itertools.chain([premier], flux)
         self.dernier_texte = (self.dernier_texte + ' ' + texte).strip()
         seuil, recu, sortie, reste = int(self.FREQ * 2 * self.AVANCE), b'', None, b''
         try:
@@ -285,7 +301,7 @@ def options_communes(ap):
     ap.add_argument('--clavier', action='store_true', help='taper ses phrases au lieu de parler')
     ap.add_argument('--muet', action='store_true', help='réponses écrites seulement')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs')
-    ap.add_argument('--voix-rapide', action='store_true', help='modèle de voix ElevenLabs plus rapide mais moins naturel')
+    ap.add_argument('--voix-rapide', action='store_true', help='ElevenLabs v4 turbo : démarre plus vite')
     ap.add_argument('--micro', type=int, help='numéro du micro (voir lister_micros.bat)')
     ap.add_argument('--modele', default='small', choices=['base', 'small', 'medium'], help='reconnaissance vocale')
     ap.add_argument('--ia', default='sonnet', choices=list(MODELES_IA), help='sonnet (défaut, rapide) ou opus (plus puissant)')
