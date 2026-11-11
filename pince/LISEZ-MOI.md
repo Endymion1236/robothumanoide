@@ -1,6 +1,12 @@
-# Pince à mâchoires parallèles (V1)
+# Pince à mâchoires parallèles (V2)
 
-Pour le bras de Câlin : prendre un **gobelet moyen** (jusqu'à 95 mm d'écart), avec un servo STS3215.
+**V2 (11/11/2026)** — Nicolas a demandé si la V1 n'était pas trop étroite : elle l'était. Un gobelet de 80 mm
+tenu au milieu des mâchoires **butait contre la base et l'engrenage A**, la marge pour l'attraper n'était que
+de 7,5 mm par côté, et des mâchoires plates tiennent mal un objet rond. V2 : bras de 50 mm, **ouverture
+110 mm**, mâchoires de **40 mm**, placées plus en avant et **creusées en arrondi** (rayon 45) qui centrent
+le gobelet. Les fichiers de la V1 sont remplacés.
+
+Pour le bras de Câlin : prendre un **gobelet moyen** (jusqu'à 110 mm d'écart), avec un servo STS3215.
 Fichiers à imprimer dans `sortie/` (déjà posés pour l'impression). Programme : `generer_pince.py`
 (toutes les cotes en tête de fichier), images : `apercu_pince.py`. **Prototype : aucune validation physique.**
 
@@ -10,18 +16,22 @@ Le servo tourne l'**engrenage A** ; l'**engrenage B**, identique, tourne en sens
 porte un **bras moteur**, doublé d'un **bras libre** parallèle : chaque **doigt** reste parallèle à l'autre
 et ils se rapprochent ensemble, gobelet au centre. Les doigts descendent pour prendre un gobelet debout.
 
-À savoir : en se fermant, les doigts **avancent un peu** (environ 19 mm entre ouvert et fermé), comme une
-main qui glisse le long du gobelet. C'est le prix d'une pince simple à bras pivotants.
+À savoir : en se fermant, les doigts **avancent un peu** (environ 28 mm entre grand ouvert et fermé), comme
+une main qui glisse le long du gobelet. C'est le prix d'une pince simple à bras pivotants.
 
 ## Contrôles faits (hors impression)
 
-- Mouvement complet de **6 à 95 mm** d'écart, vérifié en **24 positions** : **aucune collision** entre les
-  pièces mobiles, ni avec la base, la bride, le servo ou l'avant-bras.
+- Mouvement complet de **14 à 110 mm** d'écart (mesuré au creux des mâchoires), vérifié en **24 positions** :
+  **aucune collision** entre les pièces mobiles, ni avec la base, la bride, le servo ou l'avant-bras.
+- **Gobelets** (`test_gobelets.py`) : 55, 80 et 90 mm de diamètre, tenus au milieu des mâchoires ou par le
+  haut : ils ne touchent **que les mâchoires**. Marge derrière le gobelet : 30 mm (55), 10,5 mm (80),
+  1,2 mm (90 : juste). Marge pour l'attraper, mâchoires grandes ouvertes : 27,5 / 15 / 10 mm par côté.
 - Engrenages : module 1,5, 20 dents, jeu entre dents de 0,35 mm (une impression n'est jamais parfaite).
-- En dessous de **6 mm**, doigts et bras libres se toucheraient : c'est la butée du servo.
+- Fermée au maximum : 14 mm au creux, 4,6 mm entre les bouts des mâchoires (en dessous, elles se
+  toucheraient) : c'est la butée du servo. Objets plus fins que 5 mm : pas pour cette pince.
 - La pince passe **1 mm au-dessus de la partie haute** du servo (même leçon que le coude), bride à cale
   (0,5 mm de serrage) sur la partie haute.
-- Masse : environ **70 g** de pièces imprimées + 55 g de servo = **125 g**.
+- Masse : environ **88 g** de pièces imprimées + 55 g de servo = **143 g**.
 
 ## À imprimer (PLA ou PETG, 4 périmètres, remplissage 40 %)
 
@@ -50,9 +60,9 @@ Les doigts s'impriment debout (plaque sur le plateau, mâchoire vers le haut).
 
 ## Montage (servo réglé AVANT, comme pour le coude)
 
-1. **Servo seul sur la carte** : numéro **4**, butées **1676 et 2420**, puis le mettre à **2048**.
+1. **Servo seul sur la carte** : numéro **4**, butées **1663 et 2433**, puis le mettre à **2048**.
 2. Servo dans la base, câble par une des fenêtres, bride vissée.
-3. Engrenage A sur le palonnier **avec les mâchoires écartées de 56 mm** (mi-course) quand le servo est à 2048.
+3. Engrenage A sur le palonnier **avec les mâchoires écartées de 71 mm** (mi-course) quand le servo est à 2048.
 4. Engrenage B sur son poteau, dents engagées pour que les deux bras soient symétriques.
 5. Bras libres, puis doigts.
 6. **Hors tension**, ouvrir et fermer à la main : ça doit glisser sans point dur.
@@ -60,7 +70,7 @@ Les doigts s'impriment debout (plaque sur le plateau, mâchoire vers le haut).
 
 ## Limites à connaître
 
-- **Poids au bout du bras** : pince 125 g + un gobelet moyen plein (300 g environ) = plus de 400 g à
+- **Poids au bout du bras** : pince 143 g + un gobelet moyen plein (300 g environ) = plus de 400 g à
   25 cm de l'épaule. C'est beaucoup pour un STS3215 en continu : servir d'abord des **gobelets vides ou
   petits**, et prévoir peut-être un servo plus fort pour l'épaule.
 - **Force de serrage** : le servo peut écraser un gobelet en carton. Il faudra limiter son couple

@@ -1,10 +1,11 @@
 {
+ "version": "V2",
  "validation_physique": false,
  "angles_bras_deg": {
-  "ferme": -8.9,
-  "ouvert": 56.4
+  "ferme": -3.4,
+  "ouvert": 64.2
  },
- "rotation_servo_deg": 65.4,
+ "rotation_servo_deg": 67.6,
  "collisions": [],
  "pieces": {
   "pince_base": {
@@ -25,23 +26,23 @@
   },
   "pince_engrenage_A": {
    "encombrement_mm": [
-    67.0,
+    72.0,
     33.0,
     7.0
    ],
-   "masse_g_environ": 4
+   "masse_g_environ": 5
   },
   "pince_engrenage_B": {
    "encombrement_mm": [
-    66.8,
+    71.8,
     32.7,
     6.0
    ],
-   "masse_g_environ": 4
+   "masse_g_environ": 5
   },
   "pince_bras_libre_+Y": {
    "encombrement_mm": [
-    57.0,
+    62.0,
     12.0,
     5.0
    ],
@@ -49,7 +50,7 @@
   },
   "pince_bras_libre_-Y": {
    "encombrement_mm": [
-    57.0,
+    62.0,
     12.0,
     5.0
    ],
@@ -57,42 +58,42 @@
   },
   "pince_doigt_+Y": {
    "encombrement_mm": [
-    64.0,
-    14.0,
+    78.0,
+    16.7,
     64.6
    ],
-   "masse_g_environ": 8
+   "masse_g_environ": 16
   },
   "pince_doigt_-Y": {
    "encombrement_mm": [
-    64.0,
-    14.0,
+    78.0,
+    16.7,
     64.6
    ],
-   "masse_g_environ": 8
+   "masse_g_environ": 16
   }
  },
  "bride_sur_servo_mm3 (serrage voulu)": 163.2,
  "ouverture_mm (angle → écart des mâchoires)": [
   [
-   -8.9,
-   6.0
+   -3.4,
+   14.0
   ],
   [
-   25.2,
-   58.3
+   31.8,
+   72.7
   ],
   [
-   56.4,
-   95.0
+   64.2,
+   110.0
   ]
  ],
  "servo_pince": {
-  "montage": "engrenage A posé avec les mâchoires écartées de 56 mm quand le servo est à 2048",
-  "butee_min": 1676,
-  "butee_max": 2420,
+  "montage": "engrenage A posé avec les mâchoires écartées de 71 mm quand le servo est à 2048",
+  "butee_min": 1663,
+  "butee_max": 2433,
   "sens": "à vérifier au premier essai : le sens « ouvrir » peut être vers la butée min ou max"
  },
- "masse_pieces_imprimees_g": 70,
- "masse_avec_servo_g": 125
+ "masse_pieces_imprimees_g": 88,
+ "masse_avec_servo_g": 143
 }

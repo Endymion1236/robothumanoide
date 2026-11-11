@@ -1,4 +1,8 @@
-"""Pince à mâchoires parallèles pour le bras de Câlin (STS3215), ouverture 0 à 95 mm (gobelet moyen).
+"""Pince à mâchoires parallèles pour le bras de Câlin (STS3215) — V2 : ouverture jusqu'à 110 mm (gobelet moyen).
+
+V2 (11/11/2026) : en V1, un gobelet de 80 mm tenu au milieu des mâchoires butait contre la base et
+l'engrenage A, la marge était de 7,5 mm par côté et les mâchoires plates le tenaient mal. Bras de 50 mm,
+mâchoires de 40 mm placées plus en avant et creusées en arrondi (rayon 45) qui centrent le gobelet.
 
 Principe : le servo fait tourner l'engrenage A ; l'engrenage B (même taille) tourne en sens inverse.
 Chaque engrenage porte un bras moteur ; un bras libre parallèle le double (parallélogramme), si bien que
@@ -33,21 +37,26 @@ JEU = 0.2
 AX, AY = 40.0, 15.0                # axe du servo = centre de l'engrenage A
 MOD, DENTS = 1.5, 20               # module 1,5 ; 20 dents : diamètre primitif 30 = entraxe
 R_PRIM = MOD * DENTS / 2
-L_BRAS = 45.0                      # longueur des bras (pivot → axe du doigt)
+L_BRAS = 50.0                      # longueur des bras (pivot → axe du doigt)
 DECAL = 24.0                       # le bras libre est 24 mm derrière le bras moteur
 E_DOIGT = 5.0                      # de l'axe du doigt à sa face de serrage
 Z0 = H_BAS + PAL_H + 1.0           # dessous des engrenages : 1 mm au-dessus du palonnier (patin), 1,1 au-dessus de la partie haute
 EP_ENG, EP_DOIGT, EP_LIBRE, JEU_Z = 6.0, 4.0, 5.0, 0.5
 Z_DOIGT = Z0 + EP_ENG + JEU_Z
 Z_LIBRE = Z_DOIGT + EP_DOIGT + JEU_Z
-PAD_LONG, PAD_EP, PAD_BAS = 25.0, 5.0, -20.0
+PAD_LONG, PAD_EP, PAD_BAS = 40.0, 6.0, -20.0
+PAD_DEVANT = 7.0                   # la mâchoire commence 7 mm devant l'axe du doigt (au-delà du bout du bras)
+PAD_R = 45.0                       # mâchoires creusées en arc de rayon 45 : elles centrent un gobelet de 50 à 90 mm
+PAD_FLECHE = PAD_R - math.sqrt(PAD_R**2 - (PAD_LONG / 2) ** 2)   # les bouts avancent de 4,7 mm vers l'intérieur
+ECART_MAX = 110.0
 ROUL_D, ROUL_EP = 10.1, 4.0        # logement de roulement 623 (10 mm, serré 0,1)
 M3, M3_INSERT, M2_5 = 3.4, 4.0, 2.9
 
 # angles du bras moteur (depuis +X vers +Y) : fermé = doigts qui se touchent, ouvert = 95 mm
-ECART_MIN = 6.0                    # mâchoires jamais plus serrées que 6 mm : en dessous, doigts et bras libres se touchent
+# Écarts mesurés au CREUX des mâchoires. Fermée : 14 mm au creux, soit 4,6 mm entre les bouts des mâchoires.
+ECART_MIN = 14.0
 TH_FERME = math.degrees(math.asin((ECART_MIN / 2 + E_DOIGT - AY) / L_BRAS))
-TH_OUVERT = math.degrees(math.asin((95 / 2 + E_DOIGT - AY) / L_BRAS))
+TH_OUVERT = math.degrees(math.asin((ECART_MAX / 2 + E_DOIGT - AY) / L_BRAS))
 
 def box(x0, y0, z0, x1, y1, z1): return mf.Manifold.cube((x1 - x0, y1 - y0, z1 - z0)).translate((x0, y0, z0))
 def cyl(x, y, z0, z1, d, n=64): return mf.Manifold.cylinder(z1 - z0, d / 2, d / 2, n).translate((x, y, z0))
@@ -123,14 +132,18 @@ def doigt(s):
     m = extruder(barre(q2, q1, 14), Z_DOIGT, Z_DOIGT + EP_DOIGT)
     for q in (q1, q2):
         m -= cyl(q[0], q[1], Z_DOIGT - 0.1, Z_DOIGT + EP_DOIGT + 0.1, ROUL_D, 48)
-    # mâchoire : plaque verticale devant l'axe du doigt, face de serrage à E_DOIGT de l'axe, côté intérieur
-    xm0 = q1[0] + 8.0
-    yi = q1[1] - s * E_DOIGT
-    y0, y1 = (yi, yi + PAD_EP) if s > 0 else (yi - PAD_EP, yi)
+    # mâchoire : plaque verticale devant l'axe du doigt ; face de serrage creusée en arc (creux à E_DOIGT de l'axe)
+    xm0 = q1[0] + PAD_DEVANT
+    yi = q1[1] - s * E_DOIGT                                   # face au creux de l'arc
+    y_bout = yi - s * PAD_FLECHE                               # face aux deux bouts de la mâchoire
+    y0, y1 = (y_bout, yi + PAD_EP) if s > 0 else (yi - PAD_EP, y_bout)
     m += box(q1[0] + 4, min(y0, q1[1]), Z_DOIGT, xm0 + 2, max(y1, q1[1]), Z_DOIGT + EP_DOIGT)   # jonction
-    m += box(xm0, y0, PAD_BAS, xm0 + PAD_LONG, y1, Z_DOIGT + EP_DOIGT)
+    machoire = box(xm0, y0, PAD_BAS, xm0 + PAD_LONG, y1, Z_DOIGT + EP_DOIGT)
+    machoire -= cyl(xm0 + PAD_LONG / 2, yi - s * PAD_R, PAD_BAS - 1, Z_DOIGT + EP_DOIGT + 1, 2 * PAD_R, 192)
+    m += machoire
     ry0, ry1 = (y1, y1 + 4) if s > 0 else (y0 - 4, y0)                                          # nervure
-    m += box(xm0 + PAD_LONG / 2 - 2, ry0, PAD_BAS + 5, xm0 + PAD_LONG / 2 + 2, ry1, Z_DOIGT + EP_DOIGT)
+    m += box(xm0 + PAD_LONG / 2 - 2, ry0 if s > 0 else y0 - 4, PAD_BAS + 5,
+             xm0 + PAD_LONG / 2 + 2, (y1 + 4) if s > 0 else y0, Z_DOIGT + EP_DOIGT)
     return m
 
 # ---------------- Pièces fixes ----------------
@@ -207,7 +220,7 @@ DG = {1: doigt(1), -1: doigt(-1)}
 BASE, BRIDE, SERVO, AVB = base(), bride(), servo_ref(), avant_bras_ref()
 
 if __name__ == '__main__':
-    rapport = {'validation_physique': False, 'angles_bras_deg': {'ferme': round(TH_FERME, 1), 'ouvert': round(TH_OUVERT, 1)},
+    rapport = {'version': 'V2', 'validation_physique': False, 'angles_bras_deg': {'ferme': round(TH_FERME, 1), 'ouvert': round(TH_OUVERT, 1)},
                'rotation_servo_deg': round(TH_OUVERT - TH_FERME, 1), 'collisions': [], 'pieces': {}}
     fixes = {'base': BASE, 'bride': BRIDE, 'servo': SERVO, 'avant-bras': AVB}
     for nom, a, b in (('base/servo', BASE, SERVO), ('base/avant-bras', BASE, AVB), ('base/bride', BASE, BRIDE)):

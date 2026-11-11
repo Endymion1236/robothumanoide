@@ -1,0 +1,41 @@
+[
+ {
+  "diametre": 55.0,
+  "prise": "tenu au milieu",
+  "touche": {},
+  "marge_arriere_mm": 29.8
+ },
+ {
+  "diametre": 55.0,
+  "prise": "tenu par le haut",
+  "touche": {},
+  "marge_arriere_mm": 29.8,
+  "marge_approche_par_cote_mm": 27.5
+ },
+ {
+  "diametre": 80.0,
+  "prise": "tenu au milieu",
+  "touche": {},
+  "marge_arriere_mm": 10.5
+ },
+ {
+  "diametre": 80.0,
+  "prise": "tenu par le haut",
+  "touche": {},
+  "marge_arriere_mm": 10.5,
+  "marge_approche_par_cote_mm": 15.0
+ },
+ {
+  "diametre": 90.0,
+  "prise": "tenu au milieu",
+  "touche": {},
+  "marge_arriere_mm": 1.2
+ },
+ {
+  "diametre": 90.0,
+  "prise": "tenu par le haut",
+  "touche": {},
+  "marge_arriere_mm": 1.2,
+  "marge_approche_par_cote_mm": 10.0
+ }
+]
