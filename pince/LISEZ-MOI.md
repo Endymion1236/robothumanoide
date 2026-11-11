@@ -76,6 +76,10 @@ c'est le vissage qui serre.
 
 ## Montage (servo réglé AVANT, comme pour le coude)
 
+**Plan illustré** : `sortie/plan_montage_1.png` (étapes 1 à 4) et `sortie/plan_montage_2.png` (étapes 5 à 8),
+refaits par `python plan_montage.py` après `generer_pince.py`. Les inserts (rouge vif), roulements (bleu) et vis (noir)
+y sont dessinés juste au-dessus de leur trou.
+
 1. **Servo seul sur la carte** : numéro **4**, butées **1663 et 2433**, puis le mettre à **2048**.
 2. Servo dans la base, câble par une des fenêtres, bride vissée.
 3. Engrenage A sur le palonnier **avec les mâchoires écartées de 71 mm** (mi-course) quand le servo est à 2048.
