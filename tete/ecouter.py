@@ -20,7 +20,7 @@ BLOC = 480                   # 30 ms de son par bloc
 class Decoupeur:
     """Découpe un flux de son en phrases : début quand le volume dépasse le seuil, fin après un silence.
     Logique pure (sans micro), pour pouvoir la tester avec un enregistrement."""
-    def __init__(self, seuil, silence_fin=0.8, duree_min=0.4, duree_max=15.0):
+    def __init__(self, seuil, silence_fin=0.6, duree_min=0.4, duree_max=15.0):
         self.seuil, self.silence_fin, self.duree_min, self.duree_max = seuil, silence_fin, duree_min, duree_max
         self.morceaux, self.en_cours, self.silence, self.avant = [], False, 0.0, []
 
@@ -91,6 +91,7 @@ class Oreille:
             print(f'Bruit de fond {bruit:.4f} → seuil {seuil:.4f}')
         self.seuil = seuil
         self.decoupeur = Decoupeur(seuil)
+        self.duree_comprehension = None
 
     def vider(self):
         """Oublie tout ce que le micro a capté jusqu'ici (à appeler après que le robot a parlé)."""
@@ -103,7 +104,7 @@ class Oreille:
         while True:
             son = self.decoupeur.ajouter(self.file.get())
             if son is not None:
-                texte = comprendre(self.modele, son)
+                t = time.time(); texte = comprendre(self.modele, son); self.duree_comprehension = time.time() - t
                 if phrase_valable(texte):
                     return texte
 

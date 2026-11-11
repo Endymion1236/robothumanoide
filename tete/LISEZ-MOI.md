@@ -6,8 +6,8 @@ Construite par étapes, d'abord **sur l'ordinateur** (sans moteur, sans risque),
 |---|---|---|
 | 1 | **Voir** : la webcam encadre les objets et les nomme en français | essayé sur le PC le 11/11/2026 : marche, mais 80 objets seulement → ajout de **sa propre liste** (`objets.txt`) et de la **webcam externe** |
 | 2 | **Entendre** : comprendre ce qu'on lui dit (reconnaissance vocale) | **validé sur le PC le 11/11/2026** : il comprend bien (modèle « small ») |
-| 3 | **Répondre** : une IA qui répond (Claude), et une voix (ElevenLabs) | programme prêt (`parler.py`), à essayer avec les clés sur le PC |
-| 4 | **Tout relier** : écouter → répondre → parler, en boucle | fait dans `parler.py` ; reste « qu'est-ce que tu vois ? » (la caméra) |
+| 3 | **Répondre** : une IA qui répond (Claude), et une voix (ElevenLabs) | **validé sur le PC le 11/11/2026** (un peu lent → accéléré le même jour) |
+| 4 | **Tout relier** : voir + entendre + répondre | `robot.py` / `lancer_robot.bat`, testé ici sans clés, à essayer sur le PC |
 | 5 | **Bouger** : 2 servos (tourner, hocher) pour regarder vers ce qu'on lui montre | à faire |
 
 ## Étape 1 : voir
@@ -77,13 +77,49 @@ la dit**. Pendant qu'il parle, il n'écoute pas (sinon il s'entendrait). **« Au
   voix du site ElevenLabs).
 - **Sans micro** : `--clavier` pour taper ses phrases.
 - **IA** : Claude Opus 5.5, réflexion courte (`EFFORT = 'low'`), réglages en tête de `parler.py`. La
-  borne du club utilise Claude Sonnet 5.5, plus rapide et moins cher : changer `MODELE_IA` pour
+  borne du club utilise Claude Sonnet 5.5, plus rapide et moins cher : ajouter `--ia sonnet` pour
   l'essayer. Si une demande est refusée par le modèle, l'API passe la main à un autre modèle dans le
   même appel (« fallbacks »).
 
 Testé ici sans les clés : lecture du fichier des clés, filtre des phrases fantômes de Whisper,
 message clair si la clé est fausse. **Pas encore testé** : une vraie réponse de Claude et la voix
 ElevenLabs.
+
+## Étape 4 : tout relier — `lancer_robot.bat`
+
+**Câlin complet** : la caméra tourne en continu (fenêtre « Oeil de Calin » avec les cadres), le micro
+écoute, la voix répond.
+
+- À **chaque phrase**, Câlin reçoit la liste de ce que la détection automatique repère
+  (« bus, personne ×4 »), affichée aussi dans la fenêtre noire.
+- Si la phrase parle de **ce qu'il voit** (« qu'est-ce que tu vois ? », « c'est quoi ça ? »,
+  « regarde ce que je tiens », « combien… », « quelle couleur… »), il envoie aussi **la photo** à
+  Claude, qui reconnaît presque n'importe quel objet : bien plus juste que le petit modèle de
+  détection (le rouleau de scotch ne sera plus un frisbee). La fenêtre noire indique « + photo envoyée ».
+- Webcam USB : `--camera 1` dans le lanceur ; sa propre liste d'objets : `--objets objets.txt`.
+
+### Plus rapide (11/11/2026)
+
+- La réponse est **dite phrase par phrase pendant que Claude écrit la suite** : la première phrase
+  arrive bien plus tôt.
+- Voix ElevenLabs : modèle rapide **eleven_flash_v2_5**, et le son est joué **dès les premiers
+  octets** au lieu d'attendre le fichier entier. (Plus beau mais plus lent : `MODELE_VOIX =
+  'eleven_multilingual_v2'` dans `parler.py`.)
+- Fin de phrase détectée après **0,6 s** de silence au lieu de 0,8 s.
+- **`--ia sonnet`** : Claude Sonnet 5.5, l'IA de la borne, plus rapide et moins chère qu'Opus 5.5
+  (par défaut). À essayer : c'est le réglage qui gagne le plus de temps.
+- Après chaque réponse, une ligne donne les temps : *compris en … s · 1er mot de l'IA … s ·
+  1re phrase dite à … s · réponse complète … s*. Elle dit où le temps se perd.
+
+**Historique** : la conversation garde le texte des 20 derniers messages, sans la réflexion interne
+du modèle ni les photos (remplacées par « [photo de la caméra] »). Raccourcir un historique qui
+contient la réflexion du modèle peut être refusé par l'API sur les comptes récents ; c'est pour ça
+qu'elle n'est pas gardée.
+
+Testé ici sans les clés, avec une photo à la place de la webcam et un faux Claude : la photo part
+seulement sur une question visuelle, les phrases sont dites une à une, l'historique reste borné
+(20 messages après 32 tours) et sans photo. **Pas encore testé** : avec la vraie webcam, la vraie IA
+et la vraie voix.
 
 ### Installation sur le PC (une seule fois)
 
