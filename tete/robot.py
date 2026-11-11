@@ -97,9 +97,10 @@ class Oeil(threading.Thread):
                 ok, image = lire()
                 if not ok:
                     raise RuntimeError('la webcam ne renvoie plus d\'image')
-                if time.time() - t_detection > 0.33:      # ~3 détections par seconde : laisse du calcul à l'écoute
+                calculer = not parler.PAROLE.is_set()     # pendant que Câlin parle, le processeur va au son
+                if calculer and time.time() - t_detection > 0.33:   # ~3 détections par seconde : laisse du calcul à l'écoute
                     resultat, t_detection = modele(image, verbose=False)[0], time.time()
-                if self.visages and time.time() - t_visages > 0.5:   # visages 2 fois par seconde
+                if calculer and self.visages and time.time() - t_visages > 0.5:   # visages 2 fois par seconde
                     with self.verrou_visages:
                         self.visages_vus = self.visages.reconnaitre(image)
                     t_visages = time.time()

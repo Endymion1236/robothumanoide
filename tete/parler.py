@@ -22,7 +22,8 @@ MODELES_IA = {'sonnet': 'claude-sonnet-5-5',   # par défaut (choix de Nicolas, 
               'opus': 'claude-opus-5-5'}       # plus puissant, plus lent et plus cher (--ia opus)
 EFFORT = 'low'                         # conversation simple : réflexion courte, réponse plus rapide
 VOIX_ELEVENLABS = 'JBFqnCBsd6RMkjVDRZzb'   # voix par défaut (multilingue) ; remplaçable dans le fichier des clés
-MODELE_VOIX = 'eleven_flash_v2_5'         # modèle rapide d'ElevenLabs, parle français (eleven_multilingual_v2 : plus beau, plus lent)
+MODELE_VOIX = 'eleven_multilingual_v2'    # le plus naturel d'ElevenLabs (choix de Nicolas : le modèle rapide sonnait mal)
+MODELE_VOIX_RAPIDE = 'eleven_flash_v2_5'  # démarre plus vite, moins naturel (--voix-rapide)
 HISTORIQUE_MAX = 20                    # nombre de messages gardés en mémoire pendant la conversation
 
 PERSONNALITE = """Tu es Câlin, la tête d'un robot humanoïde en construction au centre équestre d'Agon-Coutainville, \
@@ -179,23 +180,43 @@ class Cerveau:
         return texte
 
 # --- Voix ---------------------------------------------------------------------------------
+# Levé pendant que Câlin parle : la caméra suspend ses calculs pour laisser le processeur au son.
+PAROLE = threading.Event()
+
 class VoixElevenLabs:
     FREQ = 22050
-    def __init__(self, cle, voix):
+    AVANCE = 0.8          # secondes de son reçues AVANT de commencer à jouer : plus de trous si le réseau ralentit
+
+    def __init__(self, cle, voix, modele=None):
         from elevenlabs.client import ElevenLabs
-        self.client, self.voix = ElevenLabs(api_key=cle), voix
+        self.client, self.voix, self.modele = ElevenLabs(api_key=cle), voix, modele or MODELE_VOIX
+        self.dernier_texte = ''
 
     def dire(self, texte):
-        """Joue le son au fur et à mesure qu'il arrive (au lieu d'attendre le fichier entier)."""
         import sounddevice as sd
         flux = self.client.text_to_speech.stream(
-            self.voix, text=texte, model_id=MODELE_VOIX, language_code='fr', output_format=f'pcm_{self.FREQ}')
-        reste = b''
-        with sd.RawOutputStream(samplerate=self.FREQ, channels=1, dtype='int16') as sortie:
+            self.voix, text=texte, model_id=self.modele, language_code='fr', output_format=f'pcm_{self.FREQ}',
+            # le texte déjà dit sert de contexte : l'intonation continue d'une phrase à l'autre
+            previous_text=self.dernier_texte[-300:] or None)
+        self.dernier_texte = (self.dernier_texte + ' ' + texte).strip()
+        seuil, recu, sortie, reste = int(self.FREQ * 2 * self.AVANCE), b'', None, b''
+        try:
             for morceau in flux:
+                if sortie is None:
+                    recu += morceau
+                    if len(recu) < seuil:
+                        continue
+                    sortie = sd.RawOutputStream(samplerate=self.FREQ, channels=1, dtype='int16', latency='high')
+                    sortie.start(); morceau, recu = recu, b''
                 donnees = reste + morceau
                 n = len(donnees) - len(donnees) % 2       # échantillons de 2 octets entiers
                 sortie.write(donnees[:n]); reste = donnees[n:]
+            if sortie is None and recu:                   # phrase courte : tout est arrivé avant le seuil
+                sortie = sd.RawOutputStream(samplerate=self.FREQ, channels=1, dtype='int16', latency='high')
+                sortie.start(); sortie.write(recu[:len(recu) - len(recu) % 2])
+        finally:
+            if sortie is not None:
+                sortie.stop(); sortie.close()             # stop() attend la fin du son déjà envoyé
 
 class VoixPC:
     """Voix de Windows (gratuite, hors ligne), choisie en français si possible."""
@@ -229,15 +250,23 @@ class Bouche:
 
     def _parler(self):
         while True:
-            texte = self.file.get()
+            textes = [self.file.get()]
+            while True:                     # regroupe les phrases déjà arrivées : moins de coupures entre elles
+                try:
+                    textes.append(self.file.get_nowait())
+                except queue.Empty:
+                    break
             try:
+                PAROLE.set()
                 if self.duree_premier_son is None and self.t0:
                     self.duree_premier_son = time.time() - self.t0
-                self.voix.dire(texte)
+                self.voix.dire(' '.join(textes))
             except Exception as e:          # une panne de voix ne doit pas arrêter la conversation
                 print(f'   (voix indisponible : {e})')
             finally:
-                self.file.task_done()
+                PAROLE.clear()
+                for _ in textes:
+                    self.file.task_done()
 
     def finir(self):
         self.file.join()
@@ -249,12 +278,14 @@ def creer_voix(a, cles):
         if not a.voix_pc:
             print('Pas de clé ElevenLabs : voix de Windows à la place.')
         return VoixPC()
-    return VoixElevenLabs(cles['ELEVENLABS_API_KEY'], cles.get('ELEVENLABS_VOICE_ID', VOIX_ELEVENLABS))
+    return VoixElevenLabs(cles['ELEVENLABS_API_KEY'], cles.get('ELEVENLABS_VOICE_ID', VOIX_ELEVENLABS),
+                          MODELE_VOIX_RAPIDE if a.voix_rapide else None)
 
 def options_communes(ap):
     ap.add_argument('--clavier', action='store_true', help='taper ses phrases au lieu de parler')
     ap.add_argument('--muet', action='store_true', help='réponses écrites seulement')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs')
+    ap.add_argument('--voix-rapide', action='store_true', help='modèle de voix ElevenLabs plus rapide mais moins naturel')
     ap.add_argument('--micro', type=int, help='numéro du micro (voir lister_micros.bat)')
     ap.add_argument('--modele', default='small', choices=['base', 'small', 'medium'], help='reconnaissance vocale')
     ap.add_argument('--ia', default='sonnet', choices=list(MODELES_IA), help='sonnet (défaut, rapide) ou opus (plus puissant)')

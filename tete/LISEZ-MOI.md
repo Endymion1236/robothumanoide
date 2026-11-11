@@ -103,9 +103,12 @@ ElevenLabs.
 
 - La réponse est **dite phrase par phrase pendant que Claude écrit la suite** : la première phrase
   arrive bien plus tôt.
-- Voix ElevenLabs : modèle rapide **eleven_flash_v2_5**, et le son est joué **dès les premiers
-  octets** au lieu d'attendre le fichier entier. (Plus beau mais plus lent : `MODELE_VOIX =
-  'eleven_multilingual_v2'` dans `parler.py`.)
+- Voix ElevenLabs (11/11/2026, la voix rapide sonnait mal et hachée) : modèle **eleven_multilingual_v2**,
+  le plus naturel (`--voix-rapide` pour le modèle rapide eleven_flash_v2_5) ; le son commence après
+  **0,8 s de réserve** (plus de trous si internet ralentit) ; la 1re phrase part seule, **les suivantes
+  sont regroupées** et le texte déjà dit sert de contexte (intonation continue) ; **la caméra suspend
+  ses calculs pendant que Câlin parle**. Autre voix : ligne `ELEVENLABS_VOICE_ID=...` dans le fichier
+  des clés (identifiant copié dans la bibliothèque de voix du site ElevenLabs).
 - Fin de phrase détectée après **0,6 s** de silence au lieu de 0,8 s.
 - **IA par défaut : Claude Sonnet 5.5** (choix de Nicolas, 11/11/2026), celle de la borne : plus rapide et
   moins chère. `--ia opus` pour Claude Opus 5.5, plus puissant mais plus lent.
