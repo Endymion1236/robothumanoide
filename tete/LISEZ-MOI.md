@@ -99,6 +99,22 @@ ElevenLabs.
 - **Webcam USB (n° 1) par défaut** dans tous les lanceurs et programmes ; celle du portable : `--camera 0`.
   Sa propre liste d'objets : `--objets objets.txt`.
 
+### Temps réel, voie A « tout en flux » (11/11/2026, choix de Nicolas)
+
+Avant, chaque étape attendait la fin de la précédente (3 à 4 s). Maintenant :
+- **Transcription en direct** (`--ecoute direct`, par défaut) : ElevenLabs **Scribe v2 temps réel**. Le
+  son part **pendant que tu parles** ; le serveur repère la fin de phrase (0,5 s de silence) et renvoie le
+  texte aussitôt. Rien n'est envoyé pendant que Câlin parle. Reconnexion automatique si le serveur coupe.
+- **Voix en direct** : le texte de Claude est envoyé à ElevenLabs **mot par mot pendant qu'il s'écrit**
+  (connexion « stream-input »), et le son est joué dès 0,3 s de réserve.
+- **Replis automatiques** : si la transcription en direct ne se connecte pas → Scribe phrase par phrase,
+  puis Whisper ; si la voix v4 refuse l'envoi mot par mot → voix phrase par phrase (le programme l'écrit).
+
+Testé ici avec de faux serveurs : phrase reçue, rien envoyé pendant que Câlin parle, phrase fantôme
+ignorée, reconnexion, texte transmis à la voix 0,4 s avant la fin de Claude, repli si la voix en direct
+est refusée. **Pas encore testé avec les vrais serveurs ElevenLabs** (non joignables d'ici) : c'est
+l'essai sur le PC qui dira si la v4 accepte la voix en direct.
+
 ### Plus rapide (11/11/2026)
 
 - La réponse est **dite phrase par phrase pendant que Claude écrit la suite** : la première phrase

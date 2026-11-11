@@ -248,7 +248,7 @@ def main():
                     photo = oeil.photo_jpeg()
                 print(f'   {contexte}' + ('  + photo envoyée' if photo else ''))
             t = time.time(); bouche.debut_tour()
-            cerveau.repondre(phrase, image_jpeg=photo, contexte=contexte, sur_phrase=bouche.dire)
+            bouche.repondre_en_direct(cerveau, phrase, image_jpeg=photo, contexte=contexte)
             bouche.finir()
             afficher_durees(d_ecoute, cerveau, bouche, time.time() - t)
             if oreille:

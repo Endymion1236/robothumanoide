@@ -9,4 +9,5 @@ sounddevice
 # repondre (parler.py) :
 anthropic
 elevenlabs
+websockets
 pyttsx3

@@ -143,6 +143,90 @@ class Oreille:
     def fermer(self):
         self.flux.stop(); self.flux.close()
 
+class OreilleTempsReel:
+    """Transcription EN DIRECT (ElevenLabs Scribe v2 temps réel) : le son part pendant qu'on parle, et la phrase
+    finie revient dès qu'on se tait (le serveur repère lui-même la fin de phrase). Même usage qu'Oreille :
+    phrase(), vider(), fermer(). muet() : renvoie True quand le robot parle (on n'envoie alors rien).
+    Si la connexion échoue au démarrage, lève une exception : l'appelant repasse sur la transcription classique."""
+    MODELE = 'scribe_v2_realtime'
+    SILENCE_FIN = 0.5                     # secondes de silence qui terminent une phrase (0,3 à 3)
+
+    def __init__(self, cle, micro=None, muet=None, connecter=None, ouvrir_micro=True):
+        import asyncio
+        self.asyncio, self.cle, self.muet = asyncio, cle, muet or (lambda: False)
+        self.textes, self.connexion, self.erreur = queue.Queue(), None, None
+        self.t_dernier_son, self.duree_comprehension, self.ouverte = None, None, threading.Event()
+        self.connecter = connecter or self._connecter_elevenlabs
+        self.boucle = asyncio.new_event_loop()
+        threading.Thread(target=self.boucle.run_forever, daemon=True).start()
+        self._ouvrir()
+        if not self.ouverte.wait(15) or self.erreur:
+            raise RuntimeError(f'transcription en direct indisponible : {self.erreur or "pas de réponse"}')
+        self.flux = None
+        if ouvrir_micro:
+            import sounddevice as sd
+            self.flux = sd.InputStream(samplerate=FREQ, channels=1, blocksize=BLOC * 2, dtype='float32', device=micro,
+                                       callback=lambda d, n, t, st: self.envoyer(d[:, 0].copy()))
+            self.flux.start()
+
+    async def _connecter_elevenlabs(self):
+        from elevenlabs.client import ElevenLabs
+        from elevenlabs.realtime.scribe import AudioFormat, CommitStrategy
+        return await ElevenLabs(api_key=self.cle).speech_to_text.realtime.connect({
+            'model_id': self.MODELE, 'audio_format': AudioFormat.PCM_16000, 'sample_rate': FREQ,
+            'commit_strategy': CommitStrategy.VAD, 'vad_silence_threshold_secs': self.SILENCE_FIN,
+            'language_code': 'fr', 'filter_background_audio': True})
+
+    def _ouvrir(self):
+        async def ouvrir():
+            try:
+                from elevenlabs.realtime.connection import RealtimeEvents as Ev
+                c = await self.connecter()
+                c.on(Ev.COMMITTED_TRANSCRIPT, self._phrase_recue)
+                c.on(Ev.ERROR, lambda d: print(f'   (transcription en direct : {d})'))
+                c.on(Ev.CLOSE, lambda *a: self._fermee())
+                self.connexion = c
+            except Exception as e:
+                self.erreur = str(e)
+            self.ouverte.set()
+        self.asyncio.run_coroutine_threadsafe(ouvrir(), self.boucle)
+
+    def _fermee(self):
+        """Le serveur a fermé (limite de durée de session…) : on rouvre, sans bloquer."""
+        self.connexion, self.erreur = None, None
+        self.ouverte.clear(); self._ouvrir()
+
+    def _phrase_recue(self, donnees):
+        texte = (donnees.get('text') or donnees.get('transcript') or '').strip()
+        if texte and not self.muet() and phrase_valable(texte):
+            if self.t_dernier_son:
+                self.duree_comprehension = time.time() - self.t_dernier_son
+            self.textes.put(texte)
+
+    def envoyer(self, bloc):
+        """Appelé par le micro (bloc de son 16 kHz) : envoie au serveur, sauf quand le robot parle."""
+        if self.muet() or self.connexion is None:
+            return
+        if float(np.sqrt(np.mean(bloc**2))) > 0.01:
+            self.t_dernier_son = time.time()
+        brut = (np.clip(bloc, -1, 1) * 32767).astype('<i2').tobytes()
+        import base64
+        self.asyncio.run_coroutine_threadsafe(
+            self.connexion.send({'audio_base_64': base64.b64encode(brut).decode()}), self.boucle)
+
+    def phrase(self):
+        return self.textes.get()
+
+    def vider(self):
+        while not self.textes.empty():
+            self.textes.get_nowait()
+
+    def fermer(self):
+        if self.flux:
+            self.flux.stop(); self.flux.close()
+        if self.connexion:
+            self.asyncio.run_coroutine_threadsafe(self.connexion.close(), self.boucle)
+
 def ecouter_micro(modele, micro=None, seuil=None):
     """Écoute en continu et renvoie les phrases comprises une par une, avec le temps de calcul."""
     oreille = Oreille(modele, micro, seuil)

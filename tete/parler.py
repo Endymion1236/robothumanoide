@@ -89,11 +89,12 @@ class Cerveau:
         import anthropic
         self.anthropic, self.modele, self.personnalite = anthropic, modele, personnalite
         self.outils, self.sur_outil = outils or [], sur_outil
+        self.sur_morceau_outil = None
         self.client = anthropic.Anthropic(api_key=cle)
         self.messages = []
         self.duree_premier_mot = None
 
-    def repondre(self, phrase, image_jpeg=None, contexte=None, sur_phrase=None):
+    def repondre(self, phrase, image_jpeg=None, contexte=None, sur_phrase=None, sur_morceau=None):
         """Renvoie le texte complet ; appelle sur_phrase(texte) dès qu'une phrase de la réponse est finie."""
         contenu = []
         if contexte:
@@ -104,6 +105,7 @@ class Cerveau:
         contenu.append({'type': 'text', 'text': phrase})
         self.messages.append({'role': 'user', 'content': contenu})
         t0, self.duree_premier_mot, tampon, morceaux = time.time(), None, '', []
+        self.sur_morceau_outil = sur_morceau
         def phrase_finie(texte):
             texte = texte.strip()
             if texte:
@@ -126,6 +128,8 @@ class Cerveau:
                 for bout in flux.text_stream:
                     if self.duree_premier_mot is None:
                         self.duree_premier_mot = time.time() - t0
+                    if sur_morceau:
+                        sur_morceau(bout)             # la voix en direct reçoit le texte mot par mot
                     tampon += bout
                     *finies, tampon = FIN_DE_PHRASE.split(tampon)
                     for f in finies:
@@ -171,6 +175,8 @@ class Cerveau:
                 a_dire = None; print(f'   (outil {bloc.name} en échec : {e})')
             notes.append(f'[{bloc.name} : {", ".join(entree.values())}]')
             if a_dire:
+                if self.sur_morceau_outil:
+                    self.sur_morceau_outil(' ' + a_dire)
                 phrase_finie(a_dire)
         return notes
 
@@ -187,6 +193,7 @@ PAROLE = threading.Event()
 class VoixElevenLabs:
     FREQ = 22050
     AVANCE = 0.8          # secondes de son reçues AVANT de commencer à jouer : plus de trous si le réseau ralentit
+    AVANCE_DIRECT = 0.3   # en direct, la voix arrive en continu : petite réserve
 
     def __init__(self, cle, voix, modele=None):
         from elevenlabs.client import ElevenLabs
@@ -234,6 +241,31 @@ class VoixElevenLabs:
             if sortie is not None:
                 sortie.stop(); sortie.close()             # stop() attend la fin du son déjà envoyé
 
+    def dire_en_direct(self, morceaux):
+        """Envoie le texte au fil de l'eau (connexion directe d'ElevenLabs) et joue le son dès qu'il arrive.
+        Lève une exception si la connexion est refusée avant le premier son (l'appelant repasse en phrases)."""
+        import sounddevice as sd
+        flux = self.client.text_to_speech.convert_realtime(self.voix, text=morceaux, model_id=self.modele,
+                                                            output_format=f'pcm_{self.FREQ}')
+        seuil, recu, sortie, reste = int(self.FREQ * 2 * self.AVANCE_DIRECT), b'', None, b''
+        try:
+            for morceau in flux:
+                if sortie is None:
+                    recu += morceau
+                    if len(recu) < seuil:
+                        continue
+                    sortie = sd.RawOutputStream(samplerate=self.FREQ, channels=1, dtype='int16', latency='high')
+                    sortie.start(); morceau, recu = recu, b''
+                donnees = reste + morceau
+                n = len(donnees) - len(donnees) % 2
+                sortie.write(donnees[:n]); reste = donnees[n:]
+            if sortie is None and recu:
+                sortie = sd.RawOutputStream(samplerate=self.FREQ, channels=1, dtype='int16', latency='high')
+                sortie.start(); sortie.write(recu[:len(recu) - len(recu) % 2])
+        finally:
+            if sortie is not None:
+                sortie.stop(); sortie.close()
+
 class VoixPC:
     """Voix de Windows (gratuite, hors ligne), choisie en français si possible."""
     def __init__(self):
@@ -254,6 +286,7 @@ class Bouche:
     écrit la suite. finir() attend que tout soit dit."""
     def __init__(self, voix):
         self.voix, self.file, self.duree_premier_son, self.t0 = voix, queue.Queue(), None, None
+        self.direct_possible = True
         threading.Thread(target=self._parler, daemon=True).start()
 
     def debut_tour(self):
@@ -287,6 +320,35 @@ class Bouche:
     def finir(self):
         self.file.join()
 
+    def repondre_en_direct(self, cerveau, phrase, **options):
+        """Fait répondre le cerveau en envoyant le texte à la voix MOT PAR MOT (voix ElevenLabs en direct).
+        Repli : si la voix en direct n'est pas possible, réponse dite phrase par phrase comme avant."""
+        if not (self.voix and hasattr(self.voix, 'dire_en_direct') and self.direct_possible):
+            return cerveau.repondre(phrase, sur_phrase=self.dire, **options)
+        file_texte, fini, echec = queue.Queue(), threading.Event(), []
+        def morceaux():
+            while (m := file_texte.get()) is not None:
+                yield m
+        def parler_fil():
+            try:
+                PAROLE.set(); self.voix.dire_en_direct(morceaux())
+            except Exception as e:
+                echec.append(e)
+            finally:
+                PAROLE.clear(); fini.set()
+        def premier_son(m):
+            if self.duree_premier_son is None and self.t0:
+                self.duree_premier_son = time.time() - self.t0
+            file_texte.put(m)
+        threading.Thread(target=parler_fil, daemon=True).start()
+        texte = cerveau.repondre(phrase, sur_phrase=lambda t: print(f'Câlin : {t}'), sur_morceau=premier_son, **options)
+        file_texte.put(None); fini.wait()
+        if echec:
+            print(f'   (voix en direct impossible : {echec[0]} ; retour à la voix phrase par phrase)')
+            self.direct_possible = False
+            self.dire(texte.split(' [')[0]); self.finir()
+        return texte
+
 def creer_voix(a, cles):
     if a.muet:
         return None
@@ -303,8 +365,9 @@ def options_communes(ap):
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs')
     ap.add_argument('--voix-rapide', action='store_true', help='ElevenLabs v4 turbo : démarre plus vite')
     ap.add_argument('--micro', type=int, help='numéro du micro (voir lister_micros.bat)')
-    ap.add_argument('--ecoute', default='elevenlabs', choices=['elevenlabs', 'whisper'],
-                    help='transcription : elevenlabs (Scribe, rapide, en ligne, défaut) ou whisper (sur le PC, gratuit)')
+    ap.add_argument('--ecoute', default='direct', choices=['direct', 'elevenlabs', 'whisper'],
+                    help='transcription : direct (Scribe en direct, défaut), elevenlabs (Scribe phrase par phrase) '
+                         'ou whisper (sur le PC, gratuit)')
     ap.add_argument('--modele', default='small', choices=['base', 'small', 'medium'], help='modèle Whisper (avec --ecoute whisper)')
     ap.add_argument('--ia', default='sonnet', choices=list(MODELES_IA), help='sonnet (défaut, rapide) ou opus (plus puissant)')
 
@@ -318,7 +381,15 @@ def cles_ou_quitter():
 
 def creer_oreille(a, cles):
     """Le micro, avec la transcription choisie (ElevenLabs si la clé est là, sinon Whisper sur le PC)."""
-    from ecouter import charger_modele, Oreille, ScribeElevenLabs
+    from ecouter import charger_modele, Oreille, OreilleTempsReel, ScribeElevenLabs
+    if a.ecoute == 'direct' and 'ELEVENLABS_API_KEY' in cles:
+        try:
+            o = OreilleTempsReel(cles['ELEVENLABS_API_KEY'], a.micro, muet=PAROLE.is_set)
+            print('Transcription : ElevenLabs Scribe v2 en direct')
+            return o
+        except Exception as e:
+            print(f'   ({e} : transcription phrase par phrase à la place)')
+            a.ecoute = 'elevenlabs'
     if a.ecoute == 'elevenlabs' and 'ELEVENLABS_API_KEY' in cles:
         print('Transcription : ElevenLabs Scribe v2 (en ligne)')
         return Oreille(ScribeElevenLabs(cles['ELEVENLABS_API_KEY']), a.micro)
@@ -363,7 +434,7 @@ def main():
                 if not phrase:
                     continue
             t = time.time(); bouche.debut_tour()
-            cerveau.repondre(phrase, sur_phrase=bouche.dire)
+            bouche.repondre_en_direct(cerveau, phrase)
             bouche.finir()
             afficher_durees(d_ecoute, cerveau, bouche, time.time() - t)
             if oreille:
