@@ -215,7 +215,8 @@ class VoixElevenLabs:
                 # le texte déjà dit sert de contexte : l'intonation continue d'une phrase à l'autre
                 extra = {'language_code': 'fr', 'previous_text': self.dernier_texte[-300:] or None}
             flux = self.client.text_to_speech.stream(self.voix, text=texte, model_id=self.modele,
-                                                     output_format=f'pcm_{self.FREQ}', **extra)
+                                                     output_format=f'pcm_{self.FREQ}',
+                                                     request_options={'timeout_in_seconds': 20}, **extra)
             return flux, next(iter(flux), b'')       # le 1er morceau déclenche l'appel : une erreur arrive ici
         try:
             flux, premier = demander()
@@ -303,11 +304,11 @@ class Bouche:
         if voix is not None and hasattr(voix, 'sur_premier_son'):
             voix.sur_premier_son = self._premier_son_entendu
         self.mesure_reelle = voix is not None and hasattr(voix, 'sur_premier_son')
+        threading.Thread(target=self._parler, daemon=True).start()
 
     def _premier_son_entendu(self):
         if self.duree_premier_son is None and self.t0:
             self.duree_premier_son = time.time() - self.t0
-        threading.Thread(target=self._parler, daemon=True).start()
 
     def debut_tour(self):
         self.t0, self.duree_premier_son = time.time(), None
@@ -317,6 +318,13 @@ class Bouche:
         if self.voix:
             self.file.put(texte)
 
+    def _surveiller(self, debut, fini):
+        if not fini.wait(12):
+            print('   (la voix ElevenLabs ne répond pas depuis 12 s : modèle ou voix refusés ? le micro reste coupé '
+                  'tant qu\'elle n\'a pas fini — essayer --voix-rapide, ou une autre voix)')
+        if not fini.wait(30):
+            print('   (voix bloquée : micro rendu de force)'); PAROLE.clear()
+
     def _parler(self):
         while True:
             textes = [self.file.get()]
@@ -325,6 +333,8 @@ class Bouche:
                     textes.append(self.file.get_nowait())
                 except queue.Empty:
                     break
+            fini = threading.Event()
+            threading.Thread(target=self._surveiller, args=(time.time(), fini), daemon=True).start()
             try:
                 PAROLE.set()
                 if not self.mesure_reelle and self.duree_premier_son is None and self.t0:
@@ -333,7 +343,7 @@ class Bouche:
             except Exception as e:          # une panne de voix ne doit pas arrêter la conversation
                 print(f'   (voix indisponible : {e})')
             finally:
-                PAROLE.clear()
+                fini.set(); PAROLE.clear()
                 for _ in textes:
                     self.file.task_done()
 
@@ -456,6 +466,7 @@ def main():
         while True:
             d_ecoute = None
             if oreille:
+                print('🎤 Je vous écoute…')
                 phrase = oreille.phrase(); d_ecoute = oreille.duree_comprehension; print(f'Vous : {phrase}')
             else:
                 phrase = input('Vous : ').strip()

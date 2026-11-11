@@ -236,6 +236,7 @@ def main():
         while True:
             d_ecoute = None
             if oreille:
+                print('🎤 Je vous écoute…')
                 phrase = oreille.phrase(); d_ecoute = oreille.duree_comprehension; print(f'Vous : {phrase}')
             else:
                 phrase = input('Vous : ').strip()

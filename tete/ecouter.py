@@ -183,7 +183,9 @@ class OreilleTempsReel:
                 from elevenlabs.realtime.connection import RealtimeEvents as Ev
                 c = await self.connecter()
                 c.on(Ev.COMMITTED_TRANSCRIPT, self._phrase_recue)
+                c.on(Ev.PARTIAL_TRANSCRIPT, self._phrase_partielle)
                 c.on(Ev.ERROR, lambda d: print(f'   (transcription en direct : {d})'))
+                c.on(Ev.SESSION_STARTED, lambda d: print('   (écoute en direct prête)'))
                 c.on(Ev.CLOSE, lambda *a: self._fermee())
                 self.connexion = c
             except Exception as e:
@@ -196,7 +198,14 @@ class OreilleTempsReel:
         self.connexion, self.erreur = None, None
         self.ouverte.clear(); self._ouvrir()
 
+    def _phrase_partielle(self, donnees):
+        """Affiche en direct ce qui est entendu (sur une seule ligne qui se met à jour)."""
+        texte = (donnees.get('text') or '').strip()
+        if texte and not self.muet():
+            print(f'\r   … {texte[-90:]:<90}', end='', flush=True)
+
     def _phrase_recue(self, donnees):
+        print('\r' + ' ' * 96 + '\r', end='')
         texte = (donnees.get('text') or donnees.get('transcript') or '').strip()
         if texte and not self.muet() and phrase_valable(texte):
             if self.t_dernier_son:
@@ -205,8 +214,10 @@ class OreilleTempsReel:
 
     def envoyer(self, bloc):
         """Appelé par le micro (bloc de son 16 kHz) : envoie au serveur, sauf quand le robot parle."""
+        self.blocs_micro = getattr(self, 'blocs_micro', 0) + 1
         if self.muet() or self.connexion is None:
             return
+        self.blocs_envoyes = getattr(self, 'blocs_envoyes', 0) + 1
         if float(np.sqrt(np.mean(bloc**2))) > 0.01:
             self.t_dernier_son = time.time()
         brut = (np.clip(bloc, -1, 1) * 32767).astype('<i2').tobytes()
@@ -215,7 +226,14 @@ class OreilleTempsReel:
             self.connexion.send({'audio_base_64': base64.b64encode(brut).decode()}), self.boucle)
 
     def phrase(self):
-        return self.textes.get()
+        """Attend la phrase suivante ; toutes les 15 s sans rien, affiche un diagnostic."""
+        while True:
+            try:
+                return self.textes.get(timeout=15)
+            except queue.Empty:
+                print(f"\n   (rien compris depuis 15 s : micro {getattr(self, 'blocs_micro', 0)} blocs, envoyés "
+                      f"{getattr(self, 'blocs_envoyes', 0)}, robot en train de parler : {'oui' if self.muet() else 'non'}, "
+                      f"connexion : {'ouverte' if self.connexion else 'fermée'})")
 
     def vider(self):
         while not self.textes.empty():
