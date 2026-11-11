@@ -56,6 +56,8 @@ def lire_cles():
     """Variables d'environnement d'abord, puis le premier fichier de clés trouvé.
     Accepte « NOM=valeur » ; reconnaît aussi une clé Anthropic (sk-ant-…) ou ElevenLabs (sk_…) seule sur sa ligne."""
     cles = {k: os.environ[k] for k in ('ANTHROPIC_API_KEY', 'ELEVENLABS_API_KEY', 'ELEVENLABS_VOICE_ID') if os.environ.get(k)}
+    if 'ELEVENLABS_VOICE_ID' in cles:
+        cles['_origine_voix'] = 'variable d\'environnement Windows ELEVENLABS_VOICE_ID'
     fichier = next((p for p in ENDROITS_CLES if p.is_file()), None)
     if fichier:
         for ligne in fichier.read_text(encoding='utf-8-sig').splitlines():
@@ -69,6 +71,8 @@ def lire_cles():
             if 'colle-ta-cle' in valeur:
                 continue
             if nom in ('ANTHROPIC_API_KEY', 'ELEVENLABS_API_KEY', 'ELEVENLABS_VOICE_ID'):
+                if nom == 'ELEVENLABS_VOICE_ID' and nom not in cles:
+                    cles['_origine_voix'] = f'fichier {fichier}'
                 cles.setdefault(nom, valeur)
             elif valeur.startswith('sk-ant-'):
                 cles.setdefault('ANTHROPIC_API_KEY', valeur)
@@ -372,8 +376,11 @@ def creer_voix(a, cles):
         if not a.voix_pc:
             print('Pas de clé ElevenLabs : voix de Windows à la place.')
         return VoixPC()
-    return VoixElevenLabs(cles['ELEVENLABS_API_KEY'], cles.get('ELEVENLABS_VOICE_ID', VOIX_ELEVENLABS),
-                          MODELE_VOIX_RAPIDE if a.voix_rapide else None)
+    voix = cles.get('ELEVENLABS_VOICE_ID', VOIX_ELEVENLABS)
+    origine = cles.get('_origine_voix', 'réglage du programme')
+    v = VoixElevenLabs(cles['ELEVENLABS_API_KEY'], voix, MODELE_VOIX_RAPIDE if a.voix_rapide else None)
+    print(f'Voix : ElevenLabs {v.modele}, voix {voix} ({origine})')
+    return v
 
 def options_communes(ap):
     ap.add_argument('--clavier', action='store_true', help='taper ses phrases au lieu de parler')
@@ -387,7 +394,10 @@ def options_communes(ap):
     ap.add_argument('--modele', default='small', choices=['base', 'small', 'medium'], help='modèle Whisper (avec --ecoute whisper)')
     ap.add_argument('--ia', default='sonnet', choices=list(MODELES_IA), help='sonnet (défaut, rapide) ou opus (plus puissant)')
 
+VERSION = '11/11/2026 · voix QynjFzqBt96iEuetB1Tq'
+
 def cles_ou_quitter():
+    print(f'Câlin — version du {VERSION} — programme : {Path(__file__).resolve().parent}')
     cles, fichier = lire_cles()
     print('Fichier des clés :', fichier or 'aucun trouvé')
     if 'ANTHROPIC_API_KEY' not in cles:
