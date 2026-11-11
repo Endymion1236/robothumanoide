@@ -68,14 +68,16 @@ c'est le vissage qui serre.
 |---|---|---|
 | Roulements 623ZZ (commandés) | 7 | engrenage B (1), bras libres (2), doigts (4) |
 | Inserts M3 à chaud | 5 | piliers de la bride (2), poteau de l'engrenage B, poteau du bras libre -Y, pivot sur la bride |
-| Vis M3 × 10 | 7 | bride (2), engrenage B (1), pivots des bras libres (2), bout des bras libres (2, vissées dans le plastique) |
+| Vis M3 × 10 | 5 | bride (2), engrenage B (1), pivots des bras libres (2) |
+| Vis M3 × 8 | 2 | bout des bras libres, vissées dans le plastique (ou M3 × 10 + 2 rondelles sous la tête) |
 | Vis M3 × 16 (14 à 20 conviennent) + écrou frein | 2 | doigt sur le bras de l'engrenage |
 | Rondelles M3 (DIN 125, 0,5 mm) | 4 | entre doigt et bras d'engrenage (2), entre bras libre et doigt (2) |
 | Vis M2,5 × 8 (fournies avec le servo) | 4 | engrenage A sur le palonnier |
 | Les 2 vis M3 × 30 de l'entretoise du bout de l'avant-bras | (déjà là) | traversent le manchon de la pince |
 
 Correction du 11/11/2026 : au bout des bras libres, un écrou sous le doigt aurait tapé dans le bras de
-l'engrenage pince presque fermée. La vis M3 × 10 s'y visse maintenant directement dans le bras (trou de 2,8).
+l'engrenage pince presque fermée. Une vis M3 × 8 s'y visse maintenant directement dans le bras (trou de 2,8) ; une M3 × 10 seule arriverait au ras du bras
+de l'engrenage. Vérifié par `verifier_visserie.py` (vis, écrous, rondelles sur toute la course : aucun contact, 2 mm de marge).
 Les passages de tête au-dessus des roulements font 6,5 mm : la vis n'appuie que sur la bague intérieure, sans rondelle.
 **Pièces à réimprimer si elles l'ont déjà été : les 2 bras libres et l'engrenage B.**
 

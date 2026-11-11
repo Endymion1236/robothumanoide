@@ -90,7 +90,7 @@ def page_pieces(pdf, n):
     vis_liste = [
         ('Inserts M3\n(laiton)', insert(0, 0, 0), LAITON, '× 5'),
         ('Roulements 623', roulement(0, 0, 0), ACIER, '× 7'),
-        ('Vis M3 × 10', vis(0, 0, 0, 10), NOIR, '× 7'),
+        ('Vis M3 × 10  × 5\n+ vis M3 × 8', vis(0, 0, 0, 10) + vis(9, 0, 0, 8), NOIR, '× 2'),
         ('Vis M3 × 16\n(14 à 20 ok)', vis(0, 0, 0, 16), NOIR, '× 2'),
         ('Écrous frein M3', ecrou(0, 0, 0), '#555', '× 2'),
         ('Rondelles M3', rondelle(0, 0, 0), RONDELLE, '× 4'),
@@ -230,23 +230,23 @@ def e_doigts(ax):
     etiquette(ax, (x, y, G.Z0 - 12), 'écrou frein\n(dessous)', (-120, -30))
     etiquette(ax, (x + 30, y - 6, G.Z_DOIGT + dz), 'doigt', (90, -40))
 
-@etape('Les bras libres', ['les 2 bras libres (avec leur roulement)', '4 vis M3 × 10', '2 rondelles M3'],
+@etape('Les bras libres', ['les 2 bras libres (avec leur roulement)', '2 vis M3 × 10', '2 vis M3 × 8', '2 rondelles M3'],
        ['Le roulement du bras se pose sur son pivot : côté bride pour l\'un, poteau de la base pour l\'autre.',
         'L\'autre bout du bras vient au-dessus du roulement arrière du doigt, avec 1 rondelle entre les deux.',
         'Pivot : vis M3 × 10 dans l\'insert, SANS rondelle.',
-        'Bout du bras : vis M3 × 10 qui se visse directement dans le plastique du bras (pas d\'écrou).',
+        'Bout du bras : vis M3 × 8 (PAS 10 : trop longue) qui se visse directement dans le plastique du bras, sans écrou.',
         'Visse doucement, sans forcer : le plastique fait le filetage.'],
-       'Le bras libre, le bras de l\'engrenage et le doigt forment un parallélogramme : c\'est lui qui garde les mâchoires bien parallèles.')
+       'Pas de M3 × 8 ? Une M3 × 10 avec 2 rondelles sous la tête. Une M3 × 10 seule frotterait sur le bras de l\'engrenage.')
 def e_bras_libres(ax):
     pcs = fixe() + mobile(('engrenage A', 'engrenage B', 'doigt +Y', 'doigt -Y'))
     dz = 14
     for k in (1, -1):
         pcs.append((P['bras libre +Y' if k > 0 else 'bras libre -Y'].translate((0, 0, dz)), COUL['bras libre +Y']))
-        pcs += [(vis(*PIV[k], G.Z_LIBRE + 4 + dz + 10, 10), NOIR), (vis(*Q2[k], G.Z_LIBRE + G.EP_LIBRE + dz + 6, 10), NOIR),
+        pcs += [(vis(*PIV[k], G.Z_LIBRE + 4 + dz + 10, 10), NOIR), (vis(*Q2[k], G.Z_LIBRE + G.EP_LIBRE + dz + 6, 8), NOIR),
                 (rondelle(*Q2[k], G.Z_LIBRE - 0.5 + 6), RONDELLE)]
     dessiner(ax, pcs, vue=(30, -40), marge=0.8)
     etiquette(ax, (*PIV[1], G.Z_LIBRE + dz + 26), 'pivot :\nM3 × 10, sans rondelle', (-120, 30))
-    etiquette(ax, (*Q2[1], G.Z_LIBRE + dz + 22), 'bout : M3 × 10\nvissée dans le bras', (100, 50))
+    etiquette(ax, (*Q2[1], G.Z_LIBRE + dz + 22), 'bout : M3 × 8\nvissée dans le bras', (100, 50))
     etiquette(ax, (*Q2[1], G.Z_LIBRE + 6.3), 'rondelle', (110, -30))
 
 @etape('Essai à la main, puis sur le bras', ['la pince montée', 'le bout de l\'avant-bras', 'les 2 vis M3 × 30 de l\'entretoise'],
