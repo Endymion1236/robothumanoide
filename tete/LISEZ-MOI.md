@@ -126,7 +126,7 @@ l'essai sur le PC qui dira si la v4 accepte la voix en direct.
   possibles dans `parler.py` : `eleven_multilingual_v2`, `eleven_flash_v2_5` ; le son commence après
   **0,8 s de réserve** (plus de trous si internet ralentit) ; la 1re phrase part seule, **les suivantes
   sont regroupées** et le texte déjà dit sert de contexte (intonation continue) ; **la caméra suspend
-  ses calculs pendant que Câlin parle**. Autre voix : ligne `ELEVENLABS_VOICE_ID=...` dans le fichier
+  ses calculs pendant que Câlin parle**. **Voix de Câlin : `QynjFzqBt96iEuetB1Tq`** (choisie par Nicolas). Autre voix : ligne `ELEVENLABS_VOICE_ID=...` dans le fichier
   des clés (identifiant copié dans la bibliothèque de voix du site ElevenLabs).
 - Fin de phrase détectée après **0,6 s** de silence au lieu de 0,8 s.
 - **Transcription (11/11/2026, trop longue entre la fin de la phrase et le texte)** : par défaut

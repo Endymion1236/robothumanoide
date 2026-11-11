@@ -21,7 +21,7 @@ import numpy as np
 MODELES_IA = {'sonnet': 'claude-sonnet-5-5',   # par défaut (choix de Nicolas, 11/11/2026) : rapide, celui de la borne
               'opus': 'claude-opus-5-5'}       # plus puissant, plus lent et plus cher (--ia opus)
 EFFORT = 'low'                         # conversation simple : réflexion courte, réponse plus rapide
-VOIX_ELEVENLABS = 'JBFqnCBsd6RMkjVDRZzb'   # voix par défaut (multilingue) ; remplaçable dans le fichier des clés
+VOIX_ELEVENLABS = 'QynjFzqBt96iEuetB1Tq'   # voix de Câlin, choisie par Nicolas (11/11/2026) ; remplaçable dans le fichier des clés
 MODELE_VOIX = 'eleven_v4'                 # ElevenLabs v4, choix de Nicolas (11/11/2026)
 MODELE_VOIX_RAPIDE = 'eleven_v4_turbo'    # v4 rapide, prévue pour la conversation (--voix-rapide)
 # Autres : 'eleven_multilingual_v2' (naturel, éprouvé), 'eleven_flash_v2_5' (très rapide, jugé mauvais)
