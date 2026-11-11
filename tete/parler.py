@@ -39,7 +39,8 @@ Ton caractère : chaleureux, curieux, un peu malicieux, passionné de chevaux, d
 Tu aimes expliquer simplement comment tu fonctionnes, surtout aux enfants.
 
 Règles :
-- Tu parles à voix haute : réponses COURTES, 1 à 3 phrases, sans listes, sans emojis, sans mise en forme.
+- Tu parles à voix haute, dans une vraie conversation : UNE ou DEUX phrases courtes (moins de 30 mots en tout), \
+sans listes, sans emojis, sans mise en forme. Ne donne plus de détails que si on te le demande.
 - Uniquement en français. Vouvoie les adultes ; tutoie un enfant s'il te tutoie ou dit son âge.
 - Ce que tu entends passe par une reconnaissance vocale qui peut se tromper : si une phrase n'a pas de sens, \
 demande de répéter plutôt que d'inventer.
@@ -308,12 +309,14 @@ class Bouche:
     def __init__(self, voix):
         self.voix, self.file, self.duree_premier_son, self.t0 = voix, queue.Queue(), None, None
         self.direct_possible = True
+        self.son_sorti = threading.Event()
         if voix is not None and hasattr(voix, 'sur_premier_son'):
             voix.sur_premier_son = self._premier_son_entendu
         self.mesure_reelle = voix is not None and hasattr(voix, 'sur_premier_son')
         threading.Thread(target=self._parler, daemon=True).start()
 
     def _premier_son_entendu(self):
+        self.son_sorti.set()
         if self.duree_premier_son is None and self.t0:
             self.duree_premier_son = time.time() - self.t0
 
@@ -326,10 +329,12 @@ class Bouche:
             self.file.put(texte)
 
     def _surveiller(self, debut, fini):
-        if not fini.wait(12):
-            print('   (la voix ElevenLabs ne répond pas depuis 12 s : modèle ou voix refusés ? le micro reste coupé '
-                  'tant qu\'elle n\'a pas fini — essayer --voix-rapide, ou une autre voix)')
-        if not fini.wait(30):
+        """Alerte seulement si AUCUN son n'est sorti au bout de 12 s (une longue réponse n'est pas une panne)."""
+        if fini.wait(12) or (self.mesure_reelle and self.son_sorti.is_set()) or not self.mesure_reelle:
+            return
+        print('   (la voix ElevenLabs n\'a produit aucun son en 12 s : modèle ou voix refusés ? '
+              'essayer --voix-rapide, ou une autre voix)')
+        if not fini.wait(20) and not self.son_sorti.is_set():
             print('   (voix bloquée : micro rendu de force)'); PAROLE.clear()
 
     def _parler(self):
@@ -340,7 +345,7 @@ class Bouche:
                     textes.append(self.file.get_nowait())
                 except queue.Empty:
                     break
-            fini = threading.Event()
+            fini = threading.Event(); self.son_sorti.clear()
             threading.Thread(target=self._surveiller, args=(time.time(), fini), daemon=True).start()
             try:
                 PAROLE.set()
