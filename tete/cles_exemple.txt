@@ -1,0 +1,12 @@
+# MODÈLE du fichier des clés du robot. NE PAS écrire les vraies clés dans CE fichier.
+#
+# 1. Copier ce texte dans le Bloc-notes.
+# 2. Remplacer les « colle-ta-cle-ici » par les vraies clés (sans espace, sans guillemets).
+# 3. Enregistrer sous :  C:\Users\nicol\cles_robot.txt
+#    (dans « Type », choisir « Tous les fichiers », sinon Windows écrit cles_robot.txt.txt)
+#
+# Ce fichier reste HORS du dossier du projet : il ne part jamais sur GitHub et n'est pas effacé
+# quand on retélécharge le projet. Ne jamais copier une clé dans une conversation.
+
+ANTHROPIC_API_KEY=colle-ta-cle-ici
+ELEVENLABS_API_KEY=colle-ta-cle-ici
