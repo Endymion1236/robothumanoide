@@ -198,6 +198,7 @@ class VoixElevenLabs:
     def __init__(self, cle, voix, modele=None):
         from elevenlabs.client import ElevenLabs
         self.client, self.voix, self.modele = ElevenLabs(api_key=cle), voix, modele or MODELE_VOIX
+        self.sur_premier_son = None     # appelé quand le son sort vraiment du haut-parleur
         self.dernier_texte = ''
         self.options_en_plus = True     # contexte d'intonation + langue ; retirées si le modèle les refuse
 
@@ -231,12 +232,16 @@ class VoixElevenLabs:
                         continue
                     sortie = sd.RawOutputStream(samplerate=self.FREQ, channels=1, dtype='int16', latency='high')
                     sortie.start(); morceau, recu = recu, b''
+                    if self.sur_premier_son:
+                        self.sur_premier_son()
                 donnees = reste + morceau
                 n = len(donnees) - len(donnees) % 2       # échantillons de 2 octets entiers
                 sortie.write(donnees[:n]); reste = donnees[n:]
             if sortie is None and recu:                   # phrase courte : tout est arrivé avant le seuil
                 sortie = sd.RawOutputStream(samplerate=self.FREQ, channels=1, dtype='int16', latency='high')
                 sortie.start(); sortie.write(recu[:len(recu) - len(recu) % 2])
+                if self.sur_premier_son:
+                    self.sur_premier_son()
         finally:
             if sortie is not None:
                 sortie.stop(); sortie.close()             # stop() attend la fin du son déjà envoyé
@@ -256,12 +261,16 @@ class VoixElevenLabs:
                         continue
                     sortie = sd.RawOutputStream(samplerate=self.FREQ, channels=1, dtype='int16', latency='high')
                     sortie.start(); morceau, recu = recu, b''
+                    if self.sur_premier_son:
+                        self.sur_premier_son()
                 donnees = reste + morceau
                 n = len(donnees) - len(donnees) % 2
                 sortie.write(donnees[:n]); reste = donnees[n:]
             if sortie is None and recu:
                 sortie = sd.RawOutputStream(samplerate=self.FREQ, channels=1, dtype='int16', latency='high')
                 sortie.start(); sortie.write(recu[:len(recu) - len(recu) % 2])
+                if self.sur_premier_son:
+                    self.sur_premier_son()
         finally:
             if sortie is not None:
                 sortie.stop(); sortie.close()
@@ -287,6 +296,13 @@ class Bouche:
     def __init__(self, voix):
         self.voix, self.file, self.duree_premier_son, self.t0 = voix, queue.Queue(), None, None
         self.direct_possible = True
+        if voix is not None and hasattr(voix, 'sur_premier_son'):
+            voix.sur_premier_son = self._premier_son_entendu
+        self.mesure_reelle = voix is not None and hasattr(voix, 'sur_premier_son')
+
+    def _premier_son_entendu(self):
+        if self.duree_premier_son is None and self.t0:
+            self.duree_premier_son = time.time() - self.t0
         threading.Thread(target=self._parler, daemon=True).start()
 
     def debut_tour(self):
@@ -307,7 +323,7 @@ class Bouche:
                     break
             try:
                 PAROLE.set()
-                if self.duree_premier_son is None and self.t0:
+                if not self.mesure_reelle and self.duree_premier_son is None and self.t0:
                     self.duree_premier_son = time.time() - self.t0
                 self.voix.dire(' '.join(textes))
             except Exception as e:          # une panne de voix ne doit pas arrêter la conversation
@@ -324,6 +340,7 @@ class Bouche:
         """Fait répondre le cerveau en envoyant le texte à la voix MOT PAR MOT (voix ElevenLabs en direct).
         Repli : si la voix en direct n'est pas possible, réponse dite phrase par phrase comme avant."""
         if not (self.voix and hasattr(self.voix, 'dire_en_direct') and self.direct_possible):
+            self.mode_dernier_tour = 'phrases'
             return cerveau.repondre(phrase, sur_phrase=self.dire, **options)
         file_texte, fini, echec = queue.Queue(), threading.Event(), []
         def morceaux():
@@ -337,15 +354,14 @@ class Bouche:
             finally:
                 PAROLE.clear(); fini.set()
         def premier_son(m):
-            if self.duree_premier_son is None and self.t0:
-                self.duree_premier_son = time.time() - self.t0
             file_texte.put(m)
         threading.Thread(target=parler_fil, daemon=True).start()
         texte = cerveau.repondre(phrase, sur_phrase=lambda t: print(f'Câlin : {t}'), sur_morceau=premier_son, **options)
+        self.mode_dernier_tour = 'direct'
         file_texte.put(None); fini.wait()
         if echec:
             print(f'   (voix en direct impossible : {echec[0]} ; retour à la voix phrase par phrase)')
-            self.direct_possible = False
+            self.direct_possible = False; self.mode_dernier_tour = 'phrases (repli)'
             self.dire(texte.split(' [')[0]); self.finir()
         return texte
 
@@ -404,8 +420,10 @@ def afficher_durees(d_ecoute, cerveau, bouche, d_total):
     if cerveau.duree_premier_mot is not None:
         morceaux.append(f'1er mot de l\'IA {cerveau.duree_premier_mot:.1f} s')
     if bouche.duree_premier_son is not None:
-        morceaux.append(f'1re phrase dite à {bouche.duree_premier_son:.1f} s')
-    morceaux.append(f'réponse complète {d_total:.1f} s')
+        morceaux.append(f'1er son entendu à {bouche.duree_premier_son:.1f} s')
+    morceaux.append(f'fin de la parole {d_total:.1f} s')
+    if getattr(bouche, 'mode_dernier_tour', None):
+        morceaux.append(f'voix : {bouche.mode_dernier_tour}')
     print('   (' + ' · '.join(morceaux) + ')')
 
 # --- Boucle -----------------------------------------------------------------------------------
