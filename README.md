@@ -50,6 +50,7 @@ Puis bouger (2 servos).
 - **posé sur la table devant la personne, jamais tendu dans les mains, jamais au-dessus de quelqu'un** ;
 - trajet **lent, bas et à plat** quand il porte ; **force limitée** dans les servos ;
 - la caméra surveille la zone : **une main trop près → arrêt** ; **interrupteur d'arrêt d'urgence** à portée ;
+- plus tard, **lidar 2D** autour du bras (voir « Se repérer ») : quelqu'un à moins de 60 cm → ralentit, à moins de 30 cm → arrêt ;
 - au club : **boissons froides pour les enfants**, service chaud réservé aux adultes.
 
 **Étapes :**
@@ -58,6 +59,41 @@ Puis bouger (2 servos).
 3. Premiers essais avec des **gobelets vides**, puis d'eau froide, puis seulement le café.
 4. Outil `servir_cafe` pour Câlin (enchaîne les gestes, vérifie que la zone est libre).
 5. Plus tard, peut-être : une **base à roulettes** pour servir plus loin que la portée du bras.
+
+## Objectif : trier des objets posés n'importe où (12/11/2026)
+
+« Câlin, range les fruits dans le bac bleu et le reste dans le rouge. » Faisable avec le bras de table
+(pas besoin du bras de taille humaine), une fois le bras complet à 6 axes.
+- **Caméra fixe au-dessus de la table**, regardant vers le bas (bien plus simple que la caméra de la tête),
+  **4 marqueurs ArUco** aux coins : la table étant plate, un pixel donne directement une position X, Y en mm,
+  sans caméra de profondeur.
+- Détection : YOLO-World (objets nommés) ; la règle de tri dite à voix haute est comprise par Claude, qui
+  peut aussi classer un objet sur photo (« ça, c'est un fruit ? »).
+- Le bras : cinématique inverse → au-dessus de l'objet, poignet tourné dans le sens de l'objet, descente,
+  serrage (l'effort du servo confirme la prise), bac, lâcher ; la caméra vérifie, et il recommence s'il a raté.
+- Niveaux : 1) cubes de couleur ; 2) objets nommés ; 3) tri « intelligent » par Claude.
+- Limites : objets de 14 à 110 mm de large (pince V2), pas d'objets plats ni collés les uns aux autres au début.
+- Variante plus tard : apprentissage par démonstration (**LeRobot**, bras « maître » piloté à la main).
+
+## Se repérer dans l'espace (12/11/2026)
+
+| Besoin | Outil | Quand |
+|---|---|---|
+| Où est son bras | angles des servos + cinématique (repère : X avant, Y gauche, Z haut, origine au pied du bras) | avec le bras complet |
+| Où est la station café, la table | gestes appris à la main, puis **marqueurs ArUco** (webcam actuelle) | station café, tri |
+| Objets posés n'importe où | caméra fixe + marqueurs (table plate), plus tard **caméra de profondeur** dans la tête | tri |
+| **Quelqu'un s'approche du bras** | **lidar 2D** (LD06 / LD19 ou RPLIDAR C1, quelques dizaines d'euros, sans danger pour les yeux) | **plus tard, avant les essais au club** |
+| Le gobelet est-il dans la pince | capteur de distance à un point (VL53L1X) dans la pince | station café |
+| Se déplacer dans le club | lidar 2D + base à roulettes (carte des lieux) | bien plus tard |
+
+## Bras de taille humaine (12/11/2026, pour plus tard)
+
+Couple continu à tenir (bras de 60 cm tendu, 300 g dans la pince) : épaule ≈ 65 kg·cm, coude ≈ 25, poignet ≈ 5.
+Le chiffre des fiches est le couple **de blocage** ; le couple **continu** est environ 3 fois plus faible.
+Choix : poignet et pince en STS3215 ; coude **STS3095-C002 (12 V !** la C001 est en 7,4 V) + réducteur 2:1 ;
+épaule STS3095-C002 + réducteur 3:1 à 4:1 + ressort de compensation. Alimentation 12 V ≈ 20 A.
+Pour la station café sur un comptoir, un bras de 45 cm suffit (beaucoup moins de couple). Commander un seul
+STS3095 d'abord, pour le tester et le mesurer.
 
 ## Feuille de route du premier bras
 
