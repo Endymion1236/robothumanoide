@@ -86,6 +86,8 @@ Les passages de tête au-dessus des roulements font 6,5 mm : la vis n'appuie que
 **Plan illustré, une page par étape : `sortie/plan_montage.pdf`** (aussi en images `sortie/plan_montage_00.png` à `_09.png`),
 refait par `python plan_montage.py` après `generer_pince.py`. Il remplace l'ancienne liste d'étapes.
 
+**Premier essai motorisé** : `bras/tester_pince.bat` (voir `bras/LISEZ-MOI.md`) : ouvrir, fermer, serrer avec une force limitée.
+
 ## Limites à connaître
 
 - **Poids au bout du bras** : pince 143 g + un gobelet moyen plein (300 g environ) = plus de 400 g à

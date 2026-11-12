@@ -17,6 +17,7 @@ def pas(degres_): return round(degres_ * PAS_PAR_TOUR / 360)
 TEMP_MAX = 55                             # °C : au-delà, on coupe la force
 CHARGE_MAX = 70                           # % de la force maximale, pendant plus de 0,5 s : servo bloqué
 VITESSE_DOUCE, ACCEL_DOUCE = 300, 20      # comme les essais dans FD
+LIMITE_COUPLE = 48                        # registre « Torque Limit » (mémoire vive : 0 à 1000 = 0 à 100 %)
 
 class ErreurServo(Exception):
     pass
@@ -135,3 +136,39 @@ class Bus:
                 return f"arrivé en {time.time() - debut:.1f} s"
             if time.time() - debut > delai_max:
                 self.relacher(ident); return f"ARRÊT : n'arrive pas en {delai_max:.0f} s (bloqué ?), force coupée"
+
+    def limiter_force(self, ident, pourcent):
+        """Force maximale du servo, en % (oubliée quand on coupe le 12 V)."""
+        self.ecrire2(ident, LIMITE_COUPLE, max(0, min(100, round(pourcent))) * 10, 'limite de force')
+
+    def serrer(self, ident, cible, force=25, delai_max=6.0, afficher=None):
+        """Avance vers `cible` avec une force limitée (en %) et s'arrête de lui-même sur un objet.
+        Renvoie (compte rendu, position, objet_tenu). L'objet reste serré avec cette force."""
+        e = self.etat(ident)
+        if not self.butees_reglees(e):
+            raise ErreurServo('butées non réglées dans le servo : mouvement refusé')
+        if not e['butee_min'] <= cible <= e['butee_max']:
+            raise ErreurServo(f"cible {cible} hors des butées {e['butee_min']}–{e['butee_max']} : refusé")
+        if e['temperature'] >= TEMP_MAX:
+            raise ErreurServo(f"servo trop chaud ({e['temperature']} °C) : laisser refroidir")
+        self.limiter_force(ident, force)
+        res, err = self.p.WritePosEx(ident, cible, VITESSE_DOUCE, ACCEL_DOUCE); self._ok(res, err, 'ordre de position')
+        debut, avant, immobile_depuis = time.time(), e['position'], None
+        while True:
+            time.sleep(0.1)
+            e = self.etat(ident)
+            if afficher:
+                afficher(e)
+            if e['temperature'] >= TEMP_MAX:
+                self.relacher(ident); return f"ARRÊT : trop chaud ({e['temperature']} °C), force coupée", e['position'], False
+            if abs(e['position'] - cible) <= 15:
+                return f"fermée jusqu'au bout en {time.time() - debut:.1f} s : rien entre les doigts", e['position'], False
+            if abs(e['position'] - avant) <= 2:
+                immobile_depuis = immobile_depuis or time.time()
+                if time.time() - immobile_depuis > 0.4 and abs(e['charge']) >= force * 0.5:
+                    return f"objet tenu (force {abs(e['charge']):.0f} % sur {force} % permis)", e['position'], True
+            else:
+                immobile_depuis = None
+            avant = e['position']
+            if time.time() - debut > delai_max:
+                self.relacher(ident); return f"ARRÊT : ni arrivée ni objet en {delai_max:.0f} s, force coupée", e['position'], False

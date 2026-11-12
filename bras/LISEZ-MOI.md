@@ -40,3 +40,22 @@ Plusieurs commandes d'un coup, séparées par des espaces (« c g d c ») ; si u
 
 Si le programme dit « Carte introuvable » : FD est peut-être encore ouvert, ou le port est un autre :
 `tester_coude.bat --port COM4`. Plusieurs servos branchés : `--id 3`.
+
+## Essai de la pince (`tester_pince.bat`)
+
+Pince montée (plan de montage `pince/sortie/plan_montage.pdf`), son servo **seul** sur la carte, FD fermé.
+
+1. Double-cliquer **`tester_pince.bat`**. Il cherche le servo n° 4 (il prévient si le numéro est autre).
+2. Butées : il vérifie 1663–2433 (propose de les régler sinon). Si le servo est **hors** de ses butées,
+   l'engrenage A est mal posé : il s'arrête et dit quoi faire.
+3. **Premier lancement** : rien entre les doigts. La pince va au milieu puis bouge un peu ; répondre
+   **o** si les mâchoires se sont **écartées**, **f** si elles se sont **rapprochées**. Retenu dans
+   `sens_pince.json` (supprimer ce fichier pour redemander).
+4. Commandes : **c** milieu (≈ 71 mm) · **o** ouvrir en grand (110 mm) · **s** serrer doucement (force 20 %)
+   · **S** serrer plus fort (35 %) · **f** fermer à vide · **l** lâcher (libre) · **i** infos · **q** quitter.
+   Plusieurs d'un coup : `o s`.
+5. **Serrer** avance avec une force limitée et **s'arrête tout seul** sur l'objet (immobile + effort) ;
+   il affiche la largeur estimée de l'objet. Ne pas laisser un objet serré plusieurs minutes.
+
+Toutes les autres sécurités du coude restent (butées, chaleur, blocage ; force jamais au-delà de 50 % pour la pince).
+Testé ici sur un servo simulé (sans objet, gobelet de 50 mm) ; **pas encore sur la vraie pince.**

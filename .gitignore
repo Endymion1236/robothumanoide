@@ -1,2 +1,4 @@
 __pycache__/
 *.pyc
+.venv/
+bras/sens_pince.json
