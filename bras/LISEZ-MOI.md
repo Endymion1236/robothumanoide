@@ -18,7 +18,8 @@ Feetech/Waveshare (copiée depuis `driver-servo/STServo_Python.zip`).
 
 Testé ici sur un **servo simulé** (pas de matériel) : refus sans butées, butées écrites puis mémoire
 du servo reverrouillée, mouvement normal, refus hors butées, obstacle sur la course → force coupée,
-servo trop chaud → refus. **Pas encore testé sur le vrai servo.**
+servo trop chaud → refus. **Essai réel le 12/11/2026 : centre et ± 30° réussis** (précision 0,2°, charge ± 2 %, 31 °C).
+Plusieurs commandes d'un coup, séparées par des espaces (« c g d c ») ; si un mouvement est refusé, la suite est annulée.
 
 ## Avant l'essai
 

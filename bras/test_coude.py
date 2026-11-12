@@ -47,24 +47,31 @@ def main():
                 'd': ('30° de l\'autre côté', MILIEU - pas(30)), 'G': ('90° d\'un côté', MILIEU + pas(90)),
                 'D': ('90° de l\'autre côté', MILIEU - pas(90))}
         print('\nCommandes :', ' · '.join(f'{k} = {v[0]}' for k, v in menu.items()), '· l = libre · i = infos · q = quitter')
-        while True:
-            choix = input('> ').strip()
-            if choix == 'q':
-                break
-            if choix == 'l':
-                bus.relacher(ident); print('   force coupée : le coude est libre'); continue
-            if choix == 'i':
-                afficher_etat(bus.etat(ident)); continue
-            if choix not in menu:
-                print('   commande inconnue'); continue
-            nom, cible = menu[choix]
-            print(f'   vers {nom} (position {cible})...')
-            try:
-                bus.tenir(ident)
-                print('  ', bus.aller(ident, cible))
-            except ErreurServo as err:
-                print('   refusé :', err)
-            afficher_etat(bus.etat(ident))
+        print('Plusieurs commandes d\'un coup : séparées par des espaces, par exemple « c g d c » (« et » est ignoré).')
+        quitter = False
+        while not quitter:
+            mots = [m for m in input('> ').replace(',', ' ').split() if m.lower() != 'et']
+            if not mots:
+                continue
+            inconnus = [m for m in mots if m not in menu and m not in ('q', 'l', 'i')]
+            if inconnus:
+                print('   commande inconnue :', ' '.join(inconnus), '(rien n\'a bougé)'); continue
+            for choix in mots:
+                if choix == 'q':
+                    quitter = True; break
+                if choix == 'l':
+                    bus.relacher(ident); print('   force coupée : le coude est libre'); continue
+                if choix == 'i':
+                    afficher_etat(bus.etat(ident)); continue
+                nom, cible = menu[choix]
+                print(f'   vers {nom} (position {cible})...')
+                try:
+                    bus.tenir(ident)
+                    print('  ', bus.aller(ident, cible))
+                except ErreurServo as err:
+                    print('   refusé :', err, '— la suite de la série est annulée')
+                    afficher_etat(bus.etat(ident)); break
+                afficher_etat(bus.etat(ident))
     except KeyboardInterrupt:
         pass
     except ErreurServo as e:
