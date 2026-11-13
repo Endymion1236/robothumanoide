@@ -85,6 +85,7 @@ Les passages de tête au-dessus des roulements font 6,5 mm : la vis n'appuie que
 
 **Plan illustré, une page par étape : `sortie/plan_montage.pdf`** (aussi en images `sortie/plan_montage_00.png` à `_09.png`),
 refait par `python plan_montage.py` après `generer_pince.py`. Il remplace l'ancienne liste d'étapes.
+Pour vérifier le montage : `sortie/vue_dessus_montee.png` (vue de dessus, quel bras va dans quel trou du doigt ; `vue_dessus.py`).
 
 **Premier essai motorisé** : `bras/tester_pince.bat` (voir `bras/LISEZ-MOI.md`) : ouvrir, fermer, serrer avec une force limitée.
 
