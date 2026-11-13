@@ -187,16 +187,17 @@ def e_roulements(ax):
     etiquette(ax, (15, 0, 6), 'engrenage B', (-40, 80))
     etiquette(ax, (30, 67, 5), 'bras libres', (-10, 80))
 
-@etape('Les engrenages (le réglage important)', ['l\'engrenage A', 'l\'engrenage B (avec son roulement)', '4 petites vis M2,5 × 8 du servo',
-       '1 vis M3 × 10', 'un pied à coulisse', 'la carte + 12 V'],
-       ['Rebranche le servo, et dans FD active le couple (Torque) en position 2048 : il ne doit plus tourner.',
+@etape('Les engrenages', ['l\'engrenage A', 'l\'engrenage B (avec son roulement)', '4 petites vis M2,5 × 8 du servo',
+       '1 vis M3 × 10', 'un pied à coulisse'],
+       ['Pas besoin de brancher le servo pour cette étape.',
         'Pose l\'engrenage B sur son poteau, SANS vis.',
         'Pose l\'engrenage A sur le palonnier : ses dents entrent dans celles de B.',
-        f'Les deux bras doivent être bien symétriques, avec {ENTRE_TROUS:.0f} mm entre les 2 trous du bout (voir le dessin, vu de dessus).',
-        'Pas bon ? Soulève B, tourne-le d\'une dent, repose-le. (A peut aussi se tourner d\'un cran sur le palonnier.)',
-        'Visse A avec les 4 vis M2,5 × 8. Visse B avec la vis M3 × 10, SANS rondelle.',
-        'Désactive le couple, coupe le 12 V.'],
-       f'Bien réglé, les mâchoires seront écartées de {ECART:.0f} mm quand le servo est au milieu : la pince pourra s\'ouvrir en grand ET se fermer.')
+        'Tourne A doucement jusqu\'à ce que ses 4 trous tombent pile sur ceux du palonnier. Garde la position où les 2 bras sont le plus près de '
+        f'{ENTRE_TROUS:.0f} mm entre les 2 trous du bout (dessin vu de dessus).',
+        'Les 2 bras doivent être symétriques. Sinon : soulève B, tourne-le d\'une dent, repose-le.',
+        'Visse A avec les 4 vis M2,5 × 8. Visse B avec la vis M3 × 10, SANS rondelle.'],
+       f'Pas besoin d\'être pile à {ENTRE_TROUS:.0f} mm : au premier lancement de tester_pince, tu règles la pince à la main et le servo '
+       'enregistre cette position comme son milieu (étalonnage).')
 def e_engrenages(ax):
     pcs = fixe() + mobile(('engrenage A', 'engrenage B'), pales=False)
     dessiner(ax, pcs, vue=(90, -90), cadre=(-20, 110, -60, 60, -10, 50), marge=0.62)
@@ -252,10 +253,9 @@ def e_bras_libres(ax):
 @etape('Essai à la main, puis sur le bras', ['la pince montée', 'le bout de l\'avant-bras', 'les 2 vis M3 × 30 de l\'entretoise'],
        ['Servo NON alimenté : ouvre et ferme doucement à la main (ça résiste un peu, c\'est le servo).',
         'Ça doit aller d\'un bout à l\'autre sans point dur, et les mâchoires restent parallèles.',
-        'Enlève les 2 vis M3 × 30 du bout de l\'avant-bras.',
-        'Enfile le manchon de la pince sur le bout de l\'avant-bras.',
-        'Remets les 2 vis M3 × 30 : elles traversent maintenant le manchon.',
-        'Premier essai avec le moteur : tout doucement, avec le menu de test (on le fera ensemble).'],
+        'Premier essai moteur, pince SEULE sur la table : bras\\tester_pince.bat. Il commence par l\'étalonnage : pince réglée à la main à 71 mm entre les mâchoires.',
+        'Quand elle marche : enlève les 2 vis M3 × 30 du bout de l\'avant-bras, enfile le manchon jusqu\'au fond.',
+        'Remets les 2 vis M3 × 30 : elles traversent maintenant le manchon.'],
        'Point dur ? Ne force pas : regarde quelle vis est trop serrée ou quelle pièce frotte.')
 def e_final(ax):
     pcs = [(BASE, COUL['base']), (SERVO, '#555'), (BRIDE, COUL['bride'])] + mobile(tuple(P), pales=False) + [(AVB.translate((-25, 0, 0)), COUL['avant-bras'])]

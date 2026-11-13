@@ -1,6 +1,7 @@
 """Premier essai motorisé de la pince (servo n° 4, butées 1663–2433), en sécurité.
 
-Au premier lancement, le programme demande dans quel sens la pince s'ouvre et le retient
+Au premier lancement : étalonnage du milieu (pince réglée à la main à mi-ouverture, le servo prend
+cette position comme 2048), puis le programme demande dans quel sens la pince s'ouvre et le retient
 (fichier sens_pince.json, à côté). Ensuite : milieu, ouvrir, fermer, serrer doucement.
 « Serrer » avance avec une force LIMITÉE et s'arrête tout seul sur l'objet : un gobelet en carton
 n'est pas écrasé. En quittant, la force est coupée (la pince devient libre)."""
@@ -31,6 +32,23 @@ def afficher_etat(e, ouvert=None):
     largeur = f" · mâchoires ≈ {ecart_mm(e['position'], ouvert):.0f} mm" if ouvert else ''
     print(f"   position {e['position']}{largeur} · butées {e['butee_min']}–{e['butee_max']} · {e['tension']:.1f} V"
           f" · {e['temperature']} °C · charge {e['charge']:+.0f} % · force {'oui' if e['force'] else 'non'}")
+
+def etalonner(bus, ident):
+    """Réglage du milieu à la main : l'engrenage A est vissé là où ses trous tombent sur le palonnier,
+    puis on règle la pince à mi-ouverture et le servo prend cette position comme milieu (2048)."""
+    bus.relacher(ident)
+    print('\nÉtalonnage du milieu. La force est coupée : tu peux tourner la pince à la main (ça résiste un peu).')
+    print('Règle-la à MI-OUVERTURE, au pied à coulisse :')
+    print('  - doigts montés : 71 mm entre les mâchoires, au creux de l\'arrondi ;')
+    print('  - doigts pas encore montés : 81 mm entre les 2 trous au bout des bras des engrenages.')
+    print('Les deux bras doivent être bien symétriques.')
+    if not input('Réglée ? Taper o puis Entrée (autre chose pour annuler) : ').strip().lower().startswith('o'):
+        print('   étalonnage annulé'); return False
+    pos = bus.etalonner_milieu(ident)
+    if abs(pos - MILIEU) > 10:
+        print(f'   ⚠️  le servo lit {pos} au lieu de {MILIEU} : étalonnage refusé par le servo ?'); return False
+    print(f'   fait : cette position est maintenant le milieu ({pos}). Les butées 1663–2433 tombent juste.')
+    return True
 
 def trouver_sens(bus, ident):
     if SENS.exists():
@@ -81,19 +99,23 @@ def main():
             if (e['butee_min'], e['butee_max']) != BUTEES_PINCE:
                 sys.exit('Butées de la pince non réglées : aucun mouvement. Arrêt.')
         if not BUTEES_PINCE[0] <= e['position'] <= BUTEES_PINCE[1]:
-            print('\n⚠️  Le servo est HORS de ses butées : l\'engrenage A est mal posé, ou le servo a tourné avant le montage.')
-            print('   Couper le 12 V, démonter l\'engrenage A, ramener le servo à 2048 dans FD, remonter (plan de montage, étape 6).')
-            sys.exit()
+            print(f"\nLe servo est à {e['position']}, hors de ses butées : normal tant que le milieu n'est pas étalonné.")
+            if not etalonner(bus, ident):
+                sys.exit('Pas d\'étalonnage : aucun mouvement. Arrêt.')
+        elif not SENS.exists():
+            print('\nPremier lancement : on étalonne d\'abord le milieu (une seule fois).')
+            if not etalonner(bus, ident):
+                sys.exit('Pas d\'étalonnage : aucun mouvement. Arrêt.')
         ouvert = trouver_sens(bus, ident)
         ferme = sum(BUTEES_PINCE) - ouvert
         menu = {'c': ('milieu', MILIEU), 'o': ('ouvrir en grand', ouvert)}
         print('\nCommandes : c = milieu · o = ouvrir en grand · s = serrer doucement · S = serrer plus fort'
-              ' · f = fermer à vide · l = lâcher (libre) · i = infos · q = quitter')
+              ' · f = fermer à vide · l = lâcher (libre) · i = infos · e = refaire l\'étalonnage · q = quitter')
         print('Plusieurs commandes d\'un coup : séparées par des espaces, par exemple « o s ».')
         quitter = False
         while not quitter:
             mots = [m for m in input('> ').replace(',', ' ').split() if m.lower() != 'et']
-            inconnus = [m for m in mots if m not in ('c', 'o', 's', 'S', 'f', 'l', 'i', 'q')]
+            inconnus = [m for m in mots if m not in ('c', 'o', 's', 'S', 'f', 'l', 'i', 'e', 'q')]
             if inconnus:
                 print('   commande inconnue :', ' '.join(inconnus), '(rien n\'a bougé)'); continue
             for choix in mots:
@@ -103,6 +125,8 @@ def main():
                     bus.relacher(ident); print('   force coupée : la pince est libre'); continue
                 if choix == 'i':
                     afficher_etat(bus.etat(ident), ouvert); continue
+                if choix == 'e':
+                    etalonner(bus, ident); afficher_etat(bus.etat(ident), ouvert); break
                 try:
                     bus.tenir(ident)
                     if choix in menu:

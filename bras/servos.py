@@ -100,6 +100,18 @@ class Bus:
         finally:
             self._ok(*self.p.LockEprom(ident), 'verrouillage')
 
+    def etalonner_milieu(self, ident):
+        """Le servo prend sa position ACTUELLE comme milieu (2048) : écrire 128 dans « Torque Enable »
+        (table mémoire Feetech STS3215). Le décalage est gardé dans sa mémoire permanente."""
+        self._ok(*self.p.unLockEprom(ident), 'déverrouillage')
+        try:
+            self.ecrire1(ident, SMS_STS_TORQUE_ENABLE, 128, 'étalonnage du milieu')
+            time.sleep(0.2)
+        finally:
+            self._ok(*self.p.LockEprom(ident), 'verrouillage')
+        self.relacher(ident)
+        return self.etat(ident)['position']
+
     def relacher(self, ident):
         """Coupe la force : le servo devient libre (on peut le tourner à la main)."""
         self.ecrire1(ident, SMS_STS_TORQUE_ENABLE, 0, 'couper la force')

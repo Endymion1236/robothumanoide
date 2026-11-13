@@ -46,16 +46,20 @@ Si le programme dit « Carte introuvable » : FD est peut-être encore ouvert, o
 Pince montée (plan de montage `pince/sortie/plan_montage.pdf`), son servo **seul** sur la carte, FD fermé.
 
 1. Double-cliquer **`tester_pince.bat`**. Il cherche le servo n° 4 (il prévient si le numéro est autre).
-2. Butées : il vérifie 1663–2433 (propose de les régler sinon). Si le servo est **hors** de ses butées,
-   l'engrenage A est mal posé : il s'arrête et dit quoi faire.
-3. **Premier lancement** : rien entre les doigts. La pince va au milieu puis bouge un peu ; répondre
+2. Butées : il vérifie 1663–2433 (propose de les régler sinon).
+3. **Étalonnage du milieu** (premier lancement, ou servo hors de ses butées, ou commande **e**) : la force
+   est coupée, régler la pince **à la main** à mi-ouverture (71 mm au creux des mâchoires, ou 81 mm entre
+   les trous du bout des bras si les doigts ne sont pas montés), taper **o** : le servo prend cette position
+   comme milieu (2048 ; registre 40 = 128, table mémoire Feetech), gardé même éteint. Ainsi l'engrenage A se
+   visse là où ses trous tombent sur le palonnier, sans chercher l'angle exact (13/11/2026).
+4. Puis, rien entre les doigts. La pince va au milieu puis bouge un peu ; répondre
    **o** si les mâchoires se sont **écartées**, **f** si elles se sont **rapprochées**. Retenu dans
    `sens_pince.json` (supprimer ce fichier pour redemander).
-4. Commandes : **c** milieu (≈ 71 mm) · **o** ouvrir en grand (110 mm) · **s** serrer doucement (force 20 %)
-   · **S** serrer plus fort (35 %) · **f** fermer à vide · **l** lâcher (libre) · **i** infos · **q** quitter.
+5. Commandes : **c** milieu (≈ 71 mm) · **o** ouvrir en grand (110 mm) · **s** serrer doucement (force 20 %)
+   · **S** serrer plus fort (35 %) · **f** fermer à vide · **l** lâcher (libre) · **i** infos · **e** refaire l'étalonnage · **q** quitter.
    Plusieurs d'un coup : `o s`.
-5. **Serrer** avance avec une force limitée et **s'arrête tout seul** sur l'objet (immobile + effort) ;
+6. **Serrer** avance avec une force limitée et **s'arrête tout seul** sur l'objet (immobile + effort) ;
    il affiche la largeur estimée de l'objet. Ne pas laisser un objet serré plusieurs minutes.
 
 Toutes les autres sécurités du coude restent (butées, chaleur, blocage ; force jamais au-delà de 50 % pour la pince).
-Testé ici sur un servo simulé (sans objet, gobelet de 50 mm) ; **pas encore sur la vraie pince.**
+Testé ici sur un servo simulé (sans objet, gobelet de 50 mm, départ hors butées puis étalonnage) ; **pas encore sur la vraie pince.**
