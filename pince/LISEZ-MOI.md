@@ -39,7 +39,7 @@ une main qui glisse le long du gobelet. C'est le prix d'une pince simple à bras
 |---|---|
 | Base (logement du servo + manchon sur l'avant-bras + poteaux) | `pince_base.stl` |
 | Bride (porte aussi un pivot) | `pince_bride.stl` |
-| Engrenage A (sur le palonnier) | `pince_engrenage_A.stl` |
+| Engrenage A (sur le palonnier) | `pince_engrenage_A.stl` pour des vis M2,5 × 8 ; avec les vis courtes fournies avec le servo : `pince_engrenage_A_vis4mm.stl`, `_vis5mm` ou `_vis6mm` selon leur longueur sous tête (logement des têtes plus profond : la vis entre de 2 à 2,5 mm dans le palonnier) |
 | Engrenage B | `pince_engrenage_B.stl` |
 | Bras libres | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
 | Doigts | `pince_doigt_+Y.stl`, `pince_doigt_-Y.stl` |
@@ -72,7 +72,7 @@ c'est le vissage qui serre.
 | Vis M3 × 8 | 2 | bout des bras libres, vissées dans le plastique (ou M3 × 10 + 2 rondelles sous la tête) |
 | Vis M3 × 16 (14 à 20 conviennent) + écrou frein | 2 | doigt sur le bras de l'engrenage |
 | Rondelles M3 (DIN 125, 0,5 mm) | 4 | entre doigt et bras d'engrenage (2), entre bras libre et doigt (2) |
-| Vis M2,5 × 8 (fournies avec le servo) | 4 | engrenage A sur le palonnier |
+| Vis M2,5 × 8 (ou les vis fournies avec le servo, avec la variante d'engrenage A à leur longueur) | 4 | engrenage A sur le palonnier |
 | Les 2 vis M3 × 30 de l'entretoise du bout de l'avant-bras | (déjà là) | traversent le manchon de la pince |
 
 Correction du 11/11/2026 : au bout des bras libres, un écrou sous le doigt aurait tapé dans le bras de

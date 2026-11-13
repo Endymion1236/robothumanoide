@@ -71,6 +71,18 @@
     64.6
    ],
    "masse_g_environ": 16
+  },
+  "pince_engrenage_A_vis4mm": {
+   "plastique_sous_tete_mm": 2.0,
+   "vis_dans_palonnier_mm": 2.0
+  },
+  "pince_engrenage_A_vis5mm": {
+   "plastique_sous_tete_mm": 2.5,
+   "vis_dans_palonnier_mm": 2.5
+  },
+  "pince_engrenage_A_vis6mm": {
+   "plastique_sous_tete_mm": 3.5,
+   "vis_dans_palonnier_mm": 2.5
   }
  },
  "bride_sur_servo_mm3 (serrage voulu)": -0.0,

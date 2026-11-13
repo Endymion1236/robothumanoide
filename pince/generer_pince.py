@@ -98,14 +98,17 @@ def barre(p, q, larg):
     return pts
 
 # ---------------- Pièces mobiles (construites à leur position « bras à 0° ») ----------------
-def engrenage_a():
-    """Engrenage moteur, vissé sur le palonnier, avec son bras (côté +Y)."""
+def engrenage_a(longueur_vis=8):
+    """Engrenage moteur, vissé sur le palonnier, avec son bras (côté +Y).
+    longueur_vis : longueur (sous tête) des 4 vis M2,5. Le logement des têtes est creusé pour qu'elles
+    entrent de 2,5 mm dans le palonnier, en gardant au moins 2 mm de plastique sous la tête."""
     m = extruder(profil_engrenage(), Z0, Z0 + EP_ENG).translate((AX, AY, 0))
     m += extruder(barre((AX, AY), (AX + L_BRAS, AY), 11), Z0, Z0 + EP_ENG)
     m += cyl(AX, AY, Z0 - 1.0, Z0, 18)                                     # patin sur le palonnier
     for k in range(4):                                                      # 4 vis M2,5 du palonnier, lamées
         a = math.radians(45 + 90 * k); x, y = AX + CERCLE_TROUS / 2 * math.cos(a), AY + CERCLE_TROUS / 2 * math.sin(a)
-        m -= cyl(x, y, Z0 - 1.1, Z0 + EP_ENG + 0.1, M2_5, 24); m -= cyl(x, y, Z0 + EP_ENG - 2.0, Z0 + EP_ENG + 0.1, 5.2, 24)
+        sous_tete = max(2.0, min(EP_ENG + 1.0 - 2.0, longueur_vis - 2.5))           # plastique sous la tête (patin compris)
+        m -= cyl(x, y, Z0 - 1.1, Z0 + EP_ENG + 0.1, M2_5, 24); m -= cyl(x, y, Z0 - 1.0 + sous_tete, Z0 + EP_ENG + 0.1, 5.4, 24)
     m -= cyl(AX, AY, Z0 - 1.1, Z0 + EP_ENG + 0.1, 7)                       # vis centrale du palonnier
     m -= cyl(AX + L_BRAS, AY, Z0 - 0.1, Z0 + EP_ENG + 0.1, M3, 24)          # axe du doigt
     return m
@@ -264,6 +267,13 @@ if __name__ == '__main__':
         t.apply_translation(-t.bounds[0]); t.export(OUT / f'{nom}.stl')
         g = t.volume / 1000 * 1.24 * 0.6                                       # PLA, ~60 % plein
         masse += g; rapport['pieces'][nom] = {'encombrement_mm': [round(v, 1) for v in t.extents], 'masse_g_environ': round(g)}
+    # variantes de l'engrenage A pour des vis M2,5 plus courtes (celles fournies avec le servo)
+    for lv in (4, 5, 6):
+        t = mesh(engrenage_a(lv)); assert t.is_watertight
+        t.apply_transform(tm.transformations.rotation_matrix(math.pi, (1, 0, 0)))
+        t.apply_translation(-t.bounds[0]); t.export(OUT / f'pince_engrenage_A_vis{lv}mm.stl')
+        rapport['pieces'][f'pince_engrenage_A_vis{lv}mm'] = {'plastique_sous_tete_mm': max(2.0, lv - 2.5),
+                                                            'vis_dans_palonnier_mm': round(lv - max(2.0, lv - 2.5), 1)}
     rapport['masse_pieces_imprimees_g'] = round(masse); rapport['masse_avec_servo_g'] = round(masse + 55)
     (OUT / 'verification_pince.json').write_text(json.dumps(rapport, indent=1, ensure_ascii=False), encoding='utf-8')
     print(json.dumps({k: v for k, v in rapport.items() if k != 'pieces'}, indent=1, ensure_ascii=False))
