@@ -124,14 +124,22 @@ def engrenage_b():
     return m
 
 def bras_libre(s):
-    """Bras libre (s = +1 côté +Y, -1 côté -Y) : roulement au pivot, trou M3 au doigt."""
+    """Bras libre (s = +1 côté +Y, -1 côté -Y) : un roulement 623 à chaque bout, enfoncé par-dessous.
+    Au pivot comme au doigt, la tête de vis descend dans le passage de 6,5 et serre la bague intérieure :
+    le bras tourne mais ne peut pas se soulever (correction du 13/11/2026 : au doigt, la vis vissée dans
+    le bras n'entrait que de 2,5 mm dans le roulement du doigt ; en serrant, le doigt basculait, soulevait
+    le bras et la vis sortait : la mâchoire tournait et la pince s'ouvrait)."""
     p, q = (AX - DECAL, s * AY), (AX - DECAL + L_BRAS, s * AY)
     m = extruder(barre(p, q, 12), Z_LIBRE, Z_LIBRE + EP_LIBRE)
-    m -= cyl(p[0], p[1], Z_LIBRE - 0.1, Z_LIBRE + ROUL_EP, ROUL_D, 48); m -= cyl(p[0], p[1], Z_LIBRE - 0.1, Z_LIBRE + EP_LIBRE + 0.1, PASSAGE_TETE, 32)
-    # bout du bras : la vis M3 x 10 se visse DANS le bras (rien sous le doigt : le bras de l'engrenage passe
-    # juste dessous quand la pince est presque fermée, un écrou y taperait)
-    m -= cyl(q[0], q[1], Z_LIBRE - 0.1, Z_LIBRE + EP_LIBRE + 0.1, M3_TARAUD, 24)
+    for c in (p, q):
+        m -= cyl(c[0], c[1], Z_LIBRE - 0.1, Z_LIBRE + ROUL_EP, ROUL_D, 48)
+        m -= cyl(c[0], c[1], Z_LIBRE - 0.1, Z_LIBRE + EP_LIBRE + 0.1, PASSAGE_TETE, 32)
     return m
+
+def bouchon_doigt():
+    """Remplace le roulement ARRIÈRE du doigt (même trou de 10,1) : la vis M3 x 8 du bras libre s'y visse
+    (trou de 2,8). Ainsi les doigts déjà imprimés restent bons."""
+    return cyl(0, 0, 0, ROUL_EP, 9.9, 64) - cyl(0, 0, -0.1, ROUL_EP + 0.1, M3_TARAUD, 24)
 
 def doigt(s):
     """Doigt : plaque qui relie les deux bras (roulements aux deux axes) + mâchoire qui descend."""
@@ -257,7 +265,7 @@ if __name__ == '__main__':
                               'butee_min': round(2048 - demi), 'butee_max': round(2048 + demi),
                               'sens': 'à vérifier au premier essai : le sens « ouvrir » peut être vers la butée min ou max'}
     pieces = {'pince_base': BASE, 'pince_bride': BRIDE, 'pince_engrenage_A': EA, 'pince_engrenage_B': EB,
-              'pince_bras_libre_+Y': BL[1], 'pince_bras_libre_-Y': BL[-1], 'pince_doigt_+Y': DG[1], 'pince_doigt_-Y': DG[-1]}
+              'pince_bras_libre_+Y': BL[1], 'pince_bras_libre_-Y': BL[-1], 'pince_doigt_+Y': DG[1], 'pince_doigt_-Y': DG[-1], 'pince_bouchon_doigt': bouchon_doigt()}
     masse = 0
     for nom, m in pieces.items():
         t = mesh(m); assert t.is_watertight and len(t.split(only_watertight=False)) == 1, nom

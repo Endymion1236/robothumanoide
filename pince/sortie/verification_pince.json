@@ -72,6 +72,14 @@
    ],
    "masse_g_environ": 16
   },
+  "pince_bouchon_doigt": {
+   "encombrement_mm": [
+    9.9,
+    9.9,
+    4.0
+   ],
+   "masse_g_environ": 0
+  },
   "pince_engrenage_A_vis4mm": {
    "plastique_sous_tete_mm": 2.0,
    "vis_dans_palonnier_mm": 2.0

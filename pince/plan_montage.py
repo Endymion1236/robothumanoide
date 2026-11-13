@@ -83,7 +83,7 @@ def page_pieces(pdf, n):
     liste = [('Base', BASE, COUL['base'], '× 1'), ('Bride', BRIDE, COUL['bride'], '× 1'),
              ('Engrenage A\n(sur le servo)', G.EA, COUL['engrenage A'], '× 1'), ('Engrenage B', G.EB, COUL['engrenage B'], '× 1'),
              ('Bras libres', G.BL[1] + G.BL[-1].translate((0, -8, 0)), COUL['bras libre +Y'], '× 2'),
-             ('Doigts (mâchoires)', G.DG[1] + G.DG[-1].translate((0, -20, 0)), COUL['doigt +Y'], '× 2')]
+             ('Doigts + 2 bouchons', G.DG[1] + G.DG[-1].translate((0, -20, 0)), COUL['doigt +Y'], '× 2')]
     for k, (nom, m, coul, qte) in enumerate(liste):
         ax = fig.add_subplot(3, 4, k + 1, projection='3d'); dessiner(ax, [(m, coul)], marge=0.75)
         ax.set_title(f'{nom}  {qte}', fontsize=15, weight='bold', color=coul)
@@ -163,10 +163,12 @@ def e_bride(ax):
     etiquette(ax, (G.BRIDE_X0 + 5, Y_PIL[0], G.H_HAUT + dz + 26), 'vis M3 × 10', (90, 50))
     etiquette(ax, (*PIV[1], G.Z_LIBRE + dz), 'pivot', (90, -10))
 
-@etape('Les 7 roulements', ['l\'engrenage B', 'les 2 bras libres', 'les 2 doigts', '7 roulements 623'],
+@etape('Les 7 roulements et les 2 bouchons', ['l\'engrenage B', 'les 2 bras libres', 'les 2 doigts', '7 roulements 623', '2 bouchons imprimés (pince_bouchon_doigt)'],
        ['Ils s\'enfoncent en force, à la main ou en appuyant sur la table.',
-        'Engrenage B et bras libres : 1 roulement chacun, par-DESSOUS, au fond de son logement.',
-        'Doigts : 2 roulements chacun, dans les 2 grands trous, au ras des deux faces.',
+        'Engrenage B : 1 roulement, par-DESSOUS, au fond de son logement.',
+        'Bras libres : 2 roulements chacun, un à CHAQUE bout, par-DESSOUS.',
+        'Doigts : 1 roulement dans le trou AVANT (près de la mâchoire), au ras des deux faces.',
+        'Doigts, trou ARRIÈRE : le bouchon imprimé, au ras des deux faces (une goutte de colle s\'il est lâche).',
         'Le roulement doit être bien à plat, pas de travers.'],
        'Trop dur ? Un coup de lime ou de papier de verre dans le trou. Trop lâche ? Une goutte de colle cyanoacrylate sur le bord extérieur (jamais dedans).')
 def e_roulements(ax):
@@ -176,14 +178,16 @@ def e_roulements(ax):
     pcs += [(place(eb, 0, 0), COUL['engrenage B']), (roulement(G.AX - G.AX, -G.AY + G.AY, -14), ACIER)]
     for k, s in enumerate((1, -1)):
         bl = G.BL[s].translate((-PIV[s][0], -PIV[s][1], -G.Z_LIBRE)).translate((0, 45 + 22 * k, 0))
-        pcs += [(bl, COUL['bras libre +Y']), (roulement(0, 45 + 22 * k, -14), ACIER)]
+        pcs += [(bl, COUL['bras libre +Y']), (roulement(0, 45 + 22 * k, -14), ACIER), (roulement(G.L_BRAS, 45 + 22 * k, -14), ACIER)]
     for k, s in enumerate((1, -1)):
         q1 = (G.AX + G.L_BRAS, s * G.AY); dg = G.DG[s].translate((-q1[0], -q1[1], -G.Z_DOIGT)).translate((95, 10 + 55 * k, 0))
-        pcs += [(dg, COUL['doigt +Y'])] + [(roulement(95 + dx, 10 + 55 * k, 12), ACIER) for dx in (0, -G.DECAL)]
+        pcs += [(dg, COUL['doigt +Y']), (roulement(95, 10 + 55 * k, 12), ACIER),
+                (G.bouchon_doigt().translate((95 - G.DECAL, 10 + 55 * k, 12)), COUL['bride'])]
     dessiner(ax, pcs, vue=(35, -60), marge=0.75)
     etiquette(ax, (0, 0, -12), 'par-dessous', (-80, -50))
     etiquette(ax, (0, 45, -12), 'par-dessous', (-90, -40))
-    etiquette(ax, (95 - G.DECAL, 10, 16), '2 par doigt', (60, -80))
+    etiquette(ax, (95, 10, 16), '1 roulement\nau trou avant', (80, -70))
+    etiquette(ax, (95 - G.DECAL, 10, 16), 'bouchon au\ntrou arrière', (-30, -90))
     etiquette(ax, (15, 0, 6), 'engrenage B', (-40, 80))
     etiquette(ax, (30, 67, 5), 'bras libres', (-10, 80))
 
@@ -214,7 +218,7 @@ def e_engrenages(ax):
         'Entre le doigt et le bras : 1 rondelle.',
         'Vis M3 × 16 par le dessus, à travers le roulement avant du doigt, la rondelle et le bras.',
         'Écrou frein en dessous. Serre jusqu\'au contact, puis vérifie que le doigt tourne encore librement.',
-        'Le 2e roulement du doigt (à l\'arrière) reste libre pour l\'étape suivante.',
+        'Le trou arrière du doigt porte le bouchon : il servira à l\'étape suivante.',
         'Même chose de l\'autre côté.'],
        'Si le doigt frotte après serrage : desserre d\'un quart de tour (l\'écrou frein ne se dévissera pas).')
 def e_doigts(ax):
@@ -231,13 +235,13 @@ def e_doigts(ax):
     etiquette(ax, (x, y, G.Z0 - 12), 'écrou frein\n(dessous)', (-120, -30))
     etiquette(ax, (x + 30, y - 6, G.Z_DOIGT + dz), 'doigt', (90, -40))
 
-@etape('Les bras libres', ['les 2 bras libres (avec leur roulement)', '2 vis M3 × 10', '2 vis M3 × 8', '2 rondelles M3'],
+@etape('Les bras libres', ['les 2 bras libres (avec leurs 2 roulements)', '2 vis M3 × 10', '2 vis M3 × 8', '2 rondelles M3'],
        ['Le roulement du bras se pose sur son pivot : côté bride pour l\'un, poteau de la base pour l\'autre.',
-        'L\'autre bout du bras vient au-dessus du roulement arrière du doigt, avec 1 rondelle entre les deux.',
+        'L\'autre bout du bras vient au-dessus du bouchon du doigt, avec 1 rondelle entre les deux.',
         'Pivot : vis M3 × 10 dans l\'insert, SANS rondelle.',
-        'Bout du bras : vis M3 × 8 (PAS 10 : trop longue) qui se visse directement dans le plastique du bras, sans écrou.',
-        'Visse doucement, sans forcer : le plastique fait le filetage.'],
-       'Pas de M3 × 8 ? Une M3 × 10 avec 2 rondelles sous la tête. Une M3 × 10 seule frotterait sur le bras de l\'engrenage.')
+        'Bout du bras : vis M3 × 8, SANS rondelle dessus : elle traverse le roulement du bras et se visse dans le bouchon du doigt.',
+        'Visse jusqu\'au contact, sans forcer : le plastique du bouchon fait le filetage. Le bras doit tourner librement mais ne plus pouvoir se soulever.'],
+       'Bien M3 × 8 au bout du bras : une M3 × 10 dépasserait sous le doigt et frotterait sur le bras de l\'engrenage.')
 def e_bras_libres(ax):
     pcs = fixe() + mobile(('engrenage A', 'engrenage B', 'doigt +Y', 'doigt -Y'))
     dz = 14
@@ -247,7 +251,7 @@ def e_bras_libres(ax):
                 (rondelle(*Q2[k], G.Z_LIBRE - 0.5 + 6), RONDELLE)]
     dessiner(ax, pcs, vue=(30, -40), marge=0.8)
     etiquette(ax, (*PIV[1], G.Z_LIBRE + dz + 26), 'pivot :\nM3 × 10, sans rondelle', (-120, 30))
-    etiquette(ax, (*Q2[1], G.Z_LIBRE + dz + 22), 'bout : M3 × 8\nvissée dans le bras', (100, 50))
+    etiquette(ax, (*Q2[1], G.Z_LIBRE + dz + 22), 'bout : M3 × 8 dans le\nroulement, vissée\ndans le bouchon', (100, 50))
     etiquette(ax, (*Q2[1], G.Z_LIBRE + 6.3), 'rondelle', (110, -30))
 
 @etape('Essai à la main, puis sur le bras', ['la pince montée', 'le bout de l\'avant-bras', 'les 2 vis M3 × 30 de l\'entretoise'],

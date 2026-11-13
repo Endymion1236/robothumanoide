@@ -43,6 +43,7 @@ une main qui glisse le long du gobelet. C'est le prix d'une pince simple à bras
 | Engrenage B | `pince_engrenage_B.stl` |
 | Bras libres | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
 | Doigts | `pince_doigt_+Y.stl`, `pince_doigt_-Y.stl` |
+| Bouchons du trou arrière des doigts (× 2) | `pince_bouchon_doigt.stl` |
 
 **Toutes les pièces sont déjà orientées pour l'impression, sans support** (vérifié : chaque pièce repose à
 plat sur le plateau). Corrigé le 11/11/2026 : les doigts, l'engrenage A et la bride étaient mal posés dans
@@ -66,10 +67,10 @@ c'est le vissage qui serre.
 
 | Quoi | Combien | Où |
 |---|---|---|
-| Roulements 623ZZ (commandés) | 7 | engrenage B (1), bras libres (2), doigts (4) |
+| Roulements 623ZZ (commandés) | 7 | engrenage B (1), bras libres (2 chacun, un à chaque bout), doigts (1 chacun, trou avant) |
 | Inserts M3 à chaud | 5 | piliers de la bride (2), poteau de l'engrenage B, poteau du bras libre -Y, pivot sur la bride |
 | Vis M3 × 10 | 5 | bride (2), engrenage B (1), pivots des bras libres (2) |
-| Vis M3 × 8 | 2 | bout des bras libres, vissées dans le plastique (ou M3 × 10 + 2 rondelles sous la tête) |
+| Vis M3 × 8 | 2 | bout des bras libres : à travers le roulement du bras, vissées dans le bouchon du doigt (pas de M3 × 10 : elle dépasserait) |
 | Vis M3 × 16 (14 à 20 conviennent) + écrou frein | 2 | doigt sur le bras de l'engrenage |
 | Rondelles M3 (DIN 125, 0,5 mm) | 4 | entre doigt et bras d'engrenage (2), entre bras libre et doigt (2) |
 | Vis M2,5 × 8 (ou les vis fournies avec le servo, avec la variante d'engrenage A à leur longueur) | 4 | engrenage A sur le palonnier |
@@ -80,6 +81,12 @@ l'engrenage pince presque fermée. Une vis M3 × 8 s'y visse maintenant directem
 de l'engrenage. Vérifié par `verifier_visserie.py` (vis, écrous, rondelles sur toute la course : aucun contact, 2 mm de marge).
 Les passages de tête au-dessus des roulements font 6,5 mm : la vis n'appuie que sur la bague intérieure, sans rondelle.
 **Pièces à réimprimer si elles l'ont déjà été : les 2 bras libres et l'engrenage B.**
+
+Correction du 13/11/2026 (essai réel) : au bout des bras libres, la vis vissée dans le bras n'entrait que de 2,5 mm
+dans le roulement arrière du doigt ; en serrant un objet, le doigt basculait, soulevait le bras, la vis sortait et la
+mâchoire tournait (la pince s'ouvrait). Maintenant le roulement est dans le **bras** (un à chaque bout) et la vis M3 × 8
+le **serre** sur un **bouchon imprimé** placé dans le trou arrière du doigt : même principe que les pivots.
+**À réimprimer : les 2 bras libres + 2 bouchons** (les doigts restent bons).
 
 ## Montage
 

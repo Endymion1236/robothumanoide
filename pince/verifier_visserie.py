@@ -18,11 +18,11 @@ def visserie(th, ancien=False):
         v[f'q1 tête {k}'] = tete(*q1, zd + 4); v[f'q1 tige {k}'] = tige(*q1, zd + 4 - 16, zd + 4)
         v[f'q1 rondelle {k}'] = rondelle(*q1, G.Z0 + G.EP_ENG); v[f'q1 écrou {k}'] = ecrou(*q1, G.Z0)
         zl = G.Z_LIBRE + G.EP_LIBRE
-        v[f'q2 tête {k}'] = tete(*q2, zl)
+        v[f'q2 tête {k}'] = tete(*q2, zl - 1) if not ancien else tete(*q2, zl)   # tête sur la bague intérieure du roulement du bras
         if ancien:   # V2 d'avant : vis M3x12 + écrou frein sous le doigt
             v[f'q2 tige {k}'] = tige(*q2, zl - 12, zl); v[f'q2 écrou {k}'] = ecrou(*q2, zd)
         else:
-            v[f'q2 tige {k}'] = tige(*q2, zl - L_Q2 - 0.3, zl)   # +0,3 : tolérance des vis
+            v[f'q2 tige {k}'] = tige(*q2, zl - 1 - L_Q2 - 0.3, zl - 1)   # +0,3 : tolérance des vis
         v[f'q2 rondelle {k}'] = rondelle(*q2, G.Z_LIBRE - 0.5)
         v[f'pivot tête {k}'] = tete(*piv, G.Z_LIBRE + 4); v[f'pivot tige {k}'] = tige(*piv, G.Z_LIBRE + 4 - 10, G.Z_LIBRE + 4)
     v['B tête'] = tete(G.AX, -G.AY, G.Z0 + 4); v['B tige'] = tige(G.AX, -G.AY, G.Z0 + 4 - 10, G.Z0 + 4)
@@ -52,4 +52,4 @@ for ancien in (True, False):
                     key = (nv, np_); pires.setdefault(key, []).append((round(e), round(vol, 1)))
     print('ANCIENNE visserie' if ancien else 'NOUVELLE visserie', '->', 'aucune collision' if not pires else '')
     for (nv, np_), l in pires.items(): print(f'   {nv} touche {np_} : écart mâchoires {l[0][0]}→{l[-1][0]} mm, jusqu\'à {max(x[1] for x in l)} mm3')
-print('marge entre la pointe de la vis du bout du bras libre et le bras de l\'engrenage :', round(G.Z_LIBRE + G.EP_LIBRE - L_Q2 - (G.Z0 + G.EP_ENG), 2), 'mm')
+print('marge entre la pointe de la vis du bout du bras libre et le bras de l\'engrenage :', round(G.Z_LIBRE + G.EP_LIBRE - 1 - L_Q2 - (G.Z0 + G.EP_ENG), 2), 'mm')
