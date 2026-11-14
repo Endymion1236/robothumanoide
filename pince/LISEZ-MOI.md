@@ -44,6 +44,7 @@ une main qui glisse le long du gobelet. C'est le prix d'une pince simple à bras
 | Bras libres | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
 | Doigts | `pince_doigt_+Y.stl`, `pince_doigt_-Y.stl` |
 | Bouchons du trou arrière des doigts (× 2) | `pince_bouchon_doigt.stl` |
+| Variantes à insert (inserts M3 × 5 × 4 : Ø ext. 5, 4 mm de long, trou de 4,3) | `pince_bouchon_doigt_insert.stl` (× 2, insert posé au fer dans le bouchon, puis bouchon dans le doigt actuel), ou doigts `pince_doigt_+Y_insert.stl` / `_-Y_insert.stl` (insert directement dans le trou arrière) : filetage en laiton au lieu du plastique |
 
 **Toutes les pièces sont déjà orientées pour l'impression, sans support** (vérifié : chaque pièce repose à
 plat sur le plateau). Corrigé le 11/11/2026 : les doigts, l'engrenage A et la bride étaient mal posés dans

@@ -51,6 +51,7 @@ PAD_FLECHE = PAD_R - math.sqrt(PAD_R**2 - (PAD_LONG / 2) ** 2)   # les bouts ava
 ECART_MAX = 110.0
 ROUL_D, ROUL_EP = 10.1, 4.0        # logement de roulement 623 (10 mm, serré 0,1)
 M3, M3_INSERT, M2_5 = 3.4, 4.0, 2.9
+INSERT_COURT = 4.3                 # insert M3 x 5 x 4 (Ø ext. 5, 4 de long) : trou de 4,3 conseillé par le fabricant
 M3_TARAUD = 2.8                    # la vis M3 se visse directement dans le plastique (bout des bras libres)
 PASSAGE_TETE = 6.5                 # au-dessus d'un roulement : la tête de vis (5,5) n'appuie que sur la bague intérieure
 
@@ -136,17 +137,18 @@ def bras_libre(s):
         m -= cyl(c[0], c[1], Z_LIBRE - 0.1, Z_LIBRE + EP_LIBRE + 0.1, PASSAGE_TETE, 32)
     return m
 
-def bouchon_doigt():
+def bouchon_doigt(insert=False):
     """Remplace le roulement ARRIÈRE du doigt (même trou de 10,1) : la vis M3 x 8 du bras libre s'y visse
     (trou de 2,8). Ainsi les doigts déjà imprimés restent bons."""
-    return cyl(0, 0, 0, ROUL_EP, 9.9, 64) - cyl(0, 0, -0.1, ROUL_EP + 0.1, M3_TARAUD, 24)
+    return cyl(0, 0, 0, ROUL_EP, 9.9, 64) - cyl(0, 0, -0.1, ROUL_EP + 0.1, INSERT_COURT if insert else M3_TARAUD, 32)
 
-def doigt(s):
-    """Doigt : plaque qui relie les deux bras (roulements aux deux axes) + mâchoire qui descend."""
+def doigt(s, insert_arriere=False):
+    """Doigt : plaque qui relie les deux bras + mâchoire qui descend. Trou avant : roulement 623.
+    Trou arrière : logement de 10,1 pour le bouchon, ou (insert_arriere) trou de 4,3 pour un insert M3 x 5 x 4."""
     q1, q2 = (AX + L_BRAS, s * AY), (AX - DECAL + L_BRAS, s * AY)
     m = extruder(barre(q2, q1, 14), Z_DOIGT, Z_DOIGT + EP_DOIGT)
-    for q in (q1, q2):
-        m -= cyl(q[0], q[1], Z_DOIGT - 0.1, Z_DOIGT + EP_DOIGT + 0.1, ROUL_D, 48)
+    for q, d in ((q1, ROUL_D), (q2, INSERT_COURT if insert_arriere else ROUL_D)):
+        m -= cyl(q[0], q[1], Z_DOIGT - 0.1, Z_DOIGT + EP_DOIGT + 0.1, d, 48)
     # mâchoire : plaque verticale devant l'axe du doigt ; face de serrage creusée en arc (creux à E_DOIGT de l'axe)
     xm0 = q1[0] + PAD_DEVANT
     yi = q1[1] - s * E_DOIGT                                   # face au creux de l'arc
@@ -265,16 +267,19 @@ if __name__ == '__main__':
                               'butee_min': round(2048 - demi), 'butee_max': round(2048 + demi),
                               'sens': 'à vérifier au premier essai : le sens « ouvrir » peut être vers la butée min ou max'}
     pieces = {'pince_base': BASE, 'pince_bride': BRIDE, 'pince_engrenage_A': EA, 'pince_engrenage_B': EB,
-              'pince_bras_libre_+Y': BL[1], 'pince_bras_libre_-Y': BL[-1], 'pince_doigt_+Y': DG[1], 'pince_doigt_-Y': DG[-1], 'pince_bouchon_doigt': bouchon_doigt()}
+              'pince_bras_libre_+Y': BL[1], 'pince_bras_libre_-Y': BL[-1], 'pince_doigt_+Y': DG[1], 'pince_doigt_-Y': DG[-1], 'pince_bouchon_doigt': bouchon_doigt(),
+              'pince_bouchon_doigt_insert': bouchon_doigt(True),
+              'pince_doigt_+Y_insert': doigt(1, True), 'pince_doigt_-Y_insert': doigt(-1, True)}
     masse = 0
+    variantes = ('_insert',)
     for nom, m in pieces.items():
         t = mesh(m); assert t.is_watertight and len(t.split(only_watertight=False)) == 1, nom
         # orientation d'impression : face plane la plus large sur le plateau, sans surplomb
-        if nom in ('pince_engrenage_A', 'pince_doigt_+Y', 'pince_doigt_-Y'):
+        if nom in ('pince_engrenage_A', 'pince_doigt_+Y', 'pince_doigt_-Y', 'pince_doigt_+Y_insert', 'pince_doigt_-Y_insert'):
             t.apply_transform(tm.transformations.rotation_matrix(math.pi, (1, 0, 0)))   # retourné : dessus sur le plateau
         t.apply_translation(-t.bounds[0]); t.export(OUT / f'{nom}.stl')
         g = t.volume / 1000 * 1.24 * 0.6                                       # PLA, ~60 % plein
-        masse += g; rapport['pieces'][nom] = {'encombrement_mm': [round(v, 1) for v in t.extents], 'masse_g_environ': round(g)}
+        masse += 0 if nom.endswith(variantes) else g; rapport['pieces'][nom] = {'encombrement_mm': [round(v, 1) for v in t.extents], 'masse_g_environ': round(g)}
     # variantes de l'engrenage A pour des vis M2,5 plus courtes (celles fournies avec le servo)
     for lv in (4, 5, 6):
         t = mesh(engrenage_a(lv)); assert t.is_watertight

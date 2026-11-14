@@ -80,6 +80,30 @@
    ],
    "masse_g_environ": 0
   },
+  "pince_bouchon_doigt_insert": {
+   "encombrement_mm": [
+    9.9,
+    9.9,
+    4.0
+   ],
+   "masse_g_environ": 0
+  },
+  "pince_doigt_+Y_insert": {
+   "encombrement_mm": [
+    78.0,
+    16.7,
+    64.6
+   ],
+   "masse_g_environ": 16
+  },
+  "pince_doigt_-Y_insert": {
+   "encombrement_mm": [
+    78.0,
+    16.7,
+    64.6
+   ],
+   "masse_g_environ": 16
+  },
   "pince_engrenage_A_vis4mm": {
    "plastique_sous_tete_mm": 2.0,
    "vis_dans_palonnier_mm": 2.0
