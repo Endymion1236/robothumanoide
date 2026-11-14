@@ -1,5 +1,5 @@
-"""Vérifie que vis, écrous et rondelles ne touchent aucune pièce sur toute la course de la pince
-(compare avec l'ancienne visserie : écrou sous le doigt). Lancer après generer_pince.py."""
+"""Vérifie que vis, écrous et rondelles ne touchent aucune pièce sur toute la course de la pince (V3).
+Lancer après generer_pince.py. Sort en erreur s'il y a un contact."""
 import sys, math, numpy as np
 import os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generer_pince as G
@@ -13,7 +13,7 @@ def visserie(th, ancien=False):
     c, s = math.cos(math.radians(th)), math.sin(math.radians(th))
     v = {}
     for k in (1, -1):
-        q1 = (G.AX + G.L_BRAS * c, k * (G.AY + G.L_BRAS * s)); q2 = (q1[0] - G.DECAL, q1[1]); piv = G.P_LIBRE[0 if k > 0 else 1]
+        q1 = (G.AX + G.L_BRAS * c, k * (G.AY + G.L_BRAS * s)); q2 = (q1[0] + G.GX, q1[1] + k * G.GY); piv = G.P_LIBRE[0 if k > 0 else 1]
         zd = G.Z_DOIGT
         v[f'q1 tête {k}'] = tete(*q1, zd + 4); v[f'q1 tige {k}'] = tige(*q1, zd + 4 - 16, zd + 4)
         v[f'q1 rondelle {k}'] = rondelle(*q1, G.Z0 + G.EP_ENG); v[f'q1 écrou {k}'] = ecrou(*q1, G.Z0)
@@ -35,21 +35,22 @@ def permis(nom_vis, piece):
     cote = '+Y' if k == '1' else '-Y'
     if j == 'q1': return piece in (f'doigt {cote}', 'engrenage A' if cote == '+Y' else 'engrenage B') and 'tête' not in nom_vis or (piece == f'doigt {cote}' and 'tête' in nom_vis)
     if j == 'q2': return piece in (f'bras libre {cote}', f'doigt {cote}')
-    if j == 'pivot': return piece in (f'bras libre {cote}', 'bride' if cote == '+Y' else 'base')
+    if j == 'pivot': return piece in (f'bras libre {cote}', 'base')
     if j == 'B': return piece in ('engrenage B', 'base')
     if j == 'bride': return piece in ('bride', 'base')
     return False
-for ancien in (True, False):
-    pires = {}
-    for th in np.linspace(G.TH_FERME, G.TH_OUVERT, 30):
-        p = G.pose(th); p.update({'base': G.BASE, 'bride': G.BRIDE, 'servo': G.SERVO})
-        for nv, mv in visserie(th, ancien).items():
-            for np_, mp in p.items():
-                if permis(nv, np_): continue
-                vol = (mv ^ mp).volume()
-                if vol > 0.05:
-                    e = 2 * (G.AY + G.L_BRAS * math.sin(math.radians(th)) - G.E_DOIGT)
-                    key = (nv, np_); pires.setdefault(key, []).append((round(e), round(vol, 1)))
-    print('ANCIENNE visserie' if ancien else 'NOUVELLE visserie', '->', 'aucune collision' if not pires else '')
-    for (nv, np_), l in pires.items(): print(f'   {nv} touche {np_} : écart mâchoires {l[0][0]}→{l[-1][0]} mm, jusqu\'à {max(x[1] for x in l)} mm3')
-print('marge entre la pointe de la vis du bout du bras libre et le bras de l\'engrenage :', round(G.Z_LIBRE + G.EP_LIBRE - 1 - L_Q2 - (G.Z0 + G.EP_ENG), 2), 'mm')
+pires = {}
+for th in np.linspace(G.TH_FERME, G.TH_OUVERT, 30):
+    p = G.pose(th); p.update({'base': G.BASE, 'bride': G.BRIDE, 'servo': G.SERVO})
+    for nv, mv in visserie(th).items():
+        for np_, mp in p.items():
+            if permis(nv, np_): continue
+            vol = (mv ^ mp).volume()
+            if vol > 0.05:
+                e = 2 * (G.AY + G.L_BRAS * math.sin(math.radians(th)) - G.E_DOIGT)
+                pires.setdefault((nv, np_), []).append((round(e), round(vol, 1)))
+print('Visserie sur toute la course ->', 'aucune collision' if not pires else 'COLLISIONS')
+for (nv, np_), l in pires.items(): print(f'   {nv} touche {np_} : écart mâchoires {l[0][0]}→{l[-1][0]} mm, jusqu\'à {max(x[1] for x in l)} mm3')
+marge = round(G.Z_LIBRE + G.EP_LIBRE - 1 - L_Q2 - (G.Z0 + G.EP_ENG), 2)
+print('marge entre la pointe de la vis du bout du bras libre et le dessus des engrenages :', marge, 'mm')
+if pires or marge < 0.5: sys.exit(1)

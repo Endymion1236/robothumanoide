@@ -1,4 +1,13 @@
-"""Pince à mâchoires parallèles pour le bras de Câlin (STS3215) — V2 : ouverture jusqu'à 110 mm (gobelet moyen).
+"""Pince à mâchoires parallèles pour le bras de Câlin (STS3215) — V3 : sans point mort (14/11/2026).
+
+V3 : en V2, le pivot du bras libre était juste DERRIÈRE celui du bras moteur. Pince presque fermée
+(20 mm entre les mâchoires), les deux bras s'alignaient avec le doigt : à ce « point mort », plus rien
+ne tenait le doigt droit. Essai réel du 14/11/2026 : un doigt s'est retourné, a coincé la pince, et les
+dents des engrenages ont sauté. V3 : le pivot du bras libre est déplacé en DIAGONALE (vers l'arrière et
+vers l'extérieur) : les bras ne s'alignent plus jamais avec le doigt sur toute la course. Les deux pivots
+sont maintenant des poteaux de la base (plus de pivot sur la bride), le poteau de l'engrenage B est plus gros.
+Engrenages : fond de dent plat (en V2, la tête de chaque dent passait à 0,03 mm du fond de la dent d'en face).
+Bras libres et bouchons : inchangés par rapport à la V2.
 
 V2 (11/11/2026) : en V1, un gobelet de 80 mm tenu au milieu des mâchoires butait contre la base et
 l'engrenage A, la marge était de 7,5 mm par côté et les mâchoires plates le tenaient mal. Bras de 50 mm,
@@ -38,7 +47,9 @@ AX, AY = 40.0, 15.0                # axe du servo = centre de l'engrenage A
 MOD, DENTS = 1.5, 20               # module 1,5 ; 20 dents : diamètre primitif 30 = entraxe
 R_PRIM = MOD * DENTS / 2
 L_BRAS = 50.0                      # longueur des bras (pivot → axe du doigt)
-DECAL = 24.0                       # le bras libre est 24 mm derrière le bras moteur
+PIV_LIBRE = (2.0, 34.0)            # pivot du bras libre côté +Y (côté -Y : symétrique)
+GX, GY = PIV_LIBRE[0] - AX, PIV_LIBRE[1] - AY   # du pivot du bras moteur au pivot du bras libre = du trou avant au trou arrière du doigt
+ENTRAXE_DOIGT = math.hypot(GX, GY) # distance entre les deux trous du doigt
 E_DOIGT = 5.0                      # de l'axe du doigt à sa face de serrage
 Z0 = H_BAS + PAL_H + 1.0           # dessous des engrenages : 1 mm au-dessus du palonnier (patin), 1,1 au-dessus de la partie haute
 EP_ENG, EP_DOIGT, EP_LIBRE, JEU_Z = 6.0, 4.0, 5.0, 0.5
@@ -82,9 +93,13 @@ def profil_engrenage(dents=DENTS, module=MOD, pression=20.0, jeu_dent=0.35, pts=
     for i in range(dents):
         c = 2 * math.pi * i / dents
         pied = max(rf, 0.1)
-        contour.append((pied * math.cos(c - math.pi / dents), pied * math.sin(c - math.pi / dents)))
+        # V3 : fond de dent PLAT (un point au pied de chaque flanc). En V2 le fond était en V (un seul point au
+        # milieu du creux) : la tête de la dent d'en face passait à 0,03 mm du fond, donc frottait une fois imprimée
+        # et poussait les engrenages à s'écarter. Mesuré par verifier_engrenages.py.
+        contour.append((pied * math.cos(c - demi), pied * math.sin(c - demi)))
         for r, t in flanc: contour.append((r * math.cos(c - t), r * math.sin(c - t)))
         for r, t in reversed(flanc): contour.append((r * math.cos(c + t), r * math.sin(c + t)))
+        contour.append((pied * math.cos(c + demi), pied * math.sin(c + demi)))
     return contour
 
 def barre(p, q, larg):
@@ -130,7 +145,7 @@ def bras_libre(s):
     le bras tourne mais ne peut pas se soulever (correction du 13/11/2026 : au doigt, la vis vissée dans
     le bras n'entrait que de 2,5 mm dans le roulement du doigt ; en serrant, le doigt basculait, soulevait
     le bras et la vis sortait : la mâchoire tournait et la pince s'ouvrait)."""
-    p, q = (AX - DECAL, s * AY), (AX - DECAL + L_BRAS, s * AY)
+    p, q = (PIV_LIBRE[0], s * PIV_LIBRE[1]), (PIV_LIBRE[0] + L_BRAS, s * PIV_LIBRE[1])
     m = extruder(barre(p, q, 12), Z_LIBRE, Z_LIBRE + EP_LIBRE)
     for c in (p, q):
         m -= cyl(c[0], c[1], Z_LIBRE - 0.1, Z_LIBRE + ROUL_EP, ROUL_D, 48)
@@ -145,7 +160,7 @@ def bouchon_doigt(insert=False):
 def doigt(s, insert_arriere=False):
     """Doigt : plaque qui relie les deux bras + mâchoire qui descend. Trou avant : roulement 623.
     Trou arrière : logement de 10,1 pour le bouchon, ou (insert_arriere) trou de 4,3 pour un insert M3 x 5 x 4."""
-    q1, q2 = (AX + L_BRAS, s * AY), (AX - DECAL + L_BRAS, s * AY)
+    q1 = (AX + L_BRAS, s * AY); q2 = (q1[0] + GX, q1[1] + s * GY)
     m = extruder(barre(q2, q1, 14), Z_DOIGT, Z_DOIGT + EP_DOIGT)
     for q, d in ((q1, ROUL_D), (q2, INSERT_COURT if insert_arriere else ROUL_D)):
         m -= cyl(q[0], q[1], Z_DOIGT - 0.1, Z_DOIGT + EP_DOIGT + 0.1, d, 48)
@@ -167,15 +182,17 @@ def doigt(s, insert_arriere=False):
 X0S = AX + AXE_BOUT - SL           # arrière du servo
 SY0, SY1 = AY - SW / 2, AY + SW / 2
 Z_BASE = -7.0                      # dessous de la base
-P_LIBRE = [(AX - DECAL, AY), (AX - DECAL, -AY)]
+P_LIBRE = [(PIV_LIBRE[0], PIV_LIBRE[1]), (PIV_LIBRE[0], -PIV_LIBRE[1])]
 ZC = 15.0                          # axe de l'avant-bras dans la hauteur de la pince
 XF = X0S - JEU - 3                 # le bout de l'avant-bras bute contre le mur arrière du logement du servo
 # Bride à dessous plat : les piliers s'arrêtent 0,5 mm SOUS le dessus du servo ; en vissant, la bride
 # appuie sur le servo avec 0,5 mm de serrage. Elle s'imprime à plat, sans support.
-BRIDE_X0, BRIDE_X1, BRIDE_Z = 6.0, 22.0, H_HAUT - 0.5
+BRIDE_X0, BRIDE_X1, BRIDE_Z = 9.0, 22.0, H_HAUT - 0.5   # V3 : commence à 9 (1 mm après le poteau du bras libre)
+D_POTEAU_B, D_POTEAU_LIBRE = 16.0, 12.0
 
 def base():
-    b = box(XF - ENT_B, -22, Z_BASE, 55, 39, Z_BASE + 4)                       # plaque
+    b = box(XF - ENT_B, -25, Z_BASE, 55, 39, Z_BASE + 4)                       # plaque
+    b += box(XF - ENT_B, -(PIV_LIBRE[1] + 7), Z_BASE, PIV_LIBRE[0] + 8, PIV_LIBRE[1] + 7, Z_BASE + 4)   # élargie sous les poteaux des bras libres
     # logement du servo : rails d'appui sous ses bords, murs
     for y0, y1 in ((SY0 - JEU, SY0 + 2), (SY1 - 2, SY1 + JEU)):
         b += box(X0S - JEU, y0, -3, X0S + SL + JEU, y1, 0)
@@ -187,9 +204,14 @@ def base():
     for y0 in (SY0 - JEU - 3 - 8, SY1 + JEU + 3):
         b += box(BRIDE_X0 + 1, y0, Z_BASE, BRIDE_X0 + 9, y0 + 8, BRIDE_Z)
         b -= cyl(BRIDE_X0 + 5, y0 + 4, BRIDE_Z - 9, BRIDE_Z + 0.1, M3_INSERT, 24)
-    # poteau de l'engrenage B et poteau du bras libre côté -Y : insert M3 en haut, épaulement pour la bague intérieure
-    for (x, y, zt) in ((AX, -AY, Z0), (P_LIBRE[1][0], P_LIBRE[1][1], Z_LIBRE)):
-        b += cyl(x, y, Z_BASE, zt - 0.6, 12) + cyl(x, y, zt - 0.6, zt, 6.5, 32)
+    # poteau de l'engrenage B et poteaux des deux bras libres : insert M3 en haut, épaulement pour la bague intérieure
+    b += box(AX - 3, -AY + 1, Z_BASE, AX + 3, SY0 - JEU - 3 + 0.1, 15)         # nervure : poteau de B appuyé contre le mur du servo
+    for s_ in (1, -1):                                                         # goussets : poteaux appuyés contre le manchon
+        x, y = PIV_LIBRE[0], s_ * PIV_LIBRE[1]
+        ya, yb = sorted((y, y - s_ * 6)); b += box(x - 6, ya, Z_BASE, x + 8, yb, BRIDE_Z)
+        ya, yb = sorted((y - s_ * 6, s_ * (FOURCHE_EP / 2 + JEU + 2))); b += box(x - 6, ya, Z_BASE, X0S - JEU, yb, BRIDE_Z)
+    for (x, y, zt, d) in ((AX, -AY, Z0, D_POTEAU_B), (*P_LIBRE[0], Z_LIBRE, D_POTEAU_LIBRE), (*P_LIBRE[1], Z_LIBRE, D_POTEAU_LIBRE)):
+        b += cyl(x, y, Z_BASE, zt - 0.6, d) + cyl(x, y, zt - 0.6, zt, 6.5, 32)
         b -= cyl(x, y, zt - 9, zt + 0.1, M3_INSERT, 24)
     # manchon sur le bout de l'avant-bras (entretoise du bout), vis M3 par le côté +Y
     yi, zi = FOURCHE_EP / 2 + JEU, FOURCHE_L / 2 + JEU
@@ -200,14 +222,11 @@ def base():
     return b
 
 def bride():
-    """Bride posée sur la partie haute du servo (0,5 mm de serrage au vissage), porte le pivot du bras libre +Y."""
+    """Bride posée sur la partie haute du servo (0,5 mm de serrage au vissage). V3 : simple barre, plus de pivot."""
     y0, y1 = SY0 - JEU - 3 - 8, SY1 + JEU + 3 + 8
     m = box(BRIDE_X0, y0, H_HAUT, BRIDE_X1, y1, H_HAUT + 4)
     for yc in (y0 + 4, y1 - 4):
         m -= cyl(BRIDE_X0 + 5, yc, H_HAUT - 0.1, H_HAUT + 4.1, M3, 24)
-    x, y = P_LIBRE[0]
-    m += cyl(x, y, H_HAUT + 4, Z_LIBRE - 0.6, 12) + cyl(x, y, Z_LIBRE - 0.6, Z_LIBRE, 6.5, 32)
-    m -= cyl(x, y, Z_LIBRE - 9, Z_LIBRE + 0.1, M3_INSERT, 24)
     return m
 
 def servo_ref():
@@ -232,18 +251,55 @@ def pose(th):
         q1 = q(s); p[nom] = DG[s].translate((q1[0] - (AX + L_BRAS), q1[1] - s * AY, 0))
     return p
 
+# ---------------- Cinématique : le doigt peut-il se retourner ? ----------------
+def bras_de_levier(th, g=None):
+    """Distance (mm) entre les deux bras parallèles pour l'angle θ : c'est le bras de levier qui tient le
+    doigt droit. À 0, bras moteur, bras libre et doigt sont alignés : POINT MORT, le doigt peut se retourner."""
+    gx, gy = g or (GX, GY); t = math.radians(th)
+    return abs(gx * math.sin(t) - gy * math.cos(t))
+
+def deux_montages(th, g=None, L=None):
+    """Pour un angle θ du bras moteur, le trou arrière du doigt a DEUX places possibles (intersection de deux
+    cercles) : la bonne (doigt parallèle) et la mauvaise (doigt retourné). Renvoie (bonne, mauvaise, écart en mm).
+    Le doigt ne peut passer de l'une à l'autre que là où elles se confondent (écart = 0)."""
+    gx, gy = g or (GX, GY); L = L or L_BRAS; t = math.radians(th)
+    q1 = np.array([AX + L * math.cos(t), AY + L * math.sin(t)]); f = np.array([AX + gx, AY + gy]); D = math.hypot(gx, gy)
+    d = np.linalg.norm(f - q1)                     # du trou avant du doigt au pivot du bras libre
+    a = (D * D - L * L + d * d) / (2 * d); h2 = D * D - a * a
+    if h2 < 0: return None, None, 0.0              # montage impossible
+    h = math.sqrt(h2); e = (f - q1) / d; n = np.array([-e[1], e[0]]); m = q1 + a * e
+    sols = [m + h * n, m - h * n]; bonne = q1 + np.array([gx, gy])
+    sols.sort(key=lambda p: np.linalg.norm(p - bonne))
+    return sols[0], sols[1], float(np.linalg.norm(sols[0] - sols[1]))
+
+def angle_doigt(th, mauvaise=False, g=None):
+    """Rotation du doigt (degrés) par rapport à sa position parallèle : 0 pour le bon montage."""
+    gx, gy = g or (GX, GY); t = math.radians(th)
+    q1 = np.array([AX + L_BRAS * math.cos(t), AY + L_BRAS * math.sin(t)])
+    p = deux_montages(th, g)[1 if mauvaise else 0]
+    a = math.degrees(math.atan2(p[1] - q1[1], p[0] - q1[0]) - math.atan2(gy, gx))
+    return (a + 180) % 360 - 180
+
 EA, EB = engrenage_a(), engrenage_b()
 BL = {1: bras_libre(1), -1: bras_libre(-1)}
 DG = {1: doigt(1), -1: doigt(-1)}
 BASE, BRIDE, SERVO, AVB = base(), bride(), servo_ref(), avant_bras_ref()
 
 if __name__ == '__main__':
-    rapport = {'version': 'V2', 'validation_physique': False, 'angles_bras_deg': {'ferme': round(TH_FERME, 1), 'ouvert': round(TH_OUVERT, 1)},
+    rapport = {'version': 'V3', 'validation_physique': False, 'angles_bras_deg': {'ferme': round(TH_FERME, 1), 'ouvert': round(TH_OUVERT, 1)},
                'rotation_servo_deg': round(TH_OUVERT - TH_FERME, 1), 'collisions': [], 'pieces': {}}
     fixes = {'base': BASE, 'bride': BRIDE, 'servo': SERVO, 'avant-bras': AVB}
     for nom, a, b in (('base/servo', BASE, SERVO), ('base/avant-bras', BASE, AVB), ('base/bride', BASE, BRIDE)):
         assert (a ^ b).volume() < 0.01, (nom, (a ^ b).volume())
     rapport['bride_sur_servo_mm3 (serrage voulu)'] = round((BRIDE ^ SERVO).volume(), 1)
+    # accès qui doivent rester libres : tournevis des 2 vis du manchon (par le côté +Y), sortie du câble du servo (des deux côtés)
+    yi = FOURCHE_EP / 2 + JEU + 3
+    for dz in (-VIS_ENT_Y, VIS_ENT_Y):
+        acces = mf.Manifold.cylinder(40, 3.2, 3.2, 24).rotate((-90, 0, 0)).translate((XF - ENT_B / 2, yi + 0.05, ZC + dz))
+        assert (acces ^ BASE).volume() < 0.01, 'un poteau gêne le tournevis des vis du manchon'
+    for y0, y1 in ((SY1 + JEU + 3.05, SY1 + 20), (SY0 - 20, SY0 - JEU - 3.05)):
+        assert (box(X0S + 17.5, y0, -2.9, X0S + 28.5, y1, 15) ^ BASE).volume() < 0.01, 'la sortie du câble est bouchée'
+    rapport['acces_libres'] = ['tournevis des 2 vis du manchon', 'sortie du câble des deux côtés']
     rapport['jeu_bride_piliers_mm (fermé au vissage)'] = round(H_HAUT - BRIDE_Z, 2)
     ouvertures = []
     angles = list(np.linspace(TH_FERME, TH_OUVERT, 24))
@@ -259,6 +315,15 @@ if __name__ == '__main__':
         y_in = AY + L_BRAS * math.sin(math.radians(th)) - E_DOIGT
         ouvertures.append((round(th, 1), round(2 * y_in, 1)))
     rapport['ouverture_mm (angle → écart des mâchoires)'] = [ouvertures[0], ouvertures[len(ouvertures) // 2], ouvertures[-1]]
+    # le doigt ne doit jamais pouvoir se retourner (défaut de la V2) : détail dans verifier_cinematique.py
+    # côté fermé, les bouts des mâchoires se touchent (butée mécanique) ; côté ouvert, on dépasse la butée de 15°
+    th_contact = math.degrees(math.asin((PAD_FLECHE + E_DOIGT - AY) / L_BRAS))
+    leviers = [bras_de_levier(t) for t in np.linspace(th_contact, TH_OUVERT + 15, 400)]
+    rapport['doigt'] = {'entraxe_des_deux_trous_mm': round(ENTRAXE_DOIGT, 1), 'pivot_bras_libre': list(PIV_LIBRE),
+                        'bras_de_levier_min_mm (des mâchoires en contact à 15° après la butée ouverte)': round(min(leviers), 1)}
+    assert min(leviers) > 12, 'point mort trop près de la course : le doigt peut se retourner'
+    rapport['largeur_hors_tout_mm'] = {f'écart {e}': round(2 * (AY + L_BRAS * math.sin(math.radians(t)) + GY + 7))
+                                       for e, t in ((14, TH_FERME), (80, math.degrees(math.asin((40 + E_DOIGT - AY) / L_BRAS))), (110, TH_OUVERT))}
     # Servo : montage à mi-ouverture quand il est à 2048 ; butées = ± la moitié de la course
     demi = (TH_OUVERT - TH_FERME) / 2 * 4096 / 360
     th_mi = (TH_FERME + TH_OUVERT) / 2
@@ -279,7 +344,14 @@ if __name__ == '__main__':
             t.apply_transform(tm.transformations.rotation_matrix(math.pi, (1, 0, 0)))   # retourné : dessus sur le plateau
         t.apply_translation(-t.bounds[0]); t.export(OUT / f'{nom}.stl')
         g = t.volume / 1000 * 1.24 * 0.6                                       # PLA, ~60 % plein
-        masse += 0 if nom.endswith(variantes) else g; rapport['pieces'][nom] = {'encombrement_mm': [round(v, 1) for v in t.extents], 'masse_g_environ': round(g)}
+        # pose d'impression : surface vraiment à plat sur le plateau, et surplombs (faces tournées vers le bas, en l'air)
+        zc = t.triangles_center[:, 2]; nz = t.face_normals[:, 2]
+        pose_mm2 = float(t.area_faces[(zc < 0.01) & (nz < -0.99)].sum())
+        surplomb = float(t.area_faces[(zc > 0.3) & (nz < -0.7)].sum())
+        assert pose_mm2 >= 40, (nom, 'pas posée à plat', pose_mm2)
+        masse += 0 if nom.endswith(variantes) else g
+        rapport['pieces'][nom] = {'encombrement_mm': [round(v, 1) for v in t.extents], 'masse_g_environ': round(g),
+                                  'surface_sur_le_plateau_mm2': round(pose_mm2), 'plafonds_en_pont_mm2': round(surplomb)}
     # variantes de l'engrenage A pour des vis M2,5 plus courtes (celles fournies avec le servo)
     for lv in (4, 5, 6):
         t = mesh(engrenage_a(lv)); assert t.is_watertight

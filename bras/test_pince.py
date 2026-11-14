@@ -1,4 +1,4 @@
-"""Premier essai motorisé de la pince (servo n° 4, butées 1663–2433), en sécurité.
+"""Premier essai motorisé de la pince V3 (servo n° 4, butées 1663–2433), en sécurité.
 
 Au premier lancement : étalonnage du milieu (pince réglée à la main à mi-ouverture, le servo prend
 cette position comme 2048), puis le programme demande dans quel sens la pince s'ouvre et le retient
@@ -13,10 +13,11 @@ MILIEU = 2048
 BUTEES_PINCE = (1663, 2433)
 ID_PINCE = 4
 FORCE_MOUVEMENT = 50          # % : la pince n'a jamais besoin de plus
+CHARGE_BLOCAGE = 35           # % : au-delà pendant 0,5 s en ouvrant ou en allant au milieu, la pince est coincée → force coupée
 FORCE_DOUCE, FORCE_FERME = 20, 35
 SENS = Path(__file__).with_name('sens_pince.json')
 
-# géométrie de la pince V2 (pince/generer_pince.py) : écart au creux des mâchoires selon l'angle du bras
+# géométrie de la pince (V2 et V3 : mêmes bras, mêmes butées ; pince/generer_pince.py) : écart au creux des mâchoires selon l'angle du bras
 AY, L_BRAS, E_DOIGT = 15.0, 50.0, 5.0
 TH_FERME = math.degrees(math.asin((14 / 2 + E_DOIGT - AY) / L_BRAS))
 TH_OUVERT = math.degrees(math.asin((110 / 2 + E_DOIGT - AY) / L_BRAS))
@@ -57,8 +58,8 @@ def trouver_sens(bus, ident):
     print('La pince va aller au milieu, puis bouger un peu. Rien ne doit être entre les doigts.')
     input('Entrée pour continuer (Ctrl + C pour arrêter)... ')
     bus.limiter_force(ident, FORCE_MOUVEMENT); bus.tenir(ident)
-    print('  ', bus.aller(ident, MILIEU))
-    print('  ', bus.aller(ident, MILIEU + 150))
+    print('  ', bus.aller(ident, MILIEU, charge_max=CHARGE_BLOCAGE))
+    print('  ', bus.aller(ident, MILIEU + 150, charge_max=CHARGE_BLOCAGE))
     while True:
         r = input('Les mâchoires se sont-elles ÉCARTÉES (o) ou RAPPROCHÉES (f) ? ').strip().lower()
         if r in ('o', 'f'):
@@ -66,7 +67,7 @@ def trouver_sens(bus, ident):
     ouvert = BUTEES_PINCE[1] if r == 'o' else BUTEES_PINCE[0]
     SENS.write_text(json.dumps({'ouvert': ouvert}))
     print(f'   retenu : la pince est ouverte côté {ouvert}, fermée côté {sum(BUTEES_PINCE) - ouvert}.')
-    print('  ', bus.aller(ident, MILIEU))
+    print('  ', bus.aller(ident, MILIEU, charge_max=CHARGE_BLOCAGE))
     return ouvert
 
 def main():
@@ -133,12 +134,18 @@ def main():
                         nom, cible = menu[choix]
                         print(f'   {nom}...')
                         bus.limiter_force(ident, FORCE_MOUVEMENT)
-                        print('  ', bus.aller(ident, cible))
+                        texte = bus.aller(ident, cible, charge_max=CHARGE_BLOCAGE)
+                        print('  ', texte)
+                        if texte.startswith('ARRÊT'):
+                            print('   La suite de la série est annulée. Regarde ce qui coince AVANT de recommencer.')
+                            afficher_etat(bus.etat(ident), ouvert); break
                     else:
                         force = {'s': FORCE_DOUCE, 'S': FORCE_FERME, 'f': FORCE_FERME}[choix]
                         print(f"   {'fermer' if choix == 'f' else 'serrer'} (force limitée à {force} %)...")
                         texte, pos, tenu = bus.serrer(ident, ferme, force)
                         print('  ', texte)
+                        if texte.startswith('ARRÊT'):
+                            print('   La suite de la série est annulée.'); afficher_etat(bus.etat(ident), ouvert); break
                         if tenu:
                             print(f'   largeur de l\'objet ≈ {ecart_mm(pos, ouvert):.0f} mm · « o » ou « l » pour le lâcher.'
                                   ' Ne pas le laisser serré plusieurs minutes.')

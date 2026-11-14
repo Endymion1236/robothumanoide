@@ -13,6 +13,7 @@ Feetech/Waveshare (copiée depuis `driver-servo/STServo_Python.zip`).
 | Lentement | vitesse 300, accélération 20 (comme les essais dans FD) |
 | Servo qui chauffe | refuse de partir à 55 °C ou plus ; coupe la force s'il y arrive pendant un mouvement |
 | Servo qui force (bloqué contre quelque chose) | charge ≥ 70 % pendant plus de 0,5 s → **force coupée** |
+| Servo qui n'avance plus (14/11/2026) | immobile 0,7 s loin de sa cible → **force coupée**. Pour la pince, dont la force est limitée à 50 %, le seuil « servo qui force » est baissé à 35 % : avant, il n'était jamais atteint et le servo a poussé jusqu'à faire sauter les dents |
 | Servo qui n'arrive pas | pas arrivé en 8 s → **force coupée** |
 | En quittant (q, Ctrl + C, erreur) | **force coupée** : le coude devient libre |
 
@@ -62,4 +63,8 @@ Pince montée (plan de montage `pince/sortie/plan_montage.pdf`), son servo **seu
    il affiche la largeur estimée de l'objet. Ne pas laisser un objet serré plusieurs minutes.
 
 Toutes les autres sécurités du coude restent (butées, chaleur, blocage ; force jamais au-delà de 50 % pour la pince).
-Testé ici sur un servo simulé (sans objet, gobelet de 50 mm, départ hors butées puis étalonnage) ; **pas encore sur la vraie pince.**
+Essai réel de la V2 le 14/11/2026 : étalonnage, ouverture et fermeture réussis, puis défaut de la pince (doigt retourné, voir `pince/LISEZ-MOI.md`). **À refaire avec la pince V3.**
+
+## Essayer les sécurités sans matériel
+
+`python test_securites.py` : dix sécurités vérifiées sur un faux servo (`servo_simule.py`), en 6 secondes : refus sans butées, hors butées, servo trop chaud, **pince coincée → force coupée en 1 s**, serrage sur un objet, étalonnage. À relancer après chaque modification de `servos.py`.

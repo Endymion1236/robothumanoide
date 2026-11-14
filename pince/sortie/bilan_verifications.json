@@ -1,0 +1,30 @@
+[
+ {
+  "verification": "pièces, collisions, pose d'impression",
+  "reussie": true
+ },
+ {
+  "verification": "doigt qui se retourne (point mort)",
+  "reussie": true
+ },
+ {
+  "verification": "place entre les dents",
+  "reussie": true
+ },
+ {
+  "verification": "jeu entre les pièces",
+  "reussie": true
+ },
+ {
+  "verification": "visserie",
+  "reussie": true
+ },
+ {
+  "verification": "gobelets",
+  "reussie": true
+ },
+ {
+  "verification": "sécurités du programme (faux servo)",
+  "reussie": true
+ }
+]

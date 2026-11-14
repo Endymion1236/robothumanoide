@@ -17,7 +17,7 @@ TH = (G.TH_FERME + G.TH_OUVERT) / 2                       # servo à 2048
 P = G.pose(TH)
 c, s_ = math.cos(math.radians(TH)), math.sin(math.radians(TH))
 Q1 = {k: (G.AX + G.L_BRAS * c, k * (G.AY + G.L_BRAS * s_)) for k in (1, -1)}     # bout des bras des engrenages
-Q2 = {k: (Q1[k][0] - G.DECAL, Q1[k][1]) for k in (1, -1)}                         # bout des bras libres
+Q2 = {k: (Q1[k][0] + G.GX, Q1[k][1] + k * G.GY) for k in (1, -1)}                         # bout des bras libres
 PIV = {1: G.P_LIBRE[0], -1: G.P_LIBRE[1]}                                          # pivots des bras libres
 ENTRE_TROUS = 2 * Q1[1][1]
 ECART = ENTRE_TROUS - 2 * G.E_DOIGT
@@ -79,10 +79,10 @@ def etape(titre, il_faut, faire, attention=None):
 # ===================== page 0 : les pièces =====================
 def page_pieces(pdf, n):
     fig = plt.figure(figsize=(16.5, 11.7)); fig.patch.set_facecolor('white')
-    fig.suptitle('Pince V2 — les pièces (regarde-les bien avant de commencer)', fontsize=20, weight='bold', y=0.985)
+    fig.suptitle('Pince V3 — les pièces (regarde-les bien avant de commencer)', fontsize=20, weight='bold', y=0.985)
     liste = [('Base', BASE, COUL['base'], '× 1'), ('Bride', BRIDE, COUL['bride'], '× 1'),
              ('Engrenage A\n(sur le servo)', G.EA, COUL['engrenage A'], '× 1'), ('Engrenage B', G.EB, COUL['engrenage B'], '× 1'),
-             ('Bras libres', G.BL[1] + G.BL[-1].translate((0, -8, 0)), COUL['bras libre +Y'], '× 2'),
+             ('Bras libres', G.BL[1] + G.BL[-1].translate((0, 2 * G.PIV_LIBRE[1] - 20, 0)), COUL['bras libre +Y'], '× 2'),
              ('Doigts + 2 bouchons', G.DG[1] + G.DG[-1].translate((0, -20, 0)), COUL['doigt +Y'], '× 2')]
     for k, (nom, m, coul, qte) in enumerate(liste):
         ax = fig.add_subplot(3, 4, k + 1, projection='3d'); dessiner(ax, [(m, coul)], marge=0.75)
@@ -117,26 +117,23 @@ def e_servo(ax):
     etiquette(ax, (G.AX, G.AY, G.H_BAS + G.PAL_H), 'palonnier\n(le disque qui tourne)', (110, 60))
     etiquette(ax, (G.X0S + 5, G.SY1, 14), 'câble', (-90, -40))
 
-@etape('Les inserts à chaud', ['la base', 'la bride', '5 inserts M3', 'le fer à souder'],
+@etape('Les inserts à chaud', ['la base', '5 inserts M3', 'le fer à souder'],
        ['Fer à 200 °C pour du PLA (230 °C pour du PETG).',
         'Pose l\'insert debout sur son trou (côté le plus étroit en bas).',
         'Appuie doucement avec la pointe du fer : il s\'enfonce tout seul en 5 à 10 s.',
         'Arrête quand il est au ras du dessus. Garde-le bien droit.',
-        '4 dans la base (rouges ici), 1 dans la bride.'],
+        'Les 5 sont dans la base : 2 piliers, le poteau de l\'engrenage B, les 2 poteaux des bras libres.'],
        'Si un insert part de travers, ressors-le tout de suite au fer et recommence.')
 def e_inserts(ax):
-    dz = 22
-    pcs = [(BASE, COUL['base']), (BRIDE.translate((0, 0, dz)), COUL['bride'])]
-    trous = [(G.BRIDE_X0 + 5, y, G.BRIDE_Z) for y in Y_PIL] + [(G.AX, -G.AY, G.Z0), (*PIV[-1], G.Z_LIBRE)]
-    pcs += [(insert(x, y, z + 7), LAITON) for x, y, z in trous] + [(insert(*PIV[1], G.Z_LIBRE + dz + 7), LAITON)]
+    trous = [(G.BRIDE_X0 + 5, y, G.BRIDE_Z) for y in Y_PIL] + [(G.AX, -G.AY, G.Z0), (*PIV[1], G.Z_LIBRE), (*PIV[-1], G.Z_LIBRE)]
+    pcs = [(BASE, COUL['base'])] + [(insert(x, y, z + 7), LAITON) for x, y, z in trous]
     dessiner(ax, pcs, vue=(32, -55), marge=0.9)
     for x, y, z in trous: ax.plot([x, x], [y, y], [z, z + 7], ls=':', color='#7a5a00', lw=2, zorder=40)
-    ax.plot([PIV[1][0]] * 2, [PIV[1][1]] * 2, [G.Z_LIBRE + dz, G.Z_LIBRE + dz + 7], ls=':', color='#7a5a00', lw=2, zorder=40)
     etiquette(ax, (G.AX, -G.AY, G.Z0 + 12), 'poteau de\nl\'engrenage B', (120, -10))
-    etiquette(ax, (*PIV[-1], G.Z_LIBRE + 12), 'poteau du\nbras libre', (60, -95))
-    etiquette(ax, (G.BRIDE_X0 + 5, Y_PIL[0], G.BRIDE_Z + 12), 'pilier', (-80, -60))
-    etiquette(ax, (G.BRIDE_X0 + 5, Y_PIL[1], G.BRIDE_Z + 12), 'pilier', (-110, 0))
-    etiquette(ax, (*PIV[1], G.Z_LIBRE + dz + 12), 'bride : 1 insert\nsur son pivot', (-60, 70))
+    etiquette(ax, (*PIV[-1], G.Z_LIBRE + 12), 'poteau d\'un\nbras libre', (-90, 50))
+    etiquette(ax, (*PIV[1], G.Z_LIBRE + 12), 'poteau de l\'autre\nbras libre', (-70, 60))
+    etiquette(ax, (G.BRIDE_X0 + 5, Y_PIL[0], G.BRIDE_Z + 12), 'pilier', (-50, 90))
+    etiquette(ax, (G.BRIDE_X0 + 5, Y_PIL[1], G.BRIDE_Z + 12), 'pilier', (60, 80))
 
 @etape('Le servo dans la base', ['la base', 'le servo réglé'],
        ['Le palonnier (le disque) va côté pinces, vers l\'avant, et en haut.',
@@ -148,8 +145,8 @@ def e_servo_base(ax):
     etiquette(ax, (G.AX, G.AY, G.H_BAS + G.PAL_H + 30), 'palonnier vers l\'avant', (100, 50))
     etiquette(ax, (G.X0S + 23, G.SY1 + 3, 8), 'fenêtre\npour le câble', (-110, -40))
 
-@etape('La bride', ['la bride (avec son insert)', '2 vis M3 × 10'],
-       ['Pose la bride sur le dessus du servo : vu de dessus, son pivot rond est aligné avec le palonnier.',
+@etape('La bride', ['la bride', '2 vis M3 × 10'],
+       ['Pose la bride en travers sur le dessus du servo, juste devant le grand poteau.',
         'Ses 2 trous tombent sur les 2 piliers.',
         'Visse les 2 vis M3 × 10 un peu chacune, à tour de rôle.',
         'Serre jusqu\'à ce que le servo ne bouge plus. Pas plus : c\'est du plastique.'],
@@ -161,7 +158,6 @@ def e_bride(ax):
     dessiner(ax, pcs, vue=(30, -50), marge=0.9)
     etiquette(ax, (G.BRIDE_X0 + 5, Y_PIL[1], G.H_HAUT + dz + 26), 'vis M3 × 10', (-90, 40))
     etiquette(ax, (G.BRIDE_X0 + 5, Y_PIL[0], G.H_HAUT + dz + 26), 'vis M3 × 10', (90, 50))
-    etiquette(ax, (*PIV[1], G.Z_LIBRE + dz), 'pivot', (90, -10))
 
 @etape('Les 7 roulements et les 2 bouchons', ['l\'engrenage B', 'les 2 bras libres', 'les 2 doigts', '7 roulements 623', '2 bouchons imprimés (pince_bouchon_doigt)'],
        ['Ils s\'enfoncent en force, à la main ou en appuyant sur la table.',
@@ -180,14 +176,14 @@ def e_roulements(ax):
         bl = G.BL[s].translate((-PIV[s][0], -PIV[s][1], -G.Z_LIBRE)).translate((0, 45 + 22 * k, 0))
         pcs += [(bl, COUL['bras libre +Y']), (roulement(0, 45 + 22 * k, -14), ACIER), (roulement(G.L_BRAS, 45 + 22 * k, -14), ACIER)]
     for k, s in enumerate((1, -1)):
-        q1 = (G.AX + G.L_BRAS, s * G.AY); dg = G.DG[s].translate((-q1[0], -q1[1], -G.Z_DOIGT)).translate((95, 10 + 55 * k, 0))
-        pcs += [(dg, COUL['doigt +Y']), (roulement(95, 10 + 55 * k, 12), ACIER),
-                (G.bouchon_doigt().translate((95 - G.DECAL, 10 + 55 * k, 12)), COUL['bride'])]
+        q1 = (G.AX + G.L_BRAS, s * G.AY); dg = G.DG[s].translate((-q1[0], -q1[1], -G.Z_DOIGT)).translate((150, 10 + 55 * k, 0))
+        pcs += [(dg, COUL['doigt +Y']), (roulement(150, 10 + 55 * k, 12), ACIER),
+                (G.bouchon_doigt().translate((150 + G.GX, 10 + 55 * k + s * G.GY, 12)), COUL['bride'])]
     dessiner(ax, pcs, vue=(35, -60), marge=0.75)
     etiquette(ax, (0, 0, -12), 'par-dessous', (-80, -50))
     etiquette(ax, (0, 45, -12), 'par-dessous', (-90, -40))
-    etiquette(ax, (95, 10, 16), '1 roulement\nau trou avant', (80, -70))
-    etiquette(ax, (95 - G.DECAL, 10, 16), 'bouchon au\ntrou arrière', (-30, -90))
+    etiquette(ax, (150, 10, 16), '1 roulement\nau trou avant', (80, -70))
+    etiquette(ax, (150 + G.GX, 10 + G.GY, 16), 'bouchon au\ntrou arrière', (-20, -110))
     etiquette(ax, (15, 0, 6), 'engrenage B', (-40, 80))
     etiquette(ax, (30, 67, 5), 'bras libres', (-10, 80))
 
@@ -218,7 +214,7 @@ def e_engrenages(ax):
         'Entre le doigt et le bras : 1 rondelle.',
         'Vis M3 × 16 par le dessus, à travers le roulement avant du doigt, la rondelle et le bras.',
         'Écrou frein en dessous. Serre jusqu\'au contact, puis vérifie que le doigt tourne encore librement.',
-        'Le trou arrière du doigt porte le bouchon : il servira à l\'étape suivante.',
+        'Le trou arrière du doigt (avec le bouchon) part vers l\'ARRIÈRE et vers l\'EXTÉRIEUR : il servira à l\'étape suivante.',
         'Même chose de l\'autre côté.'],
        'Si le doigt frotte après serrage : desserre d\'un quart de tour (l\'écrou frein ne se dévissera pas).')
 def e_doigts(ax):
@@ -236,12 +232,12 @@ def e_doigts(ax):
     etiquette(ax, (x + 30, y - 6, G.Z_DOIGT + dz), 'doigt', (90, -40))
 
 @etape('Les bras libres', ['les 2 bras libres (avec leurs 2 roulements)', '2 vis M3 × 10', '2 vis M3 × 8', '2 rondelles M3'],
-       ['Le roulement du bras se pose sur son pivot : côté bride pour l\'un, poteau de la base pour l\'autre.',
+       ['Le roulement du bras se pose sur son grand poteau, à l\'arrière de la base (un de chaque côté).',
         'L\'autre bout du bras vient au-dessus du bouchon du doigt, avec 1 rondelle entre les deux.',
         'Pivot : vis M3 × 10 dans l\'insert, SANS rondelle.',
         'Bout du bras : vis M3 × 8, SANS rondelle dessus : elle traverse le roulement du bras et se visse dans le bouchon du doigt.',
         'Visse jusqu\'au contact, sans forcer : le plastique du bouchon fait le filetage. Le bras doit tourner librement mais ne plus pouvoir se soulever.'],
-       'Bien M3 × 8 au bout du bras : une M3 × 10 dépasserait sous le doigt et frotterait sur le bras de l\'engrenage.')
+       'Bien M3 × 8 au bout du bras : une M3 × 10 dépasserait sous le doigt.')
 def e_bras_libres(ax):
     pcs = fixe() + mobile(('engrenage A', 'engrenage B', 'doigt +Y', 'doigt -Y'))
     dz = 14
@@ -256,7 +252,7 @@ def e_bras_libres(ax):
 
 @etape('Essai à la main, puis sur le bras', ['la pince montée', 'le bout de l\'avant-bras', 'les 2 vis M3 × 30 de l\'entretoise'],
        ['Servo NON alimenté : ouvre et ferme doucement à la main (ça résiste un peu, c\'est le servo).',
-        'Ça doit aller d\'un bout à l\'autre sans point dur, et les mâchoires restent parallèles.',
+        'Ça doit aller d\'un bout à l\'autre sans point dur, et les mâchoires restent parallèles. Essaie de tourner un doigt à la main : il ne doit pas pouvoir.',
         'Premier essai moteur, pince SEULE sur la table : bras\\tester_pince.bat. Il commence par l\'étalonnage : pince réglée à la main à 71 mm entre les mâchoires.',
         'Quand elle marche : enlève les 2 vis M3 × 30 du bout de l\'avant-bras, enfile le manchon jusqu\'au fond.',
         'Remets les 2 vis M3 × 30 : elles traversent maintenant le manchon.'],
