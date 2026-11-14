@@ -28,7 +28,7 @@ if __name__ == '__main__':
     th80 = math.degrees(math.asin((40 + G.E_DOIGT - G.AY) / G.L_BRAS))
     for k, (th, t, gob) in enumerate([(G.TH_OUVERT, 'ouverte (110 mm)', None), (th80, 'serre un gobelet de 80 mm', 80.0),
                                       (G.TH_FERME, 'fermée (14 mm au creux)', None)]):
-        dessiner(fig.add_subplot(1, 3, k + 1, projection='3d'), th, 'Pince V2 ' + t, gob)
+        dessiner(fig.add_subplot(1, 3, k + 1, projection='3d'), th, 'Pince V3 ' + t, gob)
     fig.text(.5, .03, 'Vert : base et bride · noir : servo · bleu : bout de l\'avant-bras · orange : engrenages · violet : bras libres · '
              'rouge : doigts (creusés en arrondi) · blanc : gobelet — prototype non validé', ha='center', fontsize=9)
     fig.tight_layout(rect=(0, .06, 1, 1)); fig.savefig(G.OUT / 'apercu_pince.png', dpi=120)

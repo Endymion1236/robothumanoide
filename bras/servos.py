@@ -119,9 +119,13 @@ class Bus:
     def tenir(self, ident):
         self.ecrire1(ident, SMS_STS_TORQUE_ENABLE, 1, 'mettre la force')
 
-    def aller(self, ident, cible, vitesse=VITESSE_DOUCE, accel=ACCEL_DOUCE, delai_max=8.0, afficher=None):
+    def aller(self, ident, cible, vitesse=VITESSE_DOUCE, accel=ACCEL_DOUCE, delai_max=8.0, afficher=None, charge_max=CHARGE_MAX):
         """Va doucement à la position cible en surveillant le servo. Renvoie un compte rendu (texte).
-        Refuse toute cible hors des butées du servo ; coupe la force en cas de chaleur, d'effort ou de blocage."""
+        Refuse toute cible hors des butées du servo ; coupe la force en cas de chaleur, d'effort ou de blocage.
+        charge_max : effort (en %) au-delà duquel le servo est considéré comme bloqué. À donner PLUS BAS que la
+        limite de force du servo : avec une force limitée à 50 %, la charge n'atteint jamais 70 % (essai du
+        14/11/2026 : pince coincée, le servo a poussé jusqu'à faire sauter les dents des engrenages).
+        Deuxième filet : s'il n'avance plus du tout pendant 0,7 s loin de la cible, la force est coupée aussi."""
         e = self.etat(ident)
         if not self.butees_reglees(e):
             raise ErreurServo('butées non réglées dans le servo : mouvement refusé')
@@ -130,7 +134,7 @@ class Bus:
         if e['temperature'] >= TEMP_MAX:
             raise ErreurServo(f"servo trop chaud ({e['temperature']} °C) : laisser refroidir")
         res, err = self.p.WritePosEx(ident, cible, vitesse, accel); self._ok(res, err, 'ordre de position')
-        debut, effort_depuis = time.time(), None
+        debut, effort_depuis, avant, immobile_depuis = time.time(), None, e['position'], None
         while True:
             time.sleep(0.1)
             e = self.etat(ident)
@@ -138,12 +142,20 @@ class Bus:
                 afficher(e)
             if e['temperature'] >= TEMP_MAX:
                 self.relacher(ident); return f"ARRÊT : trop chaud ({e['temperature']} °C), force coupée"
-            if abs(e['charge']) >= CHARGE_MAX:
+            if abs(e['charge']) >= charge_max:
                 effort_depuis = effort_depuis or time.time()
                 if time.time() - effort_depuis > 0.5:
                     self.relacher(ident); return f"ARRÊT : le servo force ({e['charge']:.0f} %), force coupée. Quelque chose le bloque ?"
             else:
                 effort_depuis = None
+            if abs(e['position'] - avant) <= 2 and abs(e['position'] - cible) > 15:
+                immobile_depuis = immobile_depuis or time.time()
+                if time.time() - immobile_depuis > 0.7:
+                    self.relacher(ident); return (f"ARRÊT : le servo n'avance plus (position {e['position']}, charge {e['charge']:.0f} %),"
+                                                  " force coupée. Quelque chose le bloque ?")
+            else:
+                immobile_depuis = None
+            avant = e['position']
             if abs(e['position'] - cible) <= 15 and not self.lire1(ident, SMS_STS_MOVING, 'en mouvement'):
                 return f"arrivé en {time.time() - debut:.1f} s"
             if time.time() - debut > delai_max:

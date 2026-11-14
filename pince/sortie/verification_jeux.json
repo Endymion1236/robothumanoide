@@ -1,0 +1,72 @@
+{
+ "jeu_minimum_exige_mm": 0.45,
+ "paires_a_moins_de_3_mm": [
+  {
+   "pieces": "engrenage A / servo",
+   "jeu_min_mm": 0.0,
+   "a_ecart_machoires_mm": 14,
+   "voulu": "vissé sur le palonnier"
+  },
+  {
+   "pieces": "engrenage A / engrenage B",
+   "jeu_min_mm": 0.33,
+   "a_ecart_machoires_mm": 14,
+   "voulu": "dents en prise"
+  },
+  {
+   "pieces": "bras libre +Y / doigt +Y",
+   "jeu_min_mm": 0.5,
+   "a_ecart_machoires_mm": 14,
+   "voulu": "articulation"
+  },
+  {
+   "pieces": "bras libre -Y / doigt -Y",
+   "jeu_min_mm": 0.5,
+   "a_ecart_machoires_mm": 14,
+   "voulu": "articulation"
+  },
+  {
+   "pieces": "doigt +Y / engrenage A",
+   "jeu_min_mm": 0.5,
+   "a_ecart_machoires_mm": 14,
+   "voulu": "articulation"
+  },
+  {
+   "pieces": "doigt -Y / engrenage B",
+   "jeu_min_mm": 0.5,
+   "a_ecart_machoires_mm": 14,
+   "voulu": "articulation"
+  },
+  {
+   "pieces": "base / bras libre +Y",
+   "jeu_min_mm": 0.6,
+   "a_ecart_machoires_mm": 110,
+   "voulu": "tourne sur son poteau"
+  },
+  {
+   "pieces": "base / bras libre -Y",
+   "jeu_min_mm": 0.6,
+   "a_ecart_machoires_mm": 110,
+   "voulu": "tourne sur son poteau"
+  },
+  {
+   "pieces": "base / engrenage B",
+   "jeu_min_mm": 0.6,
+   "a_ecart_machoires_mm": 110,
+   "voulu": "tourne sur son poteau"
+  },
+  {
+   "pieces": "bride / engrenage A",
+   "jeu_min_mm": 1.5,
+   "a_ecart_machoires_mm": 23,
+   "voulu": ""
+  },
+  {
+   "pieces": "bride / engrenage B",
+   "jeu_min_mm": 2.67,
+   "a_ecart_machoires_mm": 41,
+   "voulu": ""
+  }
+ ],
+ "alertes": []
+}

@@ -1,49 +1,73 @@
-# Pince à mâchoires parallèles (V2)
+# Pince à mâchoires parallèles (V3)
 
-**V2 (11/11/2026)** — Nicolas a demandé si la V1 n'était pas trop étroite : elle l'était. Un gobelet de 80 mm
-tenu au milieu des mâchoires **butait contre la base et l'engrenage A**, la marge pour l'attraper n'était que
-de 7,5 mm par côté, et des mâchoires plates tiennent mal un objet rond. V2 : bras de 50 mm, **ouverture
-110 mm**, mâchoires de **40 mm**, placées plus en avant et **creusées en arrondi** (rayon 45) qui centrent
-le gobelet. Les fichiers de la V1 sont remplacés.
+**V3 (14/11/2026) : sans point mort.** Essai réel de la V2 le 14/11/2026 : en se refermant à vide, un doigt s'est
+retourné d'un quart de tour ; à la réouverture la pince s'est coincée et les dents des engrenages ont sauté
+(« clac clac »). Cause : en V2, le pivot du bras libre était juste **derrière** celui du bras de l'engrenage.
+Vers 20 mm d'écart entre les mâchoires, les deux bras s'alignaient avec le doigt : à ce **point mort**, plus rien
+ne tenait le doigt droit. Le contrôle de collision ne pouvait pas le voir : il supposait les doigts toujours parallèles.
 
-Pour le bras de Câlin : prendre un **gobelet moyen** (jusqu'à 110 mm d'écart), avec un servo STS3215.
-Fichiers à imprimer dans `sortie/` (déjà posés pour l'impression). Programme : `generer_pince.py`
-(toutes les cotes en tête de fichier), images : `apercu_pince.py`. **Prototype : aucune validation physique.**
+Ce qui change :
+
+| | V2 | **V3** |
+|---|---|---|
+| Pivot du bras libre | 24 mm derrière le pivot de l'engrenage, sur la bride d'un côté | **en diagonale** : 38 mm derrière et 19 mm vers l'extérieur, sur **deux grands poteaux de la base**, appuyés contre le manchon |
+| Point mort | à 20 mm d'écart : **dans la course** | à un angle que la pince ne peut pas atteindre (les mâchoires se touchent 20° avant) |
+| Bras de levier qui tient le doigt droit | 0 à 21,6 mm (8,4 mm sur un gobelet de 55) | **16,7 à 42,5 mm** (31 mm sur un gobelet de 55) |
+| Fond des dents des engrenages | en V : la tête de la dent d'en face passait à **0,03 mm** | plat : **0,33 mm** de place |
+| Poteau de l'engrenage B | Ø 12 | **Ø 16**, appuyé contre le mur du servo |
+| Bride | portait un pivot | simple barre |
+| Programme (`bras/`) | pince coincée : le servo poussait 8 s | **force coupée en 1 s** |
+
+Inchangé : bras de 50 mm, ouverture 14 à 110 mm, mâchoires creusées, butées du servo **1663–2433**, étalonnage à
+**81 mm** entre les vis du bout des bras (71 mm au creux des mâchoires), toute la visserie.
+Les **bras libres** et les **bouchons** sont les mêmes pièces qu'en V2 (version du 13/11/2026).
+
+À savoir :
+- La pince est **plus large** : les bras libres dépassent sur les côtés. Largeur hors tout : 76 mm fermée, 142 mm sur un
+  gobelet de 80, 172 mm grande ouverte (la V2 faisait environ 134 mm grande ouverte).
+- Masse : environ 98 g de pièces + 55 g de servo = **153 g** (10 g de plus que la V2).
+- Le doigt de l'engrenage B a un petit jeu (environ 1 mm de chaque côté au bout du bras) : c'est la place entre les
+  dents. Il disparaît dès que la pince serre.
+- **Prototype : aucune validation physique de la V3.**
+
+## Vérifications (toutes relancées le 14/11/2026)
+
+**Une seule commande : `python tout_verifier.py`** (il faut `pip install numpy trimesh manifold3d python-fcl pyserial`).
+
+| Programme | Ce qu'il vérifie | Résultat |
+|---|---|---|
+| `generer_pince.py` | pièces fermées, d'un seul bloc ; aucune collision en 24 positions ; chaque pièce posée à plat pour l'impression ; tournevis des vis du manchon et sortie du câble libres | bon |
+| `verifier_cinematique.py` | **le doigt ne peut pas se retourner** : calcule les deux positions possibles du doigt (droit, retourné) et la distance au point mort, butées dépassées de 15° comprises. Refait le calcul sur la V2 : il **trouve bien le défaut** (point mort à 0°, doigt retourné de 89° pince ouverte, comme sur la photo) | V3 bonne, V2 en défaut |
+| `verifier_engrenages.py` | place entre les dents sur un pas complet, et avec l'engrenage B décalé de 0,5° | 0,33 mm / 0,21 mm |
+| `verifier_jeux.py` | distance la plus courte entre toutes les pièces sur toute la course (39 paires, 14 positions) | rien d'imprévu à moins de 1,5 mm |
+| `verifier_visserie.py` | vis, écrous et rondelles ne touchent rien sur toute la course | bon |
+| `test_gobelets.py` | gobelets de 55, 80 et 90 mm : ils ne touchent que les mâchoires (marge derrière : 29,8 / 10,5 / 1,2 mm) | bon |
+| `../bras/test_securites.py` | les sécurités du programme sur un faux servo : butées, chaleur, **pince coincée → force coupée en 1 s**, serrage | bon |
+
+Ce que les calculs ne disent pas : la tenue réelle des poteaux (hauts de 52 mm) quand la pince serre, et le
+frottement des pièces imprimées. C'est l'essai à la main de l'étape 9 du plan de montage qui le dira.
 
 ## Principe
 
 Le servo tourne l'**engrenage A** ; l'**engrenage B**, identique, tourne en sens inverse. Chaque engrenage
-porte un **bras moteur**, doublé d'un **bras libre** parallèle : chaque **doigt** reste parallèle à l'autre
-et ils se rapprochent ensemble, gobelet au centre. Les doigts descendent pour prendre un gobelet debout.
+porte un **bras moteur**, doublé d'un **bras libre** parallèle et de même longueur : chaque **doigt** reste parallèle
+à l'autre et ils se rapprochent ensemble, gobelet au centre. Les doigts descendent pour prendre un gobelet debout.
 
-À savoir : en se fermant, les doigts **avancent un peu** (environ 28 mm entre grand ouvert et fermé), comme
-une main qui glisse le long du gobelet. C'est le prix d'une pince simple à bras pivotants.
-
-## Contrôles faits (hors impression)
-
-- Mouvement complet de **14 à 110 mm** d'écart (mesuré au creux des mâchoires), vérifié en **24 positions** :
-  **aucune collision** entre les pièces mobiles, ni avec la base, la bride, le servo ou l'avant-bras.
-- **Gobelets** (`test_gobelets.py`) : 55, 80 et 90 mm de diamètre, tenus au milieu des mâchoires ou par le
-  haut : ils ne touchent **que les mâchoires**. Marge derrière le gobelet : 30 mm (55), 10,5 mm (80),
-  1,2 mm (90 : juste). Marge pour l'attraper, mâchoires grandes ouvertes : 27,5 / 15 / 10 mm par côté.
-- Engrenages : module 1,5, 20 dents, jeu entre dents de 0,35 mm (une impression n'est jamais parfaite).
-- Fermée au maximum : 14 mm au creux, 4,6 mm entre les bouts des mâchoires (en dessous, elles se
-  toucheraient) : c'est la butée du servo. Objets plus fins que 5 mm : pas pour cette pince.
-- La pince passe **1 mm au-dessus de la partie haute** du servo (même leçon que le coude), bride à cale
-  (0,5 mm de serrage) sur la partie haute.
-- Masse : environ **88 g** de pièces imprimées + 55 g de servo = **143 g**.
+En se fermant, les doigts **avancent un peu** (environ 28 mm entre grand ouvert et fermé), comme une main qui
+glisse le long du gobelet. Fermée au maximum : 14 mm au creux, 4,6 mm entre les bouts des mâchoires (butée du
+servo). Objets plus fins que 5 mm : pas pour cette pince.
 
 ## À imprimer (PLA ou PETG, 4 périmètres, remplissage 40 %)
 
 | Pièce | Fichier |
 |---|---|
-| Base (logement du servo + manchon sur l'avant-bras + poteaux) | `pince_base.stl` |
-| Bride (porte aussi un pivot) | `pince_bride.stl` |
-| Engrenage A (sur le palonnier) | `pince_engrenage_A.stl` pour des vis M2,5 × 8 ; avec les vis courtes fournies avec le servo : `pince_engrenage_A_vis4mm.stl`, `_vis5mm` ou `_vis6mm` selon leur longueur sous tête (logement des têtes plus profond : la vis entre de 2 à 2,5 mm dans le palonnier) |
-| Engrenage B | `pince_engrenage_B.stl` |
-| Bras libres | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
-| Doigts | `pince_doigt_+Y.stl`, `pince_doigt_-Y.stl` |
-| Bouchons du trou arrière des doigts (× 2) | `pince_bouchon_doigt.stl` |
+| Base (logement du servo + manchon sur l'avant-bras + 3 poteaux) — **nouvelle en V3** | `pince_base.stl` |
+| Bride (simple barre) — **nouvelle en V3** | `pince_bride.stl` |
+| Engrenage A (sur le palonnier) — **dents refaites en V3** | `pince_engrenage_A.stl` pour des vis M2,5 × 8 ; avec les vis courtes fournies avec le servo : `pince_engrenage_A_vis4mm.stl`, `_vis5mm` ou `_vis6mm` selon leur longueur sous tête (logement des têtes plus profond : la vis entre de 2 à 2,5 mm dans le palonnier) |
+| Engrenage B — **dents refaites en V3** | `pince_engrenage_B.stl` |
+| Bras libres (inchangés, les deux fichiers sont identiques) | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
+| Doigts (trou arrière déplacé) — **nouveaux en V3** | `pince_doigt_+Y.stl`, `pince_doigt_-Y.stl` |
+| Bouchons du trou arrière des doigts (× 2, inchangés) | `pince_bouchon_doigt.stl` |
 | Variantes à insert (inserts M3 × 5 × 4 : Ø ext. 5, 4 mm de long, trou de 4,3) | `pince_bouchon_doigt_insert.stl` (× 2, insert posé au fer dans le bouchon, puis bouchon dans le doigt actuel), ou doigts `pince_doigt_+Y_insert.stl` / `_-Y_insert.stl` (insert directement dans le trou arrière) : filetage en laiton au lieu du plastique |
 
 **Toutes les pièces sont déjà orientées pour l'impression, sans support** (vérifié : chaque pièce repose à
@@ -69,7 +93,7 @@ c'est le vissage qui serre.
 | Quoi | Combien | Où |
 |---|---|---|
 | Roulements 623ZZ (commandés) | 7 | engrenage B (1), bras libres (2 chacun, un à chaque bout), doigts (1 chacun, trou avant) |
-| Inserts M3 à chaud | 5 | piliers de la bride (2), poteau de l'engrenage B, poteau du bras libre -Y, pivot sur la bride |
+| Inserts M3 à chaud | 5 | tous dans la base : piliers de la bride (2), poteau de l'engrenage B, poteaux des 2 bras libres |
 | Vis M3 × 10 | 5 | bride (2), engrenage B (1), pivots des bras libres (2) |
 | Vis M3 × 8 | 2 | bout des bras libres : à travers le roulement du bras, vissées dans le bouchon du doigt (pas de M3 × 10 : elle dépasserait) |
 | Vis M3 × 16 (14 à 20 conviennent) + écrou frein | 2 | doigt sur le bras de l'engrenage |

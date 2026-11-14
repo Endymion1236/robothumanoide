@@ -1,5 +1,5 @@
 {
- "version": "V2",
+ "version": "V3",
  "validation_physique": false,
  "angles_bras_deg": {
   "ferme": -3.4,
@@ -11,18 +11,22 @@
   "pince_base": {
    "encombrement_mm": [
     70.3,
-    64.9,
+    82.0,
     52.1
    ],
-   "masse_g_environ": 38
+   "masse_g_environ": 48,
+   "surface_sur_le_plateau_mm2": 4955,
+   "plafonds_en_pont_mm2": 849
   },
   "pince_bride": {
    "encombrement_mm": [
-    16.0,
+    13.0,
     46.8,
-    12.1
+    4.0
    ],
-   "masse_g_environ": 3
+   "masse_g_environ": 2,
+   "surface_sur_le_plateau_mm2": 590,
+   "plafonds_en_pont_mm2": 0
   },
   "pince_engrenage_A": {
    "encombrement_mm": [
@@ -30,7 +34,9 @@
     33.0,
     7.0
    ],
-   "masse_g_environ": 5
+   "masse_g_environ": 5,
+   "surface_sur_le_plateau_mm2": 966,
+   "plafonds_en_pont_mm2": 64
   },
   "pince_engrenage_B": {
    "encombrement_mm": [
@@ -38,7 +44,9 @@
     32.7,
     6.0
    ],
-   "masse_g_environ": 5
+   "masse_g_environ": 5,
+   "surface_sur_le_plateau_mm2": 1020,
+   "plafonds_en_pont_mm2": 47
   },
   "pince_bras_libre_+Y": {
    "encombrement_mm": [
@@ -46,7 +54,9 @@
     12.0,
     5.0
    ],
-   "masse_g_environ": 2
+   "masse_g_environ": 2,
+   "surface_sur_le_plateau_mm2": 553,
+   "plafonds_en_pont_mm2": 94
   },
   "pince_bras_libre_-Y": {
    "encombrement_mm": [
@@ -54,23 +64,29 @@
     12.0,
     5.0
    ],
-   "masse_g_environ": 2
+   "masse_g_environ": 2,
+   "surface_sur_le_plateau_mm2": 553,
+   "plafonds_en_pont_mm2": 94
   },
   "pince_doigt_+Y": {
    "encombrement_mm": [
-    78.0,
-    16.7,
+    92.0,
+    35.7,
     64.6
    ],
-   "masse_g_environ": 16
+   "masse_g_environ": 17,
+   "surface_sur_le_plateau_mm2": 927,
+   "plafonds_en_pont_mm2": 0
   },
   "pince_doigt_-Y": {
    "encombrement_mm": [
-    78.0,
-    16.7,
+    92.0,
+    35.7,
     64.6
    ],
-   "masse_g_environ": 16
+   "masse_g_environ": 17,
+   "surface_sur_le_plateau_mm2": 927,
+   "plafonds_en_pont_mm2": 0
   },
   "pince_bouchon_doigt": {
    "encombrement_mm": [
@@ -78,7 +94,9 @@
     9.9,
     4.0
    ],
-   "masse_g_environ": 0
+   "masse_g_environ": 0,
+   "surface_sur_le_plateau_mm2": 71,
+   "plafonds_en_pont_mm2": 0
   },
   "pince_bouchon_doigt_insert": {
    "encombrement_mm": [
@@ -86,23 +104,29 @@
     9.9,
     4.0
    ],
-   "masse_g_environ": 0
+   "masse_g_environ": 0,
+   "surface_sur_le_plateau_mm2": 62,
+   "plafonds_en_pont_mm2": 0
   },
   "pince_doigt_+Y_insert": {
    "encombrement_mm": [
-    78.0,
-    16.7,
+    92.0,
+    35.7,
     64.6
    ],
-   "masse_g_environ": 16
+   "masse_g_environ": 17,
+   "surface_sur_le_plateau_mm2": 992,
+   "plafonds_en_pont_mm2": 0
   },
   "pince_doigt_-Y_insert": {
    "encombrement_mm": [
-    78.0,
-    16.7,
+    92.0,
+    35.7,
     64.6
    ],
-   "masse_g_environ": 16
+   "masse_g_environ": 17,
+   "surface_sur_le_plateau_mm2": 992,
+   "plafonds_en_pont_mm2": 0
   },
   "pince_engrenage_A_vis4mm": {
    "plastique_sous_tete_mm": 2.0,
@@ -117,7 +141,11 @@
    "vis_dans_palonnier_mm": 2.5
   }
  },
- "bride_sur_servo_mm3 (serrage voulu)": -0.0,
+ "bride_sur_servo_mm3 (serrage voulu)": 0.0,
+ "acces_libres": [
+  "tournevis des 2 vis du manchon",
+  "sortie du câble des deux côtés"
+ ],
  "jeu_bride_piliers_mm (fermé au vissage)": 0.5,
  "ouverture_mm (angle → écart des mâchoires)": [
   [
@@ -133,12 +161,25 @@
    110.0
   ]
  ],
+ "doigt": {
+  "entraxe_des_deux_trous_mm": 42.5,
+  "pivot_bras_libre": [
+   2.0,
+   34.0
+  ],
+  "bras_de_levier_min_mm (des mâchoires en contact à 15° après la butée ouverte)": 14.9
+ },
+ "largeur_hors_tout_mm": {
+  "écart 14": 76,
+  "écart 80": 142,
+  "écart 110": 172
+ },
  "servo_pince": {
   "montage": "engrenage A posé avec les mâchoires écartées de 71 mm quand le servo est à 2048",
   "butee_min": 1663,
   "butee_max": 2433,
   "sens": "à vérifier au premier essai : le sens « ouvrir » peut être vers la butée min ou max"
  },
- "masse_pieces_imprimees_g": 87,
- "masse_avec_servo_g": 142
+ "masse_pieces_imprimees_g": 98,
+ "masse_avec_servo_g": 153
 }

@@ -1,0 +1,96 @@
+{
+ "V3": {
+  "pince": "V3",
+  "points_morts_deg": [
+   -26.6,
+   153.4
+  ],
+  "point_mort_dans_la_course": false,
+  "marge_avant_point_mort_deg": 23.2,
+  "levier_min_mm": 16.7,
+  "levier_min_a_ecart_mm": 14,
+  "levier_min_avec_depassement_mm": 6.0,
+  "ecart_min_entre_bon_et_mauvais_montage_mm": 6.5,
+  "par_objet": [
+   {
+    "ecart_machoires_mm": 14,
+    "levier_mm": 16.7,
+    "jeu_du_doigt_deg": 1.0,
+    "effort_dans_le_bras_libre_N": 32
+   },
+   {
+    "ecart_machoires_mm": 30,
+    "levier_mm": 22.7,
+    "jeu_du_doigt_deg": 0.8,
+    "effort_dans_le_bras_libre_N": 24
+   },
+   {
+    "ecart_machoires_mm": 55,
+    "levier_mm": 31.1,
+    "jeu_du_doigt_deg": 0.6,
+    "effort_dans_le_bras_libre_N": 17
+   },
+   {
+    "ecart_machoires_mm": 80,
+    "levier_mm": 38.0,
+    "jeu_du_doigt_deg": 0.5,
+    "effort_dans_le_bras_libre_N": 14
+   },
+   {
+    "ecart_machoires_mm": 110,
+    "levier_mm": 42.5,
+    "jeu_du_doigt_deg": 0.4,
+    "effort_dans_le_bras_libre_N": 13
+   }
+  ],
+  "sur": true,
+  "machoires_en_contact_a_deg": -6.1,
+  "point_mort_cote_ferme_deg": -26.6
+ },
+ "V2_pour_comparaison": {
+  "pince": "V2 (pivot 24 mm derrière)",
+  "points_morts_deg": [
+   0.0
+  ],
+  "point_mort_dans_la_course": true,
+  "marge_avant_point_mort_deg": 0.0,
+  "levier_min_mm": 0.0,
+  "levier_min_a_ecart_mm": 20,
+  "levier_min_avec_depassement_mm": 0.0,
+  "ecart_min_entre_bon_et_mauvais_montage_mm": 0.0,
+  "par_objet": [
+   {
+    "ecart_machoires_mm": 14,
+    "levier_mm": 1.4,
+    "jeu_du_doigt_deg": 11.8,
+    "effort_dans_le_bras_libre_N": 375
+   },
+   {
+    "ecart_machoires_mm": 30,
+    "levier_mm": 2.4,
+    "jeu_du_doigt_deg": 7.1,
+    "effort_dans_le_bras_libre_N": 225
+   },
+   {
+    "ecart_machoires_mm": 55,
+    "levier_mm": 8.4,
+    "jeu_du_doigt_deg": 2.0,
+    "effort_dans_le_bras_libre_N": 64
+   },
+   {
+    "ecart_machoires_mm": 80,
+    "levier_mm": 14.4,
+    "jeu_du_doigt_deg": 1.2,
+    "effort_dans_le_bras_libre_N": 38
+   },
+   {
+    "ecart_machoires_mm": 110,
+    "levier_mm": 21.6,
+    "jeu_du_doigt_deg": 0.8,
+    "effort_dans_le_bras_libre_N": 25
+   }
+  ],
+  "sur": false,
+  "doigt_retourne_pince_ouverte_deg": 89
+ }
+}
