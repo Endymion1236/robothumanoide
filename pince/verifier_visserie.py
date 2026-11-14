@@ -24,7 +24,9 @@ def visserie(th, ancien=False):
         else:
             v[f'q2 tige {k}'] = tige(*q2, zl - 1 - L_Q2 - 0.3, zl - 1)   # +0,3 : tolérance des vis
         v[f'q2 rondelle {k}'] = rondelle(*q2, G.Z_LIBRE - 0.5)
+        v[f'pivot rondelle {k}'] = rondelle(*piv, G.Z_LIBRE - G.EP_RONDELLE)
         v[f'pivot tête {k}'] = tete(*piv, G.Z_LIBRE + 4); v[f'pivot tige {k}'] = tige(*piv, G.Z_LIBRE + 4 - 10, G.Z_LIBRE + 4)
+    v['B rondelle'] = rondelle(G.AX, -G.AY, G.Z0 - G.EP_RONDELLE)
     v['B tête'] = tete(G.AX, -G.AY, G.Z0 + 4); v['B tige'] = tige(G.AX, -G.AY, G.Z0 + 4 - 10, G.Z0 + 4)
     for k, y in enumerate((G.SY0 - G.JEU - 3 - 4, G.SY1 + G.JEU + 3 + 4)):
         v[f'bride tête {k}'] = tete(G.BRIDE_X0 + 5, y, G.H_HAUT + 4); v[f'bride tige {k}'] = tige(G.BRIDE_X0 + 5, y, G.H_HAUT + 4 - 10, G.H_HAUT + 4)

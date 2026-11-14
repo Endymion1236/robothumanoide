@@ -63,6 +63,7 @@ ECART_MAX = 110.0
 ROUL_D, ROUL_EP = 10.1, 4.0        # logement de roulement 623 (10 mm, serré 0,1)
 W_LIBRE = 15.0                     # largeur du bras libre. 12 mm jusqu'au 14/11/2026 : il ne restait que 0,95 mm de paroi
                                    # autour du roulement, qui l'a fendue en entrant (retour d'impression de Nicolas)
+EP_RONDELLE = 0.5                  # rondelle M3 (DIN 125) entre le dessus de chaque poteau et le roulement
 PAROI_ROULEMENT_MIN = 1.8          # mm de plastique à garder autour de chaque roulement enfoncé en force
 M3, M3_INSERT, M2_5 = 3.4, 4.0, 2.9
 INSERT_COURT = 4.3                 # insert M3 x 5 x 4 (Ø ext. 5, 4 de long) : trou de 4,3 conseillé par le fabricant
@@ -207,14 +208,16 @@ def base():
     for y0 in (SY0 - JEU - 3 - 8, SY1 + JEU + 3):
         b += box(BRIDE_X0 + 1, y0, Z_BASE, BRIDE_X0 + 9, y0 + 8, BRIDE_Z)
         b -= cyl(BRIDE_X0 + 5, y0 + 4, BRIDE_Z - 9, BRIDE_Z + 0.1, M3_INSERT, 24)
-    # poteau de l'engrenage B et poteaux des deux bras libres : insert M3 en haut, épaulement pour la bague intérieure
+    # poteau de l'engrenage B et poteaux des deux bras libres : insert M3 en haut, dessus PLAT, et une rondelle M3 de 0,5 mm
+    # sous la bague intérieure du roulement. Jusqu'au 14/11/2026 il y avait à la place une petite bague de plastique de 0,6 mm
+    # autour de l'insert : le fer à souder l'écrasait en posant l'insert, l'engrenage B descendait et se mettait de travers.
     b += box(AX - 3, -AY + 1, Z_BASE, AX + 3, SY0 - JEU - 3 + 0.1, 15)         # nervure : poteau de B appuyé contre le mur du servo
     for s_ in (1, -1):                                                         # goussets : poteaux appuyés contre le manchon
         x, y = PIV_LIBRE[0], s_ * PIV_LIBRE[1]
         ya, yb = sorted((y, y - s_ * 6)); b += box(x - 6, ya, Z_BASE, x + 8, yb, BRIDE_Z)
         ya, yb = sorted((y - s_ * 6, s_ * (FOURCHE_EP / 2 + JEU + 2))); b += box(x - 6, ya, Z_BASE, X0S - JEU, yb, BRIDE_Z)
     for (x, y, zt, d) in ((AX, -AY, Z0, D_POTEAU_B), (*P_LIBRE[0], Z_LIBRE, D_POTEAU_LIBRE), (*P_LIBRE[1], Z_LIBRE, D_POTEAU_LIBRE)):
-        b += cyl(x, y, Z_BASE, zt - 0.6, d) + cyl(x, y, zt - 0.6, zt, 6.5, 32)
+        b += cyl(x, y, Z_BASE, zt - EP_RONDELLE, d)
         b -= cyl(x, y, zt - 9, zt + 0.1, M3_INSERT, 24)
     # manchon sur le bout de l'avant-bras (entretoise du bout), vis M3 par le côté +Y
     yi, zi = FOURCHE_EP / 2 + JEU, FOURCHE_L / 2 + JEU

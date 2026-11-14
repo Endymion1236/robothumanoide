@@ -14,6 +14,24 @@
    "voulu": "dents en prise"
   },
   {
+   "pieces": "base / bras libre +Y",
+   "jeu_min_mm": 0.5,
+   "a_ecart_machoires_mm": 14,
+   "voulu": "tourne sur son poteau"
+  },
+  {
+   "pieces": "base / bras libre -Y",
+   "jeu_min_mm": 0.5,
+   "a_ecart_machoires_mm": 14,
+   "voulu": "tourne sur son poteau"
+  },
+  {
+   "pieces": "base / engrenage B",
+   "jeu_min_mm": 0.5,
+   "a_ecart_machoires_mm": 14,
+   "voulu": "tourne sur son poteau"
+  },
+  {
    "pieces": "bras libre +Y / doigt +Y",
    "jeu_min_mm": 0.5,
    "a_ecart_machoires_mm": 14,
@@ -36,24 +54,6 @@
    "jeu_min_mm": 0.5,
    "a_ecart_machoires_mm": 14,
    "voulu": "articulation"
-  },
-  {
-   "pieces": "base / bras libre +Y",
-   "jeu_min_mm": 0.6,
-   "a_ecart_machoires_mm": 110,
-   "voulu": "tourne sur son poteau"
-  },
-  {
-   "pieces": "base / bras libre -Y",
-   "jeu_min_mm": 0.6,
-   "a_ecart_machoires_mm": 110,
-   "voulu": "tourne sur son poteau"
-  },
-  {
-   "pieces": "base / engrenage B",
-   "jeu_min_mm": 0.6,
-   "a_ecart_machoires_mm": 110,
-   "voulu": "tourne sur son poteau"
   },
   {
    "pieces": "bride / engrenage A",
