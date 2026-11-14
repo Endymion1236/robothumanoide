@@ -20,11 +20,13 @@ Ce qui change :
 
 Inchangé : bras de 50 mm, ouverture 14 à 110 mm, mâchoires creusées, butées du servo **1663–2433**, étalonnage à
 **81 mm** entre les vis du bout des bras (71 mm au creux des mâchoires), toute la visserie.
-Les **bras libres** et les **bouchons** sont les mêmes pièces qu'en V2 (version du 13/11/2026).
+Les **bouchons** sont les mêmes pièces qu'en V2. Les **bras libres** sont élargis à 15 mm (14/11/2026) : à 12 mm il ne
+restait que 0,95 mm de paroi autour des roulements, et le roulement l'a fendue en entrant. Il y a maintenant 2,45 mm,
+et `generer_pince.py` refuse toute paroi de moins de 1,8 mm autour d'un roulement.
 
 À savoir :
-- La pince est **plus large** : les bras libres dépassent sur les côtés. Largeur hors tout : 76 mm fermée, 142 mm sur un
-  gobelet de 80, 172 mm grande ouverte (la V2 faisait environ 134 mm grande ouverte).
+- La pince est **plus large** : les bras libres dépassent sur les côtés. Largeur hors tout : 77 mm fermée, 143 mm sur un
+  gobelet de 80, 173 mm grande ouverte (la V2 faisait environ 134 mm grande ouverte).
 - Masse : environ 98 g de pièces + 55 g de servo = **153 g** (10 g de plus que la V2).
 - Le doigt de l'engrenage B a un petit jeu (environ 1 mm de chaque côté au bout du bras) : c'est la place entre les
   dents. Il disparaît dès que la pince serre.
@@ -65,7 +67,7 @@ servo). Objets plus fins que 5 mm : pas pour cette pince.
 | Bride (simple barre) — **nouvelle en V3** | `pince_bride.stl` |
 | Engrenage A (sur le palonnier) — **dents refaites en V3** | `pince_engrenage_A.stl` pour des vis M2,5 × 8 ; avec les vis courtes fournies avec le servo : `pince_engrenage_A_vis4mm.stl`, `_vis5mm` ou `_vis6mm` selon leur longueur sous tête (logement des têtes plus profond : la vis entre de 2 à 2,5 mm dans le palonnier) |
 | Engrenage B — **dents refaites en V3** | `pince_engrenage_B.stl` |
-| Bras libres (inchangés, les deux fichiers sont identiques) | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
+| Bras libres (élargis à 15 mm le 14/11/2026, les deux fichiers sont identiques) | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
 | Doigts (trou arrière déplacé) — **nouveaux en V3** | `pince_doigt_+Y.stl`, `pince_doigt_-Y.stl` |
 | Bouchons du trou arrière des doigts (× 2, inchangés) | `pince_bouchon_doigt.stl` |
 | Variantes à insert (inserts M3 × 5 × 4 : Ø ext. 5, 4 mm de long, trou de 4,3) | `pince_bouchon_doigt_insert.stl` (× 2, insert posé au fer dans le bouchon, puis bouchon dans le doigt actuel), ou doigts `pince_doigt_+Y_insert.stl` / `_-Y_insert.stl` (insert directement dans le trou arrière) : filetage en laiton au lieu du plastique |

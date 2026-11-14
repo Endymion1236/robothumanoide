@@ -50,22 +50,22 @@
   },
   "pince_bras_libre_+Y": {
    "encombrement_mm": [
-    62.0,
-    12.0,
+    65.0,
+    15.0,
     5.0
    ],
-   "masse_g_environ": 2,
-   "surface_sur_le_plateau_mm2": 553,
+   "masse_g_environ": 3,
+   "surface_sur_le_plateau_mm2": 766,
    "plafonds_en_pont_mm2": 94
   },
   "pince_bras_libre_-Y": {
    "encombrement_mm": [
-    62.0,
-    12.0,
+    65.0,
+    15.0,
     5.0
    ],
-   "masse_g_environ": 2,
-   "surface_sur_le_plateau_mm2": 553,
+   "masse_g_environ": 3,
+   "surface_sur_le_plateau_mm2": 766,
    "plafonds_en_pont_mm2": 94
   },
   "pince_doigt_+Y": {
@@ -146,6 +146,11 @@
   "tournevis des 2 vis du manchon",
   "sortie du câble des deux côtés"
  ],
+ "paroi_autour_des_roulements_mm": {
+  "bras libre": 2.45,
+  "doigt": 1.95,
+  "engrenage B": 8.07
+ },
  "jeu_bride_piliers_mm (fermé au vissage)": 0.5,
  "ouverture_mm (angle → écart des mâchoires)": [
   [
@@ -170,9 +175,9 @@
   "bras_de_levier_min_mm (des mâchoires en contact à 15° après la butée ouverte)": 14.9
  },
  "largeur_hors_tout_mm": {
-  "écart 14": 76,
-  "écart 80": 142,
-  "écart 110": 172
+  "écart 14": 77,
+  "écart 80": 143,
+  "écart 110": 173
  },
  "servo_pince": {
   "montage": "engrenage A posé avec les mâchoires écartées de 71 mm quand le servo est à 2048",
@@ -180,6 +185,6 @@
   "butee_max": 2433,
   "sens": "à vérifier au premier essai : le sens « ouvrir » peut être vers la butée min ou max"
  },
- "masse_pieces_imprimees_g": 98,
- "masse_avec_servo_g": 153
+ "masse_pieces_imprimees_g": 100,
+ "masse_avec_servo_g": 155
 }

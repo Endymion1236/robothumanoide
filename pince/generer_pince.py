@@ -7,7 +7,7 @@ dents des engrenages ont sauté. V3 : le pivot du bras libre est déplacé en DI
 vers l'extérieur) : les bras ne s'alignent plus jamais avec le doigt sur toute la course. Les deux pivots
 sont maintenant des poteaux de la base (plus de pivot sur la bride), le poteau de l'engrenage B est plus gros.
 Engrenages : fond de dent plat (en V2, la tête de chaque dent passait à 0,03 mm du fond de la dent d'en face).
-Bras libres et bouchons : inchangés par rapport à la V2.
+Bras libres : élargis à 15 mm (2,45 mm de paroi autour des roulements au lieu de 0,95). Bouchons : inchangés.
 
 V2 (11/11/2026) : en V1, un gobelet de 80 mm tenu au milieu des mâchoires butait contre la base et
 l'engrenage A, la marge était de 7,5 mm par côté et les mâchoires plates le tenaient mal. Bras de 50 mm,
@@ -61,6 +61,9 @@ PAD_R = 45.0                       # mâchoires creusées en arc de rayon 45 : e
 PAD_FLECHE = PAD_R - math.sqrt(PAD_R**2 - (PAD_LONG / 2) ** 2)   # les bouts avancent de 4,7 mm vers l'intérieur
 ECART_MAX = 110.0
 ROUL_D, ROUL_EP = 10.1, 4.0        # logement de roulement 623 (10 mm, serré 0,1)
+W_LIBRE = 15.0                     # largeur du bras libre. 12 mm jusqu'au 14/11/2026 : il ne restait que 0,95 mm de paroi
+                                   # autour du roulement, qui l'a fendue en entrant (retour d'impression de Nicolas)
+PAROI_ROULEMENT_MIN = 1.8          # mm de plastique à garder autour de chaque roulement enfoncé en force
 M3, M3_INSERT, M2_5 = 3.4, 4.0, 2.9
 INSERT_COURT = 4.3                 # insert M3 x 5 x 4 (Ø ext. 5, 4 de long) : trou de 4,3 conseillé par le fabricant
 M3_TARAUD = 2.8                    # la vis M3 se visse directement dans le plastique (bout des bras libres)
@@ -146,7 +149,7 @@ def bras_libre(s):
     le bras n'entrait que de 2,5 mm dans le roulement du doigt ; en serrant, le doigt basculait, soulevait
     le bras et la vis sortait : la mâchoire tournait et la pince s'ouvrait)."""
     p, q = (PIV_LIBRE[0], s * PIV_LIBRE[1]), (PIV_LIBRE[0] + L_BRAS, s * PIV_LIBRE[1])
-    m = extruder(barre(p, q, 12), Z_LIBRE, Z_LIBRE + EP_LIBRE)
+    m = extruder(barre(p, q, W_LIBRE), Z_LIBRE, Z_LIBRE + EP_LIBRE)
     for c in (p, q):
         m -= cyl(c[0], c[1], Z_LIBRE - 0.1, Z_LIBRE + ROUL_EP, ROUL_D, 48)
         m -= cyl(c[0], c[1], Z_LIBRE - 0.1, Z_LIBRE + EP_LIBRE + 0.1, PASSAGE_TETE, 32)
@@ -300,6 +303,10 @@ if __name__ == '__main__':
     for y0, y1 in ((SY1 + JEU + 3.05, SY1 + 20), (SY0 - 20, SY0 - JEU - 3.05)):
         assert (box(X0S + 17.5, y0, -2.9, X0S + 28.5, y1, 15) ^ BASE).volume() < 0.01, 'la sortie du câble est bouchée'
     rapport['acces_libres'] = ['tournevis des 2 vis du manchon', 'sortie du câble des deux côtés']
+    # paroi de plastique autour de chaque roulement enfoncé en force (trop fine, elle se fend à l'enfoncement)
+    parois = {'bras libre': (W_LIBRE - ROUL_D) / 2, 'doigt': (14 - ROUL_D) / 2, 'engrenage B': R_PRIM - 1.25 * MOD - ROUL_D / 2}
+    rapport['paroi_autour_des_roulements_mm'] = {k: round(v, 2) for k, v in parois.items()}
+    assert min(parois.values()) >= PAROI_ROULEMENT_MIN, ('paroi trop fine autour d\'un roulement', parois)
     rapport['jeu_bride_piliers_mm (fermé au vissage)'] = round(H_HAUT - BRIDE_Z, 2)
     ouvertures = []
     angles = list(np.linspace(TH_FERME, TH_OUVERT, 24))
@@ -322,7 +329,7 @@ if __name__ == '__main__':
     rapport['doigt'] = {'entraxe_des_deux_trous_mm': round(ENTRAXE_DOIGT, 1), 'pivot_bras_libre': list(PIV_LIBRE),
                         'bras_de_levier_min_mm (des mâchoires en contact à 15° après la butée ouverte)': round(min(leviers), 1)}
     assert min(leviers) > 12, 'point mort trop près de la course : le doigt peut se retourner'
-    rapport['largeur_hors_tout_mm'] = {f'écart {e}': round(2 * (AY + L_BRAS * math.sin(math.radians(t)) + GY + 7))
+    rapport['largeur_hors_tout_mm'] = {f'écart {e}': round(2 * (AY + L_BRAS * math.sin(math.radians(t)) + GY + max(7, W_LIBRE / 2)))
                                        for e, t in ((14, TH_FERME), (80, math.degrees(math.asin((40 + E_DOIGT - AY) / L_BRAS))), (110, TH_OUVERT))}
     # Servo : montage à mi-ouverture quand il est à 2048 ; butées = ± la moitié de la course
     demi = (TH_OUVERT - TH_FERME) / 2 * 4096 / 360
