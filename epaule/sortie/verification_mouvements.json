@@ -1,0 +1,125 @@
+{
+ "jeu_mini_haut_du_bras_mm": {
+  "bras haut / servo de l'épaule": {
+   "jeu": 0.4,
+   "a_l_angle": -30.0
+  },
+  "bras bas / servo de l'épaule": {
+   "jeu": 1.24,
+   "a_l_angle": -30.0
+  },
+  "bras bas / berceau de l'épaule": {
+   "jeu": 2.0,
+   "a_l_angle": -30.0
+  },
+  "bras bas / bâti": {
+   "jeu": 7.0,
+   "a_l_angle": 90.0
+  }
+ },
+ "positions_interdites": {
+  "épaule -30°, coude -90°": [
+   "table"
+  ],
+  "épaule -30°, coude -75°": [
+   "table"
+  ],
+  "épaule -30°, coude -60°": [
+   "table"
+  ],
+  "épaule -30°, coude -45°": [
+   "table"
+  ],
+  "épaule -30°, coude -30°": [
+   "table"
+  ],
+  "épaule -30°, coude -15°": [
+   "table"
+  ],
+  "épaule -30°, coude 0°": [
+   "table"
+  ],
+  "épaule -30°, coude 15°": [
+   "table"
+  ],
+  "épaule -15°, coude -90°": [
+   "table"
+  ],
+  "épaule -15°, coude -75°": [
+   "table"
+  ],
+  "épaule -15°, coude -60°": [
+   "table"
+  ],
+  "épaule -15°, coude -45°": [
+   "table"
+  ],
+  "épaule -15°, coude -30°": [
+   "table"
+  ],
+  "épaule -15°, coude -15°": [
+   "table"
+  ],
+  "épaule -15°, coude 0°": [
+   "table"
+  ],
+  "épaule 0°, coude -90°": [
+   "table"
+  ],
+  "épaule 0°, coude -75°": [
+   "table"
+  ],
+  "épaule 0°, coude -60°": [
+   "table"
+  ],
+  "épaule 0°, coude -45°": [
+   "table"
+  ],
+  "épaule 0°, coude -30°": [
+   "table"
+  ],
+  "épaule 15°, coude -90°": [
+   "table"
+  ],
+  "épaule 15°, coude -75°": [
+   "table"
+  ],
+  "épaule 15°, coude -60°": [
+   "table"
+  ],
+  "épaule 15°, coude -45°": [
+   "table"
+  ],
+  "épaule 30°, coude -90°": [
+   "table"
+  ],
+  "épaule 30°, coude -75°": [
+   "table"
+  ],
+  "épaule 45°, coude -90°": [
+   "table"
+  ]
+ },
+ "contacts_avec_le_bati_ou_le_bras": {},
+ "ressort": {
+  "longueur_entre_vis_mm": [
+   35,
+   123
+  ],
+  "contacts": []
+ },
+ "trous_en_face": {
+  "berceau sur le mur": true,
+  "berceau du coude sur la platine": true,
+  "vis des entretoises": true,
+  "vis des disques du servo": true,
+  "trous du ressort dans le mât": true
+ },
+ "vis": {
+  "M3x30 des entretoises : prise dans l'insert (mm)": 7.15,
+  "fond du trou d'insert sous la pointe (mm)": 1.85,
+  "M3x10 du berceau sur le mur : prise dans le socle (mm)": 4.0,
+  "M3x10 du berceau du coude : prise dans le socle (mm)": 4.2
+ },
+ "erreurs": []
+}
