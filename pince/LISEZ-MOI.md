@@ -99,14 +99,19 @@ c'est le vissage qui serre.
 | Vis M3 × 10 | 5 | bride (2), engrenage B (1), pivots des bras libres (2) |
 | Vis M3 × 8 | 2 | bout des bras libres : à travers le roulement du bras, vissées dans le bouchon du doigt (pas de M3 × 10 : elle dépasserait) |
 | Vis M3 × 16 (14 à 20 conviennent) + écrou frein | 2 | doigt sur le bras de l'engrenage |
-| Rondelles M3 (DIN 125, 0,5 mm) | 4 | entre doigt et bras d'engrenage (2), entre bras libre et doigt (2) |
+| Rondelles M3 (DIN 125, 0,5 mm) | 7 | entre doigt et bras d'engrenage (2), entre bras libre et doigt (2), **sur le dessus des 3 poteaux, sous le roulement (3)** |
 | Vis M2,5 × 8 (ou les vis fournies avec le servo, avec la variante d'engrenage A à leur longueur) | 4 | engrenage A sur le palonnier |
 | Les 2 vis M3 × 30 de l'entretoise du bout de l'avant-bras | (déjà là) | traversent le manchon de la pince |
 
 Correction du 11/11/2026 : au bout des bras libres, un écrou sous le doigt aurait tapé dans le bras de
 l'engrenage pince presque fermée. Une vis M3 × 8 s'y visse maintenant directement dans le bras (trou de 2,8) ; une M3 × 10 seule arriverait au ras du bras
 de l'engrenage. Vérifié par `verifier_visserie.py` (vis, écrous, rondelles sur toute la course : aucun contact, 2 mm de marge).
-Les passages de tête au-dessus des roulements font 6,5 mm : la vis n'appuie que sur la bague intérieure, sans rondelle.
+Les passages de tête au-dessus des roulements font 6,5 mm : la vis n'appuie que sur la bague intérieure, sans rondelle sous la tête.
+
+Correction du 14/11/2026 (montage de la V3) : en haut des 3 poteaux (engrenage B, 2 bras libres), le roulement reposait sur une petite
+bague de plastique de 0,6 mm autour de l'insert. Le fer à souder l'écrasait en posant l'insert : l'engrenage B descendait et se mettait
+de travers. Le dessus des poteaux est maintenant **plat**, et le roulement repose sur **une rondelle M3** (0,5 mm) posée sur l'insert.
+Sur une base imprimée avant cette correction : limer le dessus du poteau à plat (laiton compris), puis une rondelle.
 **Pièces à réimprimer si elles l'ont déjà été : les 2 bras libres et l'engrenage B.**
 
 Correction du 13/11/2026 (essai réel) : au bout des bras libres, la vis vissée dans le bras n'entrait que de 2,5 mm

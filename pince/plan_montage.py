@@ -93,7 +93,7 @@ def page_pieces(pdf, n):
         ('Vis M3 × 10  × 5\n+ vis M3 × 8', vis(0, 0, 0, 10) + vis(9, 0, 0, 8), NOIR, '× 2'),
         ('Vis M3 × 16\n(14 à 20 ok)', vis(0, 0, 0, 16), NOIR, '× 2'),
         ('Écrous frein M3', ecrou(0, 0, 0), '#555', '× 2'),
-        ('Rondelles M3', rondelle(0, 0, 0), RONDELLE, '× 4'),
+        ('Rondelles M3', rondelle(0, 0, 0), RONDELLE, '× 7'),
     ]
     for k, (nom, m, coul, qte) in enumerate(vis_liste):
         ax = fig.add_subplot(3, 4, 7 + k, projection='3d'); dessiner(ax, [(m, coul)], cadre=(-8, 8, -8, 8, -2, 22), marge=0.9)
@@ -121,7 +121,8 @@ def e_servo(ax):
        ['Fer à 200 °C pour du PLA (230 °C pour du PETG).',
         'Pose l\'insert debout sur son trou (côté le plus étroit en bas).',
         'Appuie doucement avec la pointe du fer : il s\'enfonce tout seul en 5 à 10 s.',
-        'Arrête quand il est au ras du dessus. Garde-le bien droit.',
+        'Arrête quand il est au ras du dessus, JAMAIS plus haut. Garde-le bien droit.',
+        'Sur les 3 poteaux, une rondelle doit ensuite se poser bien à plat : si l\'insert dépasse ou si du plastique a remonté, un coup de lime à plat.',
         'Les 5 sont dans la base : 2 piliers, le poteau de l\'engrenage B, les 2 poteaux des bras libres.'],
        'Si un insert part de travers, ressors-le tout de suite au fer et recommence.')
 def e_inserts(ax):
@@ -188,14 +189,14 @@ def e_roulements(ax):
     etiquette(ax, (30, 67, 5), 'bras libres', (-10, 80))
 
 @etape('Les engrenages', ['l\'engrenage A', 'l\'engrenage B (avec son roulement)', '4 petites vis M2,5 × 8 du servo',
-       '1 vis M3 × 10', 'un pied à coulisse'],
+       '1 vis M3 × 10', '1 rondelle M3', 'un pied à coulisse'],
        ['Pas besoin de brancher le servo pour cette étape.',
-        'Pose l\'engrenage B sur son poteau, SANS vis.',
+        'Pose 1 rondelle M3 sur le poteau de B, bien centrée sur l\'insert, puis l\'engrenage B par-dessus, SANS vis.',
         'Pose l\'engrenage A sur le palonnier : ses dents entrent dans celles de B.',
         'Tourne A doucement jusqu\'à ce que ses 4 trous tombent pile sur ceux du palonnier. Garde la position où les 2 bras sont le plus près de '
         f'{ENTRE_TROUS:.0f} mm entre les 2 trous du bout (dessin vu de dessus).',
         'Les 2 bras doivent être symétriques. Sinon : soulève B, tourne-le d\'une dent, repose-le.',
-        'Visse A avec les 4 vis M2,5 × 8. Visse B avec la vis M3 × 10, SANS rondelle.'],
+        'Visse A avec les 4 vis M2,5 × 8. Visse B avec la vis M3 × 10, SANS rondelle sous la tête.'],
        f'Pas besoin d\'être pile à {ENTRE_TROUS:.0f} mm : au premier lancement de tester_pince, tu règles la pince à la main et le servo '
        'enregistre cette position comme son milieu (étalonnage).')
 def e_engrenages(ax):
@@ -206,7 +207,7 @@ def e_engrenages(ax):
     for k in (1, -1): ax.plot([Q1[k][0]], [Q1[k][1]], [zt], 'o', color='#c0392b', ms=9, zorder=61)
     etiquette(ax, (Q1[1][0], 0, zt), f'{ENTRE_TROUS:.0f} mm\nentre les 2 trous', (110, 0), '#c0392b')
     etiquette(ax, (G.AX, G.AY, zt), 'A (sur le servo)\n4 vis M2,5', (-120, 90))
-    etiquette(ax, (G.AX, -G.AY, zt), 'B (sur son poteau)\nvis M3 × 10', (-120, -90))
+    etiquette(ax, (G.AX, -G.AY, zt), 'B : 1 rondelle sur le poteau,\npuis B, puis vis M3 × 10', (-120, -90))
     ax.text2D(0.08, 0.95, 'VU DE DESSUS', transform=ax.transAxes, fontsize=15, weight='bold')
 
 @etape('Les doigts', ['les 2 doigts (avec leurs roulements)', '2 vis M3 × 16', '2 écrous frein M3', '2 rondelles M3'],
@@ -231,10 +232,10 @@ def e_doigts(ax):
     etiquette(ax, (x, y, G.Z0 - 12), 'écrou frein\n(dessous)', (-120, -30))
     etiquette(ax, (x + 30, y - 6, G.Z_DOIGT + dz), 'doigt', (90, -40))
 
-@etape('Les bras libres', ['les 2 bras libres (avec leurs 2 roulements)', '2 vis M3 × 10', '2 vis M3 × 8', '2 rondelles M3'],
-       ['Le roulement du bras se pose sur son grand poteau, à l\'arrière de la base (un de chaque côté).',
+@etape('Les bras libres', ['les 2 bras libres (avec leurs 2 roulements)', '2 vis M3 × 10', '2 vis M3 × 8', '4 rondelles M3'],
+       ['Pose 1 rondelle M3 sur chaque grand poteau, à l\'arrière de la base. Le roulement du bras se pose dessus.',
         'L\'autre bout du bras vient au-dessus du bouchon du doigt, avec 1 rondelle entre les deux.',
-        'Pivot : vis M3 × 10 dans l\'insert, SANS rondelle.',
+        'Pivot : vis M3 × 10 dans l\'insert, SANS rondelle sous la tête.',
         'Bout du bras : vis M3 × 8, SANS rondelle dessus : elle traverse le roulement du bras et se visse dans le bouchon du doigt.',
         'Visse jusqu\'au contact, sans forcer : le plastique du bouchon fait le filetage. Le bras doit tourner librement mais ne plus pouvoir se soulever.'],
        'Bien M3 × 8 au bout du bras : une M3 × 10 dépasserait sous le doigt.')
@@ -244,9 +245,9 @@ def e_bras_libres(ax):
     for k in (1, -1):
         pcs.append((P['bras libre +Y' if k > 0 else 'bras libre -Y'].translate((0, 0, dz)), COUL['bras libre +Y']))
         pcs += [(vis(*PIV[k], G.Z_LIBRE + 4 + dz + 10, 10), NOIR), (vis(*Q2[k], G.Z_LIBRE + G.EP_LIBRE + dz + 6, 8), NOIR),
-                (rondelle(*Q2[k], G.Z_LIBRE - 0.5 + 6), RONDELLE)]
+                (rondelle(*Q2[k], G.Z_LIBRE - 0.5 + 6), RONDELLE), (rondelle(*PIV[k], G.Z_LIBRE + 5), RONDELLE)]
     dessiner(ax, pcs, vue=(30, -40), marge=0.8)
-    etiquette(ax, (*PIV[1], G.Z_LIBRE + dz + 26), 'pivot :\nM3 × 10, sans rondelle', (-120, 30))
+    etiquette(ax, (*PIV[1], G.Z_LIBRE + dz + 26), 'pivot : 1 rondelle sur\nle poteau, puis M3 × 10', (-120, 30))
     etiquette(ax, (*Q2[1], G.Z_LIBRE + dz + 22), 'bout : M3 × 8 dans le\nroulement, vissée\ndans le bouchon', (100, 50))
     etiquette(ax, (*Q2[1], G.Z_LIBRE + 6.3), 'rondelle', (110, -30))
 
