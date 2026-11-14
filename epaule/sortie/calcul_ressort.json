@@ -1,0 +1,330 @@
+{
+ "sans_ressort": {
+  "trou": [
+   -46.0,
+   32.0
+  ],
+  "effort_servo_max_kgcm": 18.8,
+  "force_ressort_max_N": 0.0,
+  "usage_du_ressort_pourcent": 0,
+  "ressort_mou_au_dessus_de_deg": -30
+ },
+ "ressorts": [
+  {
+   "ressort": "ton ressort (70 mm)",
+   "raideur_N_par_mm": 0.66,
+   "force_max_N": 61,
+   "allongement_sous_1_kg_mm": 14.9,
+   "trou": [
+    -46.0,
+    50.0
+   ],
+   "effort_servo_max_kgcm": 14.0,
+   "force_ressort_max_N": 39.5,
+   "usage_du_ressort_pourcent": 64,
+   "ressort_mou_au_dessus_de_deg": 65,
+   "detail": [
+    {
+     "angle": -30,
+     "longueur_ressort": 122.5,
+     "force_N": 39.5,
+     "ressort_kgcm": 3.7,
+     "pince vide / tendu": 3.5,
+     "pince vide / avant-bras horizontal": 4.0,
+     "gobelet vide (15 g) / tendu": 3.9,
+     "gobelet vide (15 g) / avant-bras horizontal": 4.5,
+     "gobelet plein (300 g) / tendu": 12.6,
+     "gobelet plein (300 g) / avant-bras horizontal": 14.0
+    },
+    {
+     "angle": -25,
+     "longueur_ressort": 121.6,
+     "force_N": 38.9,
+     "ressort_kgcm": 4.7,
+     "pince vide / tendu": 2.8,
+     "pince vide / avant-bras horizontal": 3.2,
+     "gobelet vide (15 g) / tendu": 3.3,
+     "gobelet vide (15 g) / avant-bras horizontal": 3.7,
+     "gobelet plein (300 g) / tendu": 12.3,
+     "gobelet plein (300 g) / avant-bras horizontal": 13.3
+    },
+    {
+     "angle": -20,
+     "longueur_ressort": 120.5,
+     "force_N": 38.1,
+     "ressort_kgcm": 5.6,
+     "pince vide / tendu": 2.2,
+     "pince vide / avant-bras horizontal": 2.4,
+     "gobelet vide (15 g) / tendu": 2.7,
+     "gobelet vide (15 g) / avant-bras horizontal": 2.9,
+     "gobelet plein (300 g) / tendu": 12.0,
+     "gobelet plein (300 g) / avant-bras horizontal": 12.7
+    },
+    {
+     "angle": -15,
+     "longueur_ressort": 119.1,
+     "force_N": 37.2,
+     "ressort_kgcm": 6.5,
+     "pince vide / tendu": 1.6,
+     "pince vide / avant-bras horizontal": 1.7,
+     "gobelet vide (15 g) / tendu": 2.1,
+     "gobelet vide (15 g) / avant-bras horizontal": 2.2,
+     "gobelet plein (300 g) / tendu": 11.7,
+     "gobelet plein (300 g) / avant-bras horizontal": 12.1
+    },
+    {
+     "angle": -10,
+     "longueur_ressort": 117.5,
+     "force_N": 36.1,
+     "ressort_kgcm": 7.2,
+     "pince vide / tendu": 1.0,
+     "pince vide / avant-bras horizontal": 1.0,
+     "gobelet vide (15 g) / tendu": 1.5,
+     "gobelet vide (15 g) / avant-bras horizontal": 1.5,
+     "gobelet plein (300 g) / tendu": 11.3,
+     "gobelet plein (300 g) / avant-bras horizontal": 11.5
+    },
+    {
+     "angle": -5,
+     "longueur_ressort": 115.6,
+     "force_N": 34.9,
+     "ressort_kgcm": 7.9,
+     "pince vide / tendu": 0.4,
+     "pince vide / avant-bras horizontal": 0.4,
+     "gobelet vide (15 g) / tendu": 0.9,
+     "gobelet vide (15 g) / avant-bras horizontal": 0.9,
+     "gobelet plein (300 g) / tendu": 10.9,
+     "gobelet plein (300 g) / avant-bras horizontal": 10.9
+    },
+    {
+     "angle": 0,
+     "longueur_ressort": 113.6,
+     "force_N": 33.6,
+     "ressort_kgcm": 8.4,
+     "pince vide / tendu": -0.1,
+     "pince vide / avant-bras horizontal": -0.1,
+     "gobelet vide (15 g) / tendu": 0.4,
+     "gobelet vide (15 g) / avant-bras horizontal": 0.4,
+     "gobelet plein (300 g) / tendu": 10.4,
+     "gobelet plein (300 g) / avant-bras horizontal": 10.4
+    },
+    {
+     "angle": 5,
+     "longueur_ressort": 111.3,
+     "force_N": 32.1,
+     "ressort_kgcm": 8.9,
+     "pince vide / tendu": -0.6,
+     "pince vide / avant-bras horizontal": -0.6,
+     "gobelet vide (15 g) / tendu": -0.0,
+     "gobelet vide (15 g) / avant-bras horizontal": -0.0,
+     "gobelet plein (300 g) / tendu": 9.9,
+     "gobelet plein (300 g) / avant-bras horizontal": 9.9
+    },
+    {
+     "angle": 10,
+     "longueur_ressort": 108.9,
+     "force_N": 30.5,
+     "ressort_kgcm": 9.1,
+     "pince vide / tendu": -0.9,
+     "pince vide / avant-bras horizontal": -0.9,
+     "gobelet vide (15 g) / tendu": -0.4,
+     "gobelet vide (15 g) / avant-bras horizontal": -0.4,
+     "gobelet plein (300 g) / tendu": 9.4,
+     "gobelet plein (300 g) / avant-bras horizontal": 9.6
+    },
+    {
+     "angle": 15,
+     "longueur_ressort": 106.2,
+     "force_N": 28.7,
+     "ressort_kgcm": 9.3,
+     "pince vide / tendu": -1.3,
+     "pince vide / avant-bras horizontal": -1.1,
+     "gobelet vide (15 g) / tendu": -0.7,
+     "gobelet vide (15 g) / avant-bras horizontal": -0.6,
+     "gobelet plein (300 g) / tendu": 8.9,
+     "gobelet plein (300 g) / avant-bras horizontal": 9.2
+    },
+    {
+     "angle": 20,
+     "longueur_ressort": 103.3,
+     "force_N": 26.8,
+     "ressort_kgcm": 9.3,
+     "pince vide / tendu": -1.5,
+     "pince vide / avant-bras horizontal": -1.3,
+     "gobelet vide (15 g) / tendu": -1.0,
+     "gobelet vide (15 g) / avant-bras horizontal": -0.7,
+     "gobelet plein (300 g) / tendu": 8.4,
+     "gobelet plein (300 g) / avant-bras horizontal": 9.0
+    },
+    {
+     "angle": 25,
+     "longueur_ressort": 100.3,
+     "force_N": 24.8,
+     "ressort_kgcm": 9.2,
+     "pince vide / tendu": -1.6,
+     "pince vide / avant-bras horizontal": -1.3,
+     "gobelet vide (15 g) / tendu": -1.1,
+     "gobelet vide (15 g) / avant-bras horizontal": -0.8,
+     "gobelet plein (300 g) / tendu": 7.9,
+     "gobelet plein (300 g) / avant-bras horizontal": 8.9
+    },
+    {
+     "angle": 30,
+     "longueur_ressort": 97.0,
+     "force_N": 22.7,
+     "ressort_kgcm": 8.9,
+     "pince vide / tendu": -1.6,
+     "pince vide / avant-bras horizontal": -1.2,
+     "gobelet vide (15 g) / tendu": -1.2,
+     "gobelet vide (15 g) / avant-bras horizontal": -0.7,
+     "gobelet plein (300 g) / tendu": 7.5,
+     "gobelet plein (300 g) / avant-bras horizontal": 8.9
+    },
+    {
+     "angle": 35,
+     "longueur_ressort": 93.6,
+     "force_N": 20.4,
+     "ressort_kgcm": 8.4,
+     "pince vide / tendu": -1.6,
+     "pince vide / avant-bras horizontal": -0.9,
+     "gobelet vide (15 g) / tendu": -1.1,
+     "gobelet vide (15 g) / avant-bras horizontal": -0.4,
+     "gobelet plein (300 g) / tendu": 7.0,
+     "gobelet plein (300 g) / avant-bras horizontal": 8.9
+    },
+    {
+     "angle": 40,
+     "longueur_ressort": 90.0,
+     "force_N": 18.1,
+     "ressort_kgcm": 7.8,
+     "pince vide / tendu": -1.4,
+     "pince vide / avant-bras horizontal": -0.6,
+     "gobelet vide (15 g) / tendu": -1.0,
+     "gobelet vide (15 g) / avant-bras horizontal": -0.1,
+     "gobelet plein (300 g) / tendu": 6.6,
+     "gobelet plein (300 g) / avant-bras horizontal": 9.1
+    },
+    {
+     "angle": 45,
+     "longueur_ressort": 86.2,
+     "force_N": 15.6,
+     "ressort_kgcm": 7.0,
+     "pince vide / tendu": -1.1,
+     "pince vide / avant-bras horizontal": -0.1,
+     "gobelet vide (15 g) / tendu": -0.7,
+     "gobelet vide (15 g) / avant-bras horizontal": 0.4,
+     "gobelet plein (300 g) / tendu": 6.3,
+     "gobelet plein (300 g) / avant-bras horizontal": 9.4
+    },
+    {
+     "angle": 50,
+     "longueur_ressort": 82.3,
+     "force_N": 13.0,
+     "ressort_kgcm": 6.1,
+     "pince vide / tendu": -0.7,
+     "pince vide / avant-bras horizontal": 0.6,
+     "gobelet vide (15 g) / tendu": -0.4,
+     "gobelet vide (15 g) / avant-bras horizontal": 1.0,
+     "gobelet plein (300 g) / tendu": 6.0,
+     "gobelet plein (300 g) / avant-bras horizontal": 9.8
+    },
+    {
+     "angle": 55,
+     "longueur_ressort": 78.2,
+     "force_N": 10.3,
+     "ressort_kgcm": 5.0,
+     "pince vide / tendu": -0.2,
+     "pince vide / avant-bras horizontal": 1.3,
+     "gobelet vide (15 g) / tendu": 0.1,
+     "gobelet vide (15 g) / avant-bras horizontal": 1.8,
+     "gobelet plein (300 g) / tendu": 5.8,
+     "gobelet plein (300 g) / avant-bras horizontal": 10.3
+    },
+    {
+     "angle": 60,
+     "longueur_ressort": 74.0,
+     "force_N": 7.6,
+     "ressort_kgcm": 3.8,
+     "pince vide / tendu": 0.4,
+     "pince vide / avant-bras horizontal": 2.2,
+     "gobelet vide (15 g) / tendu": 0.6,
+     "gobelet vide (15 g) / avant-bras horizontal": 2.6,
+     "gobelet plein (300 g) / tendu": 5.6,
+     "gobelet plein (300 g) / avant-bras horizontal": 10.9
+    },
+    {
+     "angle": 65,
+     "longueur_ressort": 69.7,
+     "force_N": 0.0,
+     "ressort_kgcm": 0.0,
+     "pince vide / tendu": 3.5,
+     "pince vide / avant-bras horizontal": 5.6,
+     "gobelet vide (15 g) / tendu": 3.7,
+     "gobelet vide (15 g) / avant-bras horizontal": 6.0,
+     "gobelet plein (300 g) / tendu": 8.0,
+     "gobelet plein (300 g) / avant-bras horizontal": 14.0
+    },
+    {
+     "angle": 70,
+     "longueur_ressort": 65.2,
+     "force_N": 0.0,
+     "ressort_kgcm": 0.0,
+     "pince vide / tendu": 2.8,
+     "pince vide / avant-bras horizontal": 5.2,
+     "gobelet vide (15 g) / tendu": 3.0,
+     "gobelet vide (15 g) / avant-bras horizontal": 5.6,
+     "gobelet plein (300 g) / tendu": 6.4,
+     "gobelet plein (300 g) / avant-bras horizontal": 13.4
+    },
+    {
+     "angle": 75,
+     "longueur_ressort": 60.6,
+     "force_N": 0.0,
+     "ressort_kgcm": 0.0,
+     "pince vide / tendu": 2.2,
+     "pince vide / avant-bras horizontal": 4.8,
+     "gobelet vide (15 g) / tendu": 2.3,
+     "gobelet vide (15 g) / avant-bras horizontal": 5.2,
+     "gobelet plein (300 g) / tendu": 4.9,
+     "gobelet plein (300 g) / avant-bras horizontal": 12.7
+    },
+    {
+     "angle": 80,
+     "longueur_ressort": 56.0,
+     "force_N": 0.0,
+     "ressort_kgcm": 0.0,
+     "pince vide / tendu": 1.4,
+     "pince vide / avant-bras horizontal": 4.4,
+     "gobelet vide (15 g) / tendu": 1.5,
+     "gobelet vide (15 g) / avant-bras horizontal": 4.8,
+     "gobelet plein (300 g) / tendu": 3.3,
+     "gobelet plein (300 g) / avant-bras horizontal": 12.0
+    },
+    {
+     "angle": 85,
+     "longueur_ressort": 51.2,
+     "force_N": 0.0,
+     "ressort_kgcm": 0.0,
+     "pince vide / tendu": 0.7,
+     "pince vide / avant-bras horizontal": 4.0,
+     "gobelet vide (15 g) / tendu": 0.8,
+     "gobelet vide (15 g) / avant-bras horizontal": 4.4,
+     "gobelet plein (300 g) / tendu": 1.6,
+     "gobelet plein (300 g) / avant-bras horizontal": 11.2
+    },
+    {
+     "angle": 90,
+     "longueur_ressort": 46.4,
+     "force_N": 0.0,
+     "ressort_kgcm": 0.0,
+     "pince vide / tendu": 0.0,
+     "pince vide / avant-bras horizontal": 3.6,
+     "gobelet vide (15 g) / tendu": 0.0,
+     "gobelet vide (15 g) / avant-bras horizontal": 4.0,
+     "gobelet plein (300 g) / tendu": 0.0,
+     "gobelet plein (300 g) / avant-bras horizontal": 10.5
+    }
+   ]
+  }
+ ]
+}
