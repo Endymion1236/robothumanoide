@@ -79,7 +79,25 @@ est identique à celui que tu connais (servo, bride, câble).
    jusqu'à 4 kg. Ne lâche pas le bras tant que le servo n'est pas alimenté ou le bras posé.
 8. Fixe le pied sur la table avant le premier essai motorisé.
 
-Le programme d'essai de l'épaule (butées, étalonnage bras à l'horizontale) reste à écrire : `bras/test_epaule.py`.
+## Essai motorisé : `bras/tester_epaule.bat`
+
+Le servo d'épaule doit porter le **n° 2** (à régler dans FD, comme les autres), ou lance `tester_epaule.bat --id N`.
+
+**Ordre conseillé, du moins risqué au plus chargé :**
+1. **Haut du bras seul** : sans ressort, sans avant-bras. On vérifie l'étalonnage, le sens et les butées.
+2. **Avec l'avant-bras et la pince, sans ressort** : `tester_epaule.bat --coude N` (N = numéro du servo du coude, qui doit
+   être branché et alimenté : il est tenu raide). Tape **m** : le programme mesure l'effort du servo à 6 hauteurs.
+3. **Avec le ressort** : refais **m** et compare. Change de trou, recommence, garde le trou qui donne l'effort le plus faible.
+
+Ce que fait le programme, et pourquoi il diffère de ceux du coude et de la pince :
+- L'épaule **porte** le bras. Le programme ne coupe jamais la force sans te demander de **tenir le bras**.
+- Si une sécurité arrête un mouvement (blocage, effort, chaleur), le servo **retient le bras sur place** avec une force
+  réduite à 40 %, au lieu de le lâcher.
+- Premier lancement, **sans aucun mouvement du moteur** : tu tiens le haut du bras à l'horizontale (zéro), puis tu le lèves
+  à la main (le programme en déduit le sens), et il écrit les butées : 30° sous l'horizontale, 90° au-dessus.
+- Commandes : `b h 3 6 v` = −20°, 0°, 30°, 60°, 90° · `+` `-` = 10° plus haut ou plus bas · `m` = mesure · `i` = infos · `q` = quitter.
+
+Essayé ici sur un faux servo (étalonnage, mouvements, blocage, double Ctrl+C) ; **pas encore sur le vrai.**
 
 ## Vérifications
 

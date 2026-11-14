@@ -65,6 +65,12 @@ Pince montée (plan de montage `pince/sortie/plan_montage.pdf`), son servo **seu
 Toutes les autres sécurités du coude restent (butées, chaleur, blocage ; force jamais au-delà de 50 % pour la pince).
 Essai réel de la V2 le 14/11/2026 : étalonnage, ouverture et fermeture réussis, puis défaut de la pince (doigt retourné, voir `pince/LISEZ-MOI.md`). **À refaire avec la pince V3.**
 
+## Essai de l'épaule : `tester_epaule.bat`
+
+Voir `epaule/LISEZ-MOI.md`. Différence importante avec le coude et la pince : l'épaule porte le bras, donc ce programme
+ne coupe jamais la force sans demander de tenir le bras, et une sécurité qui se déclenche **retient le bras sur place**
+(force réduite à 40 %) au lieu de le lâcher (`si_arret='retenir'` dans `servos.py`).
+
 ## Essayer les sécurités sans matériel
 
-`python test_securites.py` : dix sécurités vérifiées sur un faux servo (`servo_simule.py`), en 6 secondes : refus sans butées, hors butées, servo trop chaud, **pince coincée → force coupée en 1 s**, serrage sur un objet, étalonnage. À relancer après chaque modification de `servos.py`.
+`python test_securites.py` : douze sécurités vérifiées sur un faux servo (`servo_simule.py`), en 6 secondes : refus sans butées, hors butées, servo trop chaud, **pince coincée → force coupée en 1 s**, serrage sur un objet, étalonnage. À relancer après chaque modification de `servos.py`.

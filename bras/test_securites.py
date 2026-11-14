@@ -41,4 +41,11 @@ r, pos, tenu = b6.serrer(1, 1700, force=20); assert not tenu and 'rien entre les
 # 10. étalonnage du milieu
 b7, s7 = bus_avec(position=2300, butees=(1663, 2433))
 assert b7.etalonner_milieu(1) == 2048 and not s7.force; print('ok  étalonnage : la position devient 2048, force coupée')
+# 11. épaule : en cas de blocage, le bras est RETENU sur place (force réduite), pas lâché
+b8, s8 = bus_avec(butees=(1663, 2433), obstacle=2200)
+r = b8.aller(1, 2400, si_arret='retenir')
+assert r.startswith('ARRÊT') and 'RETIENT' in r and s8.force and s8.limite == 400 and abs(s8.cible - 2200) < 3, (r, s8.force, s8.limite, s8.cible)
+print('ok  épaule bloquée : bras retenu sur place, force réduite à 40 % —', r[:44])
+# 12. retenir : tient la position actuelle
+b9, s9 = bus_avec(position=2300, butees=(1663, 2433)); assert b9.retenir(1) == 2300 and s9.force and s9.cible == 2300; print('ok  retenir : le servo tient là où il est')
 print('\nToutes les sécurités répondent.')
