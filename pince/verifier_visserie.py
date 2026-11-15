@@ -25,6 +25,10 @@ def visserie(th, ancien=False):
             v[f'q2 tige {k}'] = tige(*q2, zl - 1 - L_Q2 - 0.3, zl - 1)   # +0,3 : tolérance des vis
         v[f'q2 rondelle {k}'] = rondelle(*q2, G.Z_LIBRE - 0.5)
         v[f'pivot rondelle {k}'] = rondelle(*piv, G.Z_LIBRE - G.EP_RONDELLE)
+        q1_dessin = (G.AX + G.L_BRAS, k * G.AY)                                  # les 2 vis M3 x 10 de la mâchoire, sous la plaque du doigt
+        for n, (x, y) in enumerate(G._cotes_machoire(k)[5]):
+            x, y = x + q1[0] - q1_dessin[0], y + q1[1] - q1_dessin[1]; zt = G.Z_DOIGT + G.EP_COUVRE
+            v[f'mâchoire{n} tête {k}'] = tete(x, y, zt); v[f'mâchoire{n} tige {k}'] = tige(x, y, zt - 10.3, zt)
         v[f'pivot tête {k}'] = tete(*piv, G.Z_LIBRE + 4); v[f'pivot tige {k}'] = tige(*piv, G.Z_LIBRE + 4 - 10, G.Z_LIBRE + 4)
     v['B rondelle'] = rondelle(G.AX, -G.AY, G.Z0 - G.EP_RONDELLE)
     v['B tête'] = tete(G.AX, -G.AY, G.Z0 + 4); v['B tige'] = tige(G.AX, -G.AY, G.Z0 + 4 - 10, G.Z0 + 4)
@@ -37,6 +41,7 @@ def permis(nom_vis, piece):
     cote = '+Y' if k == '1' else '-Y'
     if j == 'q1': return piece in (f'doigt {cote}', 'engrenage A' if cote == '+Y' else 'engrenage B') and 'tête' not in nom_vis or (piece == f'doigt {cote}' and 'tête' in nom_vis)
     if j == 'q2': return piece in (f'bras libre {cote}', f'doigt {cote}')
+    if j.startswith('mâchoire'): return piece == f'doigt {cote}'
     if j == 'pivot': return piece in (f'bras libre {cote}', 'base')
     if j == 'B': return piece in ('engrenage B', 'base')
     if j == 'bride': return piece in ('bride', 'base')
@@ -55,4 +60,5 @@ print('Visserie sur toute la course ->', 'aucune collision' if not pires else 'C
 for (nv, np_), l in pires.items(): print(f'   {nv} touche {np_} : écart mâchoires {l[0][0]}→{l[-1][0]} mm, jusqu\'à {max(x[1] for x in l)} mm3')
 marge = round(G.Z_LIBRE + G.EP_LIBRE - 1 - L_Q2 - (G.Z0 + G.EP_ENG), 2)
 print('marge entre la pointe de la vis du bout du bras libre et le dessus des engrenages :', marge, 'mm')
-if pires or marge < 0.5: sys.exit(1)
+prise = 10 - G.EP_COUVRE; print('vis M3 x 10 de la mâchoire : prise dans la mâchoire', prise, 'mm (trou d\'insert de 9 mm)')
+if pires or marge < 0.5 or not 3.5 <= prise <= 8.5: sys.exit(1)

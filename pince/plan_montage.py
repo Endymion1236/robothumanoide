@@ -83,14 +83,14 @@ def page_pieces(pdf, n):
     liste = [('Base', BASE, COUL['base'], '× 1'), ('Bride', BRIDE, COUL['bride'], '× 1'),
              ('Engrenage A\n(sur le servo)', G.EA, COUL['engrenage A'], '× 1'), ('Engrenage B', G.EB, COUL['engrenage B'], '× 1'),
              ('Bras libres', G.BL[1] + G.BL[-1].translate((0, 2 * G.PIV_LIBRE[1] - 20, 0)), COUL['bras libre +Y'], '× 2'),
-             ('Doigts + 2 bouchons', G.DG[1] + G.DG[-1].translate((0, -20, 0)), COUL['doigt +Y'], '× 2')]
+             ('Doigts : plaque + mâchoire\n(+ 2 bouchons)', G.doigt_plaque(1).translate((0, 0, 14)) + G.doigt_machoire(1), COUL['doigt +Y'], '× 2')]
     for k, (nom, m, coul, qte) in enumerate(liste):
         ax = fig.add_subplot(3, 4, k + 1, projection='3d'); dessiner(ax, [(m, coul)], marge=0.75)
         ax.set_title(f'{nom}  {qte}', fontsize=15, weight='bold', color=coul)
     vis_liste = [
-        ('Inserts M3\n(laiton)', insert(0, 0, 0), LAITON, '× 5'),
+        ('Inserts M3\n(laiton)', insert(0, 0, 0), LAITON, '× 9'),
         ('Roulements 623', roulement(0, 0, 0), ACIER, '× 7'),
-        ('Vis M3 × 10  × 5\n+ vis M3 × 8', vis(0, 0, 0, 10) + vis(9, 0, 0, 8), NOIR, '× 2'),
+        ('Vis M3 × 10  × 9\n+ vis M3 × 8', vis(0, 0, 0, 10) + vis(9, 0, 0, 8), NOIR, '× 2'),
         ('Vis M3 × 16\n(14 à 20 ok)', vis(0, 0, 0, 16), NOIR, '× 2'),
         ('Écrous frein M3', ecrou(0, 0, 0), '#555', '× 2'),
         ('Rondelles M3', rondelle(0, 0, 0), RONDELLE, '× 7'),
@@ -117,13 +117,14 @@ def e_servo(ax):
     etiquette(ax, (G.AX, G.AY, G.H_BAS + G.PAL_H), 'palonnier\n(le disque qui tourne)', (110, 60))
     etiquette(ax, (G.X0S + 5, G.SY1, 14), 'câble', (-90, -40))
 
-@etape('Les inserts à chaud', ['la base', '5 inserts M3', 'le fer à souder'],
+@etape('Les inserts à chaud', ['la base', 'les 2 mâchoires', '9 inserts M3', 'le fer à souder'],
        ['Fer à 200 °C pour du PLA (230 °C pour du PETG).',
         'Pose l\'insert debout sur son trou (côté le plus étroit en bas).',
         'Appuie doucement avec la pointe du fer : il s\'enfonce tout seul en 5 à 10 s.',
         'Arrête quand il est au ras du dessus, JAMAIS plus haut. Garde-le bien droit.',
         'Sur les 3 poteaux, une rondelle doit ensuite se poser bien à plat : si l\'insert dépasse ou si du plastique a remonté, un coup de lime à plat.',
-        'Les 5 sont dans la base : 2 piliers, le poteau de l\'engrenage B, les 2 poteaux des bras libres.'],
+        '5 dans la base : 2 piliers, le poteau de l\'engrenage B, les 2 poteaux des bras libres.',
+        '4 dans les mâchoires : 2 dans le dessus de chacune (le petit côté percé de 2 trous).'],
        'Si un insert part de travers, ressors-le tout de suite au fer et recommence.')
 def e_inserts(ax):
     trous = [(G.BRIDE_X0 + 5, y, G.BRIDE_Z) for y in Y_PIL] + [(G.AX, -G.AY, G.Z0), (*PIV[1], G.Z_LIBRE), (*PIV[-1], G.Z_LIBRE)]
@@ -160,7 +161,26 @@ def e_bride(ax):
     etiquette(ax, (G.BRIDE_X0 + 5, Y_PIL[1], G.H_HAUT + dz + 26), 'vis M3 × 10', (-90, 40))
     etiquette(ax, (G.BRIDE_X0 + 5, Y_PIL[0], G.H_HAUT + dz + 26), 'vis M3 × 10', (90, 50))
 
-@etape('Les 7 roulements et les 2 bouchons', ['l\'engrenage B', 'les 2 bras libres', 'les 2 doigts', '7 roulements 623', '2 bouchons imprimés (pince_bouchon_doigt)'],
+@etape('Les mâchoires sous leurs plaques', ['les 2 plaques de doigt', 'les 2 mâchoires (avec leurs inserts)', '4 vis M3 × 10'],
+       ['Chaque doigt est en deux pièces : une plaque (à plat) et une mâchoire (le bloc creusé en arc).',
+        'Pose la plaque sur le dessus de la mâchoire : les deux formes en arc se superposent exactement.',
+        'Le creux de l\'arc regarde du côté opposé au grand bras de la plaque (vers le gobelet).',
+        'Visse les 2 vis M3 × 10 par le dessus de la plaque, bien serrées.',
+        'Fais pareil pour l\'autre doigt : les deux doigts sont symétriques, pas identiques.'],
+       'Si les arcs ne se superposent pas, tu as pris la plaque de l\'autre côté : échange-les.')
+def e_machoires(ax):
+    pcs = []
+    for k, s in enumerate((1, -1)):
+        q1, xm0, yi, y0, y1, pos_vis = G._cotes_machoire(s); d = (-q1[0], -q1[1] + 70 * k, -G.Z_DOIGT)
+        pcs += [(G.doigt_machoire(s).translate(d), COUL['doigt +Y']), (G.doigt_plaque(s).translate(d).translate((0, 0, 22)), pale(COUL['doigt +Y']))]
+        pcs += [(vis(x + d[0], y + d[1], 32, 10), NOIR) for x, y in pos_vis]
+    dessiner(ax, pcs, vue=(24, -58), marge=0.8)
+    q1, xm0, yi, y0, y1, pos_vis = G._cotes_machoire(1)
+    etiquette(ax, (xm0 - q1[0] + 20, yi - q1[1], -30), 'mâchoire', (110, -30))
+    etiquette(ax, (-20, 10, 24), 'plaque', (-90, 60))
+    etiquette(ax, (pos_vis[1][0] - q1[0], pos_vis[1][1] - q1[1], 45), '2 vis M3 × 10', (90, 50))
+
+@etape('Les 7 roulements et les 2 bouchons', ['l\'engrenage B', 'les 2 bras libres', 'les 2 doigts assemblés', '7 roulements 623', '2 bouchons imprimés (pince_bouchon_doigt)'],
        ['Ils s\'enfoncent en force, à la main ou en appuyant sur la table.',
         'Engrenage B : 1 roulement, par-DESSOUS, au fond de son logement.',
         'Bras libres : 2 roulements chacun, un à CHAQUE bout, par-DESSOUS.',

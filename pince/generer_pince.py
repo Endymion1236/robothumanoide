@@ -161,26 +161,50 @@ def bouchon_doigt(insert=False):
     (trou de 2,8). Ainsi les doigts déjà imprimés restent bons."""
     return cyl(0, 0, 0, ROUL_EP, 9.9, 64) - cyl(0, 0, -0.1, ROUL_EP + 0.1, INSERT_COURT if insert else M3_TARAUD, 32)
 
-def doigt(s, insert_arriere=False):
-    """Doigt : plaque qui relie les deux bras + mâchoire qui descend. Trou avant : roulement 623.
-    Trou arrière : logement de 10,1 pour le bouchon, ou (insert_arriere) trou de 4,3 pour un insert M3 x 5 x 4."""
-    q1 = (AX + L_BRAS, s * AY); q2 = (q1[0] + GX, q1[1] + s * GY)
+EP_COUVRE = 6.0                    # épaisseur de la plaque au-dessus de la mâchoire (4 ailleurs)
+VIS_MACH_U = 14.0                  # les 2 vis de la mâchoire : à 14 mm de part et d'autre de son milieu
+
+def _cotes_machoire(s):
+    """Cotes communes à la plaque et à la mâchoire d'un doigt (s = +1 ou -1), pince dans sa position de dessin."""
+    q1 = (AX + L_BRAS, s * AY); xm0 = q1[0] + PAD_DEVANT
+    yi = q1[1] - s * E_DOIGT                                   # face de serrage, au creux de l'arc
+    y_bout = yi - s * PAD_FLECHE                               # face de serrage, aux deux bouts de la mâchoire
+    y0, y1 = (y_bout, yi + PAD_EP) if s > 0 else (yi - PAD_EP, y_bout)
+    creux = PAD_R - math.sqrt(PAD_R ** 2 - VIS_MACH_U ** 2)    # profondeur de l'arc à l'endroit des vis
+    vis = [(xm0 + PAD_LONG / 2 + u, yi + s * (PAD_EP - creux) / 2) for u in (-VIS_MACH_U, VIS_MACH_U)]   # au milieu de l'épaisseur
+    return q1, xm0, yi, y0, y1, vis
+
+def _profil_machoire(s, z0, z1):
+    """La mâchoire vue de dessus (un rectangle creusé en arc côté gobelet), entre deux hauteurs."""
+    q1, xm0, yi, y0, y1, vis = _cotes_machoire(s)
+    return box(xm0, y0, z0, xm0 + PAD_LONG, y1, z1) - cyl(xm0 + PAD_LONG / 2, yi - s * PAD_R, z0 - 1, z1 + 1, 2 * PAD_R, 192)
+
+def doigt_plaque(s, insert_arriere=False):
+    """Plaque du doigt : relie les deux bras et couvre le dessus de la mâchoire. S'imprime À PLAT.
+    Trou avant : roulement 623. Trou arrière : logement de 10,1 pour le bouchon, ou (insert_arriere) trou de 4,3
+    pour un insert M3 x 5 x 4. Deux trous de 3,4 pour les vis de la mâchoire."""
+    q1, xm0, yi, y0, y1, vis = _cotes_machoire(s); q2 = (q1[0] + GX, q1[1] + s * GY)
     m = extruder(barre(q2, q1, 14), Z_DOIGT, Z_DOIGT + EP_DOIGT)
     for q, d in ((q1, ROUL_D), (q2, INSERT_COURT if insert_arriere else ROUL_D)):
         m -= cyl(q[0], q[1], Z_DOIGT - 0.1, Z_DOIGT + EP_DOIGT + 0.1, d, 48)
-    # mâchoire : plaque verticale devant l'axe du doigt ; face de serrage creusée en arc (creux à E_DOIGT de l'axe)
-    xm0 = q1[0] + PAD_DEVANT
-    yi = q1[1] - s * E_DOIGT                                   # face au creux de l'arc
-    y_bout = yi - s * PAD_FLECHE                               # face aux deux bouts de la mâchoire
-    y0, y1 = (y_bout, yi + PAD_EP) if s > 0 else (yi - PAD_EP, y_bout)
     m += box(q1[0] + 4, min(y0, q1[1]), Z_DOIGT, xm0 + 2, max(y1, q1[1]), Z_DOIGT + EP_DOIGT)   # jonction
-    machoire = box(xm0, y0, PAD_BAS, xm0 + PAD_LONG, y1, Z_DOIGT + EP_DOIGT)
-    machoire -= cyl(xm0 + PAD_LONG / 2, yi - s * PAD_R, PAD_BAS - 1, Z_DOIGT + EP_DOIGT + 1, 2 * PAD_R, 192)
-    m += machoire
-    ry0, ry1 = (y1, y1 + 4) if s > 0 else (y0 - 4, y0)                                          # nervure
-    m += box(xm0 + PAD_LONG / 2 - 2, ry0 if s > 0 else y0 - 4, PAD_BAS + 5,
-             xm0 + PAD_LONG / 2 + 2, (y1 + 4) if s > 0 else y0, Z_DOIGT + EP_DOIGT)
+    m += _profil_machoire(s, Z_DOIGT, Z_DOIGT + EP_COUVRE)
+    for x, y in vis: m -= cyl(x, y, Z_DOIGT - 0.1, Z_DOIGT + EP_COUVRE + 0.1, 3.4, 24)
     return m
+
+def doigt_machoire(s):
+    """Mâchoire : s'imprime COUCHÉE sur son dos (creux vers le haut), 11 mm de haut au lieu de 65 debout.
+    Deux inserts M3 dans le dessus, pour la visser sous la plaque. Couchée, ses couches sont dans le sens où
+    elle travaille quand elle serre. (Jusqu'au 15/11/2026 le doigt était d'un bloc, imprimé debout : la
+    mâchoire, haute et fine, a été accrochée par la buse en cours d'impression.)"""
+    q1, xm0, yi, y0, y1, vis = _cotes_machoire(s)
+    m = _profil_machoire(s, PAD_BAS, Z_DOIGT)
+    for x, y in vis: m -= cyl(x, y, Z_DOIGT - 9, Z_DOIGT + 0.1, M3_INSERT, 24)
+    return m
+
+def doigt(s, insert_arriere=False):
+    """Le doigt assemblé (plaque + mâchoire), pour les contrôles de mouvement."""
+    return doigt_plaque(s, insert_arriere) + doigt_machoire(s)
 
 # ---------------- Pièces fixes ----------------
 X0S = AX + AXE_BOUT - SL           # arrière du servo
@@ -343,16 +367,19 @@ if __name__ == '__main__':
                               'butee_min': round(2048 - demi), 'butee_max': round(2048 + demi),
                               'sens': 'à vérifier au premier essai : le sens « ouvrir » peut être vers la butée min ou max'}
     pieces = {'pince_base': BASE, 'pince_bride': BRIDE, 'pince_engrenage_A': EA, 'pince_engrenage_B': EB,
-              'pince_bras_libre_+Y': BL[1], 'pince_bras_libre_-Y': BL[-1], 'pince_doigt_+Y': DG[1], 'pince_doigt_-Y': DG[-1], 'pince_bouchon_doigt': bouchon_doigt(),
+              'pince_bras_libre_+Y': BL[1], 'pince_bras_libre_-Y': BL[-1], 'pince_doigt_plaque_+Y': doigt_plaque(1), 'pince_doigt_plaque_-Y': doigt_plaque(-1),
+              'pince_doigt_machoire_+Y': doigt_machoire(1), 'pince_doigt_machoire_-Y': doigt_machoire(-1), 'pince_bouchon_doigt': bouchon_doigt(),
               'pince_bouchon_doigt_insert': bouchon_doigt(True),
-              'pince_doigt_+Y_insert': doigt(1, True), 'pince_doigt_-Y_insert': doigt(-1, True)}
+              'pince_doigt_plaque_+Y_insert': doigt_plaque(1, True), 'pince_doigt_plaque_-Y_insert': doigt_plaque(-1, True)}
     masse = 0
     variantes = ('_insert',)
     for nom, m in pieces.items():
         t = mesh(m); assert t.is_watertight and len(t.split(only_watertight=False)) == 1, nom
         # orientation d'impression : face plane la plus large sur le plateau, sans surplomb
-        if nom in ('pince_engrenage_A', 'pince_doigt_+Y', 'pince_doigt_-Y', 'pince_doigt_+Y_insert', 'pince_doigt_-Y_insert'):
+        if nom == 'pince_engrenage_A':
             t.apply_transform(tm.transformations.rotation_matrix(math.pi, (1, 0, 0)))   # retourné : dessus sur le plateau
+        if nom.startswith('pince_doigt_machoire'):                                      # couchée sur son dos, creux vers le haut
+            t.apply_transform(tm.transformations.rotation_matrix(-math.pi / 2 if nom.endswith('+Y') else math.pi / 2, (1, 0, 0)))
         t.apply_translation(-t.bounds[0]); t.export(OUT / f'{nom}.stl')
         g = t.volume / 1000 * 1.24 * 0.6                                       # PLA, ~60 % plein
         # pose d'impression : surface vraiment à plat sur le plateau, et surplombs (faces tournées vers le bas, en l'air)
@@ -360,6 +387,7 @@ if __name__ == '__main__':
         pose_mm2 = float(t.area_faces[(zc < 0.01) & (nz < -0.99)].sum())
         surplomb = float(t.area_faces[(zc > 0.3) & (nz < -0.7)].sum())
         assert pose_mm2 >= 40, (nom, 'pas posée à plat', pose_mm2)
+        assert t.extents[2] <= 60, (nom, 'trop haute pour s\'imprimer sans risque', t.extents[2])
         masse += 0 if nom.endswith(variantes) else g
         rapport['pieces'][nom] = {'encombrement_mm': [round(v, 1) for v in t.extents], 'masse_g_environ': round(g),
                                   'surface_sur_le_plateau_mm2': round(pose_mm2), 'plafonds_en_pont_mm2': round(surplomb)}
