@@ -90,4 +90,4 @@ et dit lequel lancer.
    (force coupée sur les deux servos).
 
 Sur le support de table, le coude est couché : la pince saisit de côté. Simulé ici (geste complet, coude
-bloqué en route, rien entre les doigts) ; **pas encore essayé en vrai.**
+bloqué en route, rien entre les doigts) ; **réussi en vrai le 15/11/2026** (gobelet tenu à 47 mm, avant-bras à +89°, 31 °C max).
