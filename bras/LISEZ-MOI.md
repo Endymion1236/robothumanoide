@@ -74,3 +74,20 @@ ne coupe jamais la force sans demander de tenir le bras, et une sécurité qui s
 ## Essayer les sécurités sans matériel
 
 `python test_securites.py` : douze sécurités vérifiées sur un faux servo (`servo_simule.py`), en 6 secondes : refus sans butées, hors butées, servo trop chaud, **pince coincée → force coupée en 1 s**, serrage sur un objet, étalonnage. À relancer après chaque modification de `servos.py`.
+
+## Premier geste : prendre et poser (`geste_prendre_poser.bat`)
+
+Coude (n° 1) et pince (n° 4) sur le même câble, pince sur l'avant-bras, FD fermé. Avant : `tester_coude.bat`
+et `tester_pince.bat` au moins une fois (butées, étalonnage, sens de la pince) ; sinon le programme refuse
+et dit lequel lancer.
+
+1. **g** (poser d'un côté) ou **d** (de l'autre). Coude au centre, pince ouverte.
+2. Présenter le gobelet entre les mâchoires, **Entrée** : la pince serre à 35 % et s'arrête sur l'objet
+   (largeur affichée). Rien entre les doigts → elle se rouvre et le geste s'arrête.
+3. L'avant-bras tourne de 90° en tenant le gobelet. Si le coude est arrêté par une sécurité, la pince
+   tient toujours : Entrée pour qu'elle lâche (main dessous).
+4. Main ou boîte sous le gobelet, **Entrée** : la pince le lâche ; retour au centre. **q** pour quitter
+   (force coupée sur les deux servos).
+
+Sur le support de table, le coude est couché : la pince saisit de côté. Simulé ici (geste complet, coude
+bloqué en route, rien entre les doigts) ; **pas encore essayé en vrai.**
