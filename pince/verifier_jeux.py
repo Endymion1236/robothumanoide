@@ -7,7 +7,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np, trimesh as tm
 import generer_pince as G
 
-JEU_MIN = 0.45            # mm : en dessous, risque de frottement une fois imprimé
+JEU_MIN = 2.0             # mm exigés entre deux pièces qui ne sont pas censées se frôler. 0,45 jusqu'au 15/11/2026 : la bride passait
+                          # à 1,5 mm des dents de l'engrenage A, « presque touchée » une fois imprimée (retour de montage)
 # paires qui se touchent ou se frôlent EXPRÈS (appui d'un roulement, dents en prise, rondelle de 0,5 mm entre deux pièces)
 VOULU = {('base', 'servo'): 'servo dans son logement', ('bride', 'servo'): 'la bride serre le servo',
          ('base', 'bride'): 'bride vissée sur ses piliers', ('avant-bras', 'base'): 'manchon enfilé sur l\'avant-bras',
