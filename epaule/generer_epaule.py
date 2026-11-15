@@ -54,6 +54,7 @@ B = type('P', (), B)
 # ---------------- Cotes de l'épaule ----------------
 H_AXE = 95.0                    # hauteur de l'axe au-dessus du pied du bâti
 EP_MUR, EP_PIED = 6.0, 6.0
+R_COIN_PIED = 12.0              # coins du pied arrondis : ils tiennent mieux au plateau
 Y_FOURCHE = B.base_T + 2.0      # la fourche passe 2 mm au-dessus du socle du berceau (comme au coude) : 7
 EP_HAUT = 7.0                   # plaque haute du bras, platine comprise (4 au coude) : une seule face plane pour l'impression
 Y_PL_HAUT = Y_FOURCHE + F.z_haut                 # dessous de la plaque haute : 48,3
@@ -142,7 +143,13 @@ def pince_ouverte():
 def bati():
     """Pied + mur du berceau + mur arrière + mât du ressort, d'un seul bloc. S'imprime posé sur son pied, sans support."""
     zp = -H_AXE
-    pied = box(-95, -24, zp - EP_PIED, 34, Y_MAT + EP_MUR + 8, zp)
+    # pied à coins arrondis (rayon 12) : sur un grand pied plat en PETG, ce sont les coins vifs qui se décollent
+    # du plateau en premier (impression du 15/11/2026 partie en fils)
+    x0, x1, y0, y1, r = -95, 34, -24, Y_MAT + EP_MUR + 8, R_COIN_PIED
+    pied = box(x0 + r, y0, zp - EP_PIED, x1 - r, y1, zp) + box(x0, y0 + r, zp - EP_PIED, x1, y1 - r, zp)
+    for cx in (x0 + r, x1 - r):
+        for cy in (y0 + r, y1 - r):
+            pied += mf.Manifold.cylinder(EP_PIED, r, r, 64).translate((cx, cy, zp - EP_PIED))
     mur = box(X_MUR_AR, -EP_MUR, zp, 30, 0, 36)                                                # mur du berceau
     arriere = box(X_MUR_AR - EP_MUR, -EP_MUR, zp, X_MUR_AR, Y_MAT + EP_MUR, 56)                # mur arrière : relie le mur et le mât
     # mât : jusqu'à x = -40 sur toute la hauteur (le servo s'enfile devant), drapeau jusqu'à -28 au-dessus, dessous en pente à 45°

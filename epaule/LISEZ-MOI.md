@@ -53,6 +53,10 @@ l'ancien berceau (trous de 4,5 mm), les têtes de vis seraient sur le socle, sou
 a des trous de 4 mm pour des inserts M3 : les vis viennent par-derrière, rien ne dépasse. Tout le reste du berceau
 est identique à celui que tu connais (servo, bride, câble).
 
+**Bâti en PETG (15/11/2026)** : la première impression s'est décollée du plateau (grand pied plat, coins vifs). Les coins du
+pied sont maintenant arrondis (rayon 12). À l'impression : filament séché (8 h à 55 °C), plaque lavée au liquide vaisselle,
+bordure de 8 mm, plateau 85–90 °C, enceinte fermée, colle en bâton sur toute la zone si besoin.
+
 ## Visserie
 
 | Quoi | Nombre | Où |
