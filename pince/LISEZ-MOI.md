@@ -49,6 +49,15 @@ et `generer_pince.py` refuse toute paroi de moins de 1,8 mm autour d'un roulemen
 Ce que les calculs ne disent pas : la tenue réelle des poteaux (hauts de 52 mm) quand la pince serre, et le
 frottement des pièces imprimées. C'est l'essai à la main de l'étape 9 du plan de montage qui le dira.
 
+## Doigts en deux pièces (15/11/2026)
+
+Le doigt d'un bloc s'imprimait debout : une mâchoire de 11 mm d'épaisseur sur 65 mm de haut. À l'impression, la buse l'a
+accrochée et les couches se sont décalées. Et debout, les couches étaient dans le mauvais sens pour serrer.
+Chaque doigt est maintenant une **plaque** (imprimée à plat, 6 mm de haut) et une **mâchoire** (imprimée couchée sur le
+dos, 11 mm de haut), assemblées par 2 vis M3 × 10 dans 2 inserts. La nervure du dos de la mâchoire a disparu.
+Forme, cotes de serrage et mouvement : inchangés. `generer_pince.py` refuse maintenant toute pièce de plus de 60 mm de haut
+à l'impression. Les variantes `_insert` concernent seulement le trou arrière de la plaque.
+
 ## Principe
 
 Le servo tourne l'**engrenage A** ; l'**engrenage B**, identique, tourne en sens inverse. Chaque engrenage
@@ -68,7 +77,8 @@ servo). Objets plus fins que 5 mm : pas pour cette pince.
 | Engrenage A (sur le palonnier) — **dents refaites en V3** | `pince_engrenage_A.stl` pour des vis M2,5 × 8 ; avec les vis courtes fournies avec le servo : `pince_engrenage_A_vis4mm.stl`, `_vis5mm` ou `_vis6mm` selon leur longueur sous tête (logement des têtes plus profond : la vis entre de 2 à 2,5 mm dans le palonnier) |
 | Engrenage B — **dents refaites en V3** | `pince_engrenage_B.stl` |
 | Bras libres (élargis à 15 mm le 14/11/2026, les deux fichiers sont identiques) | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |
-| Doigts (trou arrière déplacé) — **nouveaux en V3** | `pince_doigt_+Y.stl`, `pince_doigt_-Y.stl` |
+| Plaques des doigts — **en deux pièces depuis le 15/11/2026** | `pince_doigt_plaque_+Y.stl`, `pince_doigt_plaque_-Y.stl` |
+| Mâchoires des doigts (imprimées couchées, creux vers le haut) | `pince_doigt_machoire_+Y.stl`, `pince_doigt_machoire_-Y.stl` |
 | Bouchons du trou arrière des doigts (× 2, inchangés) | `pince_bouchon_doigt.stl` |
 | Variantes à insert (inserts M3 × 5 × 4 : Ø ext. 5, 4 mm de long, trou de 4,3) | `pince_bouchon_doigt_insert.stl` (× 2, insert posé au fer dans le bouchon, puis bouchon dans le doigt actuel), ou doigts `pince_doigt_+Y_insert.stl` / `_-Y_insert.stl` (insert directement dans le trou arrière) : filetage en laiton au lieu du plastique |
 
@@ -95,8 +105,8 @@ c'est le vissage qui serre.
 | Quoi | Combien | Où |
 |---|---|---|
 | Roulements 623ZZ (commandés) | 7 | engrenage B (1), bras libres (2 chacun, un à chaque bout), doigts (1 chacun, trou avant) |
-| Inserts M3 à chaud | 5 | tous dans la base : piliers de la bride (2), poteau de l'engrenage B, poteaux des 2 bras libres |
-| Vis M3 × 10 | 5 | bride (2), engrenage B (1), pivots des bras libres (2) |
+| Inserts M3 à chaud | 9 | base (5) : piliers de la bride (2), poteau de l'engrenage B, poteaux des 2 bras libres ; mâchoires (4) : 2 dans le dessus de chacune |
+| Vis M3 × 10 | 9 | bride (2), engrenage B (1), pivots des bras libres (2), mâchoires sous leurs plaques (4) |
 | Vis M3 × 8 | 2 | bout des bras libres : à travers le roulement du bras, vissées dans le bouchon du doigt (pas de M3 × 10 : elle dépasserait) |
 | Vis M3 × 16 (14 à 20 conviennent) + écrou frein | 2 | doigt sur le bras de l'engrenage |
 | Rondelles M3 (DIN 125, 0,5 mm) | 7 | entre doigt et bras d'engrenage (2), entre bras libre et doigt (2), **sur le dessus des 3 poteaux, sous le roulement (3)** |
