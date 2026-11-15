@@ -9,6 +9,7 @@ import argparse, sys
 from servos import Bus, ErreurServo, degres, pas
 
 MILIEU = 2048
+ID_COUDE = 1                   # passera à 3 quand le bras complet sera assemblé
 BUTEES_COUDE = (908, 3188)     # ± 100° : la fourche touche les colonnes du bras V1 à ± 109°
 
 def afficher_etat(e):
@@ -30,9 +31,13 @@ def main():
         if ident is None:
             trouves = bus.chercher()
             print('Servos trouvés :', trouves or 'aucun')
-            if len(trouves) != 1:
-                sys.exit('Brancher UN seul servo (ou préciser --id N).')
-            ident = trouves[0]
+            if len(trouves) == 1:
+                ident = trouves[0]
+            elif ID_COUDE in trouves:
+                ident = ID_COUDE                      # coude + pince sur le même câble : on prend le coude
+                print(f'Plusieurs servos : je pilote le coude, n° {ID_COUDE}.')
+            else:
+                sys.exit(f'Servo du coude (n° {ID_COUDE}) introuvable : brancher le coude seul, ou préciser --id N.')
         e = bus.etat(ident); print(f'Servo n° {ident} :'); afficher_etat(e)
         if not bus.butees_reglees(e) or (e['butee_min'], e['butee_max']) != BUTEES_COUDE:
             print(f"\nLes butées du servo sont {e['butee_min']}–{e['butee_max']}. Pour le coude, il faut {BUTEES_COUDE[0]}–{BUTEES_COUDE[1]}.")
