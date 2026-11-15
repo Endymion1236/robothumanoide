@@ -41,7 +41,7 @@ et `generer_pince.py` refuse toute paroi de moins de 1,8 mm autour d'un roulemen
 | `generer_pince.py` | pièces fermées, d'un seul bloc ; aucune collision en 24 positions ; chaque pièce posée à plat pour l'impression ; tournevis des vis du manchon et sortie du câble libres | bon |
 | `verifier_cinematique.py` | **le doigt ne peut pas se retourner** : calcule les deux positions possibles du doigt (droit, retourné) et la distance au point mort, butées dépassées de 15° comprises. Refait le calcul sur la V2 : il **trouve bien le défaut** (point mort à 0°, doigt retourné de 89° pince ouverte, comme sur la photo) | V3 bonne, V2 en défaut |
 | `verifier_engrenages.py` | place entre les dents sur un pas complet, et avec l'engrenage B décalé de 0,5° | 0,33 mm / 0,21 mm |
-| `verifier_jeux.py` | distance la plus courte entre toutes les pièces sur toute la course (39 paires, 14 positions) | rien d'imprévu à moins de 1,5 mm |
+| `verifier_jeux.py` | distance la plus courte entre toutes les pièces sur toute la course (39 paires, 14 positions) ; il exige 2 mm entre deux pièces qui ne doivent pas se frôler | rien d'imprévu à moins de 3 mm |
 | `verifier_visserie.py` | vis, écrous et rondelles ne touchent rien sur toute la course | bon |
 | `test_gobelets.py` | gobelets de 55, 80 et 90 mm : ils ne touchent que les mâchoires (marge derrière : 29,8 / 10,5 / 1,2 mm) | bon |
 | `../bras/test_securites.py` | les sécurités du programme sur un faux servo : butées, chaleur, **pince coincée → force coupée en 1 s**, serrage | bon |
@@ -64,7 +64,7 @@ servo). Objets plus fins que 5 mm : pas pour cette pince.
 | Pièce | Fichier |
 |---|---|
 | Base (logement du servo + manchon sur l'avant-bras + 3 poteaux) — **nouvelle en V3** | `pince_base.stl` |
-| Bride (simple barre) — **nouvelle en V3** | `pince_bride.stl` |
+| Bride (simple barre) — **nouvelle en V3**, rétrécie le 15/11/2026 (elle passait à 1,5 mm des dents de l'engrenage A, maintenant 4 mm) | `pince_bride.stl` |
 | Engrenage A (sur le palonnier) — **dents refaites en V3** | `pince_engrenage_A.stl` pour des vis M2,5 × 8 ; avec les vis courtes fournies avec le servo : `pince_engrenage_A_vis4mm.stl`, `_vis5mm` ou `_vis6mm` selon leur longueur sous tête (logement des têtes plus profond : la vis entre de 2 à 2,5 mm dans le palonnier) |
 | Engrenage B — **dents refaites en V3** | `pince_engrenage_B.stl` |
 | Bras libres (élargis à 15 mm le 14/11/2026, les deux fichiers sont identiques) | `pince_bras_libre_+Y.stl`, `pince_bras_libre_-Y.stl` |

@@ -20,12 +20,12 @@
   },
   "pince_bride": {
    "encombrement_mm": [
-    13.0,
+    10.5,
     46.8,
     4.0
    ],
-   "masse_g_environ": 2,
-   "surface_sur_le_plateau_mm2": 590,
+   "masse_g_environ": 1,
+   "surface_sur_le_plateau_mm2": 473,
    "plafonds_en_pont_mm2": 0
   },
   "pince_engrenage_A": {
@@ -185,6 +185,6 @@
   "butee_max": 2433,
   "sens": "à vérifier au premier essai : le sens « ouvrir » peut être vers la butée min ou max"
  },
- "masse_pieces_imprimees_g": 100,
- "masse_avec_servo_g": 155
+ "masse_pieces_imprimees_g": 99,
+ "masse_avec_servo_g": 154
 }

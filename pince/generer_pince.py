@@ -191,7 +191,8 @@ ZC = 15.0                          # axe de l'avant-bras dans la hauteur de la p
 XF = X0S - JEU - 3                 # le bout de l'avant-bras bute contre le mur arrière du logement du servo
 # Bride à dessous plat : les piliers s'arrêtent 0,5 mm SOUS le dessus du servo ; en vissant, la bride
 # appuie sur le servo avec 0,5 mm de serrage. Elle s'imprime à plat, sans support.
-BRIDE_X0, BRIDE_X1, BRIDE_Z = 9.0, 22.0, H_HAUT - 0.5   # V3 : commence à 9 (1 mm après le poteau du bras libre)
+BRIDE_X0, BRIDE_X1, BRIDE_Z = 9.0, 19.5, H_HAUT - 0.5   # commence à 9 (1 mm après le poteau du bras libre) ; finit à 19,5 :
+                                                        # à 22, il ne restait que 1,5 mm avant les dents de l'engrenage A (15/11/2026)
 D_POTEAU_B, D_POTEAU_LIBRE = 16.0, 12.0
 
 def base():

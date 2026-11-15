@@ -1,5 +1,5 @@
 {
- "jeu_minimum_exige_mm": 0.45,
+ "jeu_minimum_exige_mm": 2.0,
  "paires_a_moins_de_3_mm": [
   {
    "pieces": "engrenage A / servo",
@@ -54,18 +54,6 @@
    "jeu_min_mm": 0.5,
    "a_ecart_machoires_mm": 14,
    "voulu": "articulation"
-  },
-  {
-   "pieces": "bride / engrenage A",
-   "jeu_min_mm": 1.5,
-   "a_ecart_machoires_mm": 23,
-   "voulu": ""
-  },
-  {
-   "pieces": "bride / engrenage B",
-   "jeu_min_mm": 2.67,
-   "a_ecart_machoires_mm": 41,
-   "voulu": ""
   }
  ],
  "alertes": []
