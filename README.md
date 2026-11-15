@@ -95,6 +95,31 @@ Choix : poignet et pince en STS3215 ; coude **STS3095-C002 (12 V !** la C001 est
 Pour la station café sur un comptoir, un bras de 45 cm suffit (beaucoup moins de couple). Commander un seul
 STS3095 d'abord, pour le tester et le mesurer.
 
+## Objectif : le buste humanoïde (15/11/2026, après le 2e bras)
+
+Les deux bras et la tête réunis sur un **buste**, posé sur la banque d'accueil du club : à terme, Câlin.
+Taille : bras de 35 cm (celui de table) → buste aux proportions d'un enfant de 8 à 10 ans (moins impressionnant,
+plus léger, plus sûr).
+
+**Ce qui est repris** : avant-bras, pince, coude, haut du bras, berceaux des servos, programmes (`bras/`), tête (`tete/`).
+**Ce qui change** : le bâti d'essai de l'épaule est remplacé par le torse ; au repos le bras **pend** le long du corps
+(le ressort est replacé en conséquence) ; une vraie épaule a 2 ou 3 mouvements (lever devant, écarter, tourner).
+
+**Fabrication : pas tout en impression 3D.**
+- **Ossature en profilés aluminium 20 × 20** (rainure de 6, coupés à longueur, écrous en T) : rigide, légère,
+  démontable, on y ajoute ou déplace des éléments sans rien réimprimer. Ou contreplaqué de 10 à 15 mm si plus simple
+  à l'atelier du club.
+- **Impression 3D seulement pour les pièces de liaison** : supports des épaules et du cou sur les profilés, boîtiers.
+- **Habillage à la fin**, au choix : coque imprimée en panneaux, mousse et tissu (costume de Câlin), ou plaques
+  thermoformées. L'habillage ne porte rien.
+
+**Dedans** : 2 épaules symétriques, cou (2 servos) et tête (caméra, micro, haut-parleur), carte(s) servos,
+alimentation 12 V et interrupteur d'arrêt d'urgence accessible, plus tard l'ordinateur embarqué (Raspberry Pi 5 / Jetson).
+Pied lesté ou vissé : bras tendus, il ne doit jamais basculer.
+
+**Ordre** : 1) un bras complet sur le bâti (épaule, socle, poignet) ; 2) le 2e bras en symétrique ; 3) dessin du buste
+(ossature + liaisons) ; 4) tête installée et reliée aux bras ; 5) habillage.
+
 ## Feuille de route du premier bras
 
 | # | Étape | État |
