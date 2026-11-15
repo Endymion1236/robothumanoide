@@ -137,6 +137,18 @@ class Bus:
         self.relacher(ident)
         return f"ARRÊT : {cause}, force coupée.{question}"
 
+    def trop_chaud(self, ident, e):
+        """Vrai seulement si la température dépasse TEMP_MAX à 3 lectures de suite (0,1 s). Une lecture isolée
+        peut être fausse : le 15/11/2026, 75 °C lus une fois pendant un serrage, 35 °C juste avant et après
+        (impossible en une seconde) ; la pince s'était arrêtée pour rien. Une vraie chauffe, elle, dure."""
+        if e['temperature'] < TEMP_MAX:
+            return False
+        for _ in range(2):
+            time.sleep(0.05)
+            if self.lire1(ident, SMS_STS_PRESENT_TEMPERATURE, 'température') < TEMP_MAX:
+                return False
+        return True
+
     def aller(self, ident, cible, vitesse=VITESSE_DOUCE, accel=ACCEL_DOUCE, delai_max=8.0, afficher=None, charge_max=CHARGE_MAX, si_arret='relacher'):
         """Va doucement à la position cible en surveillant le servo. Renvoie un compte rendu (texte).
         Refuse toute cible hors des butées du servo ; coupe la force en cas de chaleur, d'effort ou de blocage.
@@ -151,7 +163,7 @@ class Bus:
             raise ErreurServo('butées non réglées dans le servo : mouvement refusé')
         if not e['butee_min'] <= cible <= e['butee_max']:
             raise ErreurServo(f"cible {cible} hors des butées {e['butee_min']}–{e['butee_max']} : refusé")
-        if e['temperature'] >= TEMP_MAX:
+        if self.trop_chaud(ident, e):
             raise ErreurServo(f"servo trop chaud ({e['temperature']} °C) : laisser refroidir")
         res, err = self.p.WritePosEx(ident, cible, vitesse, accel); self._ok(res, err, 'ordre de position')
         debut, effort_depuis, avant, immobile_depuis = time.time(), None, e['position'], None
@@ -160,7 +172,7 @@ class Bus:
             e = self.etat(ident)
             if afficher:
                 afficher(e)
-            if e['temperature'] >= TEMP_MAX:
+            if self.trop_chaud(ident, e):
                 return self._arreter(ident, si_arret, f"trop chaud ({e['temperature']} °C)")
             if abs(e['charge']) >= charge_max:
                 effort_depuis = effort_depuis or time.time()
@@ -192,7 +204,7 @@ class Bus:
             raise ErreurServo('butées non réglées dans le servo : mouvement refusé')
         if not e['butee_min'] <= cible <= e['butee_max']:
             raise ErreurServo(f"cible {cible} hors des butées {e['butee_min']}–{e['butee_max']} : refusé")
-        if e['temperature'] >= TEMP_MAX:
+        if self.trop_chaud(ident, e):
             raise ErreurServo(f"servo trop chaud ({e['temperature']} °C) : laisser refroidir")
         self.limiter_force(ident, force)
         res, err = self.p.WritePosEx(ident, cible, VITESSE_DOUCE, ACCEL_DOUCE); self._ok(res, err, 'ordre de position')
@@ -202,7 +214,7 @@ class Bus:
             e = self.etat(ident)
             if afficher:
                 afficher(e)
-            if e['temperature'] >= TEMP_MAX:
+            if self.trop_chaud(ident, e):
                 self.relacher(ident); return f"ARRÊT : trop chaud ({e['temperature']} °C), force coupée", e['position'], False
             if abs(e['position'] - cible) <= 15:
                 return f"fermée jusqu'au bout en {time.time() - debut:.1f} s : rien entre les doigts", e['position'], False
