@@ -134,22 +134,24 @@ def e_inserts(fig):
     etiquette(a3, p_y_vers_z((E.B_VIS, E.Y_FACE + 14, 0)), '1 insert\n(vis du ressort)', (-40, 50), taille=11)
     etiquette(a3, p_y_vers_z((120, E.Y_FACE, 0)), 'platine', (50, -40), taille=11)
 
-@etape('Le berceau de l\'épaule sur le mur', ['le bâti', 'un berceau à inserts', '4 vis M3 × 10'],
-       ['Le SOCLE du berceau se pose à plat contre la face intérieure du mur (celle qui regarde le mât).',
+@etape('Le bloc épaule sur le mur', ['le bâti', 'le bloc monté sur la table', '4 vis M3 × 10'],
+       ['Présente le bloc entre le mur et le mât : le haut du bras ressort vers l\'avant, par le côté ouvert du bâti.',
+        'Le SOCLE du berceau se pose à plat contre la face intérieure du mur (celle qui regarde le mât).',
         'Les 2 colonnes du berceau vont vers l\'ARRIÈRE (côté mur du fond), comme sur le dessin A.',
         'Les 4 vis M3 × 10 passent PAR DERRIÈRE le mur (dessin B) et se vissent dans les inserts du socle.',
         'Serre en croix, jusqu\'au contact.'],
-       'Côté berceau, rien ne doit dépasser du socle : la fourche du bras passera 2 mm au-dessus.',
-       [(C['bati'], 'bâti'), (C['berceau'], 'berceau')])
+       'Les vis sont derrière le mur : faciles d\'accès, même avec le bras monté. Tiens le bloc d\'une main pendant les 2 premières vis.',
+       [(C['bati'], 'bâti'), (C['berceau'], 'bloc épaule')])
 def e_berceau_mur(fig):
     a1, a2 = panneaux(fig, 2, ['A. Côté berceau', 'B. Par derrière le mur'])
     dy = 26
-    pcs = [(E.BATI, C['bati']), (E.BERCEAU_E.translate((0, dy, 0)), C['berceau'])]
-    dessiner(a1, pcs, vue=(22, 55), marge=0.62)
+    bloc = E.BERCEAU_E + E.SERVO_E + E.BRAS_BAS + E.BRAS_HAUT + E.BRIDE_E
+    pcs = [(E.BATI, C['bati']), (bloc.translate((0, dy, 0)), C['berceau'])]
+    dessiner(a1, pcs, vue=(22, 55), marge=0.7)
     for x, z in E.TROUS_MUR: guide(a1, (x, 0, z), (x, dy, z))
-    etiquette(a1, (-20, dy + 5, 28), 'berceau : socle\ncontre le mur', (120, 40)); etiquette(a1, (-46, dy + 40, 20), 'colonnes\nvers l\'arrière', (-110, 40))
-    etiquette(a1, (20, 0, 30), 'mur', (40, 80))
-    pcs = [(E.BATI, C['bati']), (E.BERCEAU_E, GRIS)] + [(vis(x, z, -E.EP_MUR - 16, 10, 1), NOIR) for x, z in E.TROUS_MUR]
+    etiquette(a1, (-20, dy + 5, 28), 'socle du berceau\ncontre le mur', (-150, -20)); etiquette(a1, (120, dy + 50, 0), 'haut du bras\n(vers l\'avant)', (-40, -110))
+    etiquette(a1, (20, 0, 30), 'mur', (90, 40))
+    pcs = [(E.BATI, C['bati']), (E.BERCEAU_E + E.SERVO_E + E.BRAS_BAS + E.BRAS_HAUT + E.BRIDE_E, GRIS)] + [(vis(x, z, -E.EP_MUR - 16, 10, 1), NOIR) for x, z in E.TROUS_MUR]
     dessiner(a2, pcs, vue=(18, -125), marge=0.62)
     for x, z in E.TROUS_MUR: guide(a2, (x, -E.EP_MUR - 6, z), (x, 0, z))
     etiquette(a2, (E.TROUS_MUR[1][0], -E.EP_MUR - 20, E.TROUS_MUR[1][1]), '4 vis M3 × 10', (-90, -60))
@@ -174,27 +176,27 @@ def e_berceau_platine(fig):
     etiquette(a2, (E.TROUS_PLATINE[1][0], E.Y_PL_HAUT - 20, E.TROUS_PLATINE[1][1]), '4 vis M3 × 10', (110, 30))
     etiquette(a2, (60, E.Y_PL_HAUT, 0), 'moitié haute,\nface intérieure', (-90, -60))
 
-@etape('Le servo et le haut du bras', ['le servo n° 2 et son disque libre', 'les 2 moitiés du haut du bras', '8 vis M2,5 (fournies avec le servo)', '4 vis M3 × 30'],
-       ['Même fourche qu\'au coude, même ordre de montage que sur le support de table.',
-        'Le servo se couche dans le berceau du mur, palonnier vers l\'extérieur (loin du mur).',
-        'Moitié BASSE (orange clair) côté mur, sur le disque libre : 4 vis M2,5.',
+@etape('Le servo et le haut du bras, À PLAT SUR LA TABLE', ['le 2e berceau à inserts (pas encore sur le mur)', 'le servo n° 2 et son disque libre', 'les 2 moitiés du haut du bras', '8 vis M2,5 (fournies avec le servo)', '4 vis M3 × 30'],
+       ['Tout se fait sur la table, berceau posé à plat, exactement comme pour le coude : même fourche, même ordre.',
+        'Le servo se couche dans le berceau, palonnier vers le haut (côté opposé au socle).',
+        'Moitié BASSE (orange clair) côté socle du berceau, sur le disque libre : 4 vis M2,5.',
         'Moitié HAUTE (orange foncé) côté extérieur, sur le palonnier : 4 vis M2,5. Bras à peu près horizontal.',
         '4 vis M3 × 30 par la face extérieure (dessin B), dans les inserts de la moitié basse. Serre en croix, arrête dès que les entretoises se touchent.'],
        'Le zéro exact de l\'épaule sera réglé par le programme : pas besoin d\'être précis ici.',
-       [(C['servo'], 'servo'), (C['bas'], 'moitié basse'), (C['haut'], 'moitié haute')])
+       [(C['berceau'], 'berceau'), (C['servo'], 'servo'), (C['bas'], 'moitié basse'), (C['haut'], 'moitié haute')])
 def e_bras(fig):
     a1, a2 = panneaux(fig, 2, ['A. Servo dans le berceau, moitié basse sur le disque libre', 'B. Moitié haute sur le palonnier + 4 vis M3 × 30'])
-    pcs = [(E.BATI, GRIS), (E.BERCEAU_E, GRIS), (E.SERVO_E, C['servo']), (E.BRAS_BAS, C['bas'])]
-    dessiner(a1, pcs, vue=(22, 55), marge=0.6)
-    etiquette(a1, (-15, 47, 10), 'servo', (-90, 50)); etiquette(a1, (90, 9, 12), 'moitié basse\n(côté mur)', (90, -40))
+    pcs = [(E.BERCEAU_E, C['berceau']), (E.SERVO_E, C['servo']), (E.BRAS_BAS, C['bas'])]
+    dessiner(a1, pcs, vue=(30, 55), marge=0.62)
+    etiquette(a1, (-15, 47, 10), 'servo', (-90, 50)); etiquette(a1, (90, 9, 12), 'moitié basse\n(côté socle)', (90, -40))
     dy = 30
-    pcs = [(E.BATI, GRIS), (E.BERCEAU_E, GRIS), (E.SERVO_E, GRIS_SERVO), (E.BRAS_BAS, GRIS), (E.BRAS_HAUT.translate((0, dy, 0)), C['haut'])]
+    pcs = [(E.BERCEAU_E, GRIS), (E.SERVO_E, GRIS_SERVO), (E.BRAS_BAS, GRIS), (E.BRAS_HAUT.translate((0, dy, 0)), C['haut'])]
     pcs += [(vis(x, z, E.Y_FACE + dy + 16, 30, -1), NOIR) for x, z in ENT]
-    dessiner(a2, pcs, vue=(22, 55), marge=0.6)
+    dessiner(a2, pcs, vue=(30, 55), marge=0.62)
     for x, z in ENT: guide(a2, (x, E.Y_FACE + dy - 14, z), (x, Y_HAUT_ENT_BAS, z))
     etiquette(a2, (130, E.Y_FACE + dy, 25), 'moitié haute', (110, 40)); etiquette(a2, (ENT[2][0], E.Y_FACE + dy + 20, ENT[2][1]), '4 vis M3 × 30', (-120, 60))
 
-@etape('La bride de l\'épaule', ['la bride', '2 vis M3 × 10'],
+@etape('La bride de l\'épaule, toujours sur la table', ['la bride', '2 vis M3 × 10'],
        ['La bride se pose en travers sur le servo, entre les 2 colonnes du berceau.',
         'Les 2 vis M3 × 10 se vissent dans les inserts en haut des colonnes, un peu chacune, à tour de rôle.',
         'Serre jusqu\'à ce que le servo ne bouge plus. Pas plus.'],
@@ -202,9 +204,9 @@ def e_bras(fig):
 def e_bride(fig):
     ax, = panneaux(fig, 1)
     dy = 22
-    pcs = [(E.BATI, GRIS), (E.BERCEAU_E, GRIS), (E.SERVO_E, GRIS_SERVO), (E.BRIDE_E.translate((0, dy, 0)), C['bride'])]
+    pcs = [(E.BERCEAU_E, GRIS), (E.SERVO_E, GRIS_SERVO), (E.BRIDE_E.translate((0, dy, 0)), C['bride'])]
     pcs += [(vis(x, z, 51.9 + dy + 16, 10, -1), NOIR) for x, z in BRIDE_VIS]
-    dessiner(ax, pcs, vue=(38, 70), marge=0.8, cadre=(-65, 35, -5, 95, -40, 40))
+    dessiner(ax, pcs, vue=(38, 70), marge=0.75, cadre=(-65, 35, -5, 95, -40, 40))
     ax.text2D(0.02, 0.02, '(le haut du bras n\'est pas dessiné, pour y voir clair)', transform=ax.transAxes, fontsize=11, style='italic')
     for x, z in BRIDE_VIS: guide(ax, (x, 51.9 + dy, z), (x, Y_HAUT_COL, z))
     etiquette(ax, (-25, 51.9 + dy, 0), 'bride', (-120, 30)); etiquette(ax, (BRIDE_VIS[0][0], 51.9 + dy + 20, BRIDE_VIS[0][1]), '2 vis M3 × 10', (90, 60))
@@ -297,6 +299,9 @@ def page_pieces(pdf, n):
              'Dans les étapes : EN COULEUR = la pièce que tu poses maintenant · GRIS = déjà monté · pointillés rouges = où va la vis.', fontsize=13)
     fig.subplots_adjust(left=0.01, right=0.99, top=0.92, bottom=0.08, hspace=0.25, wspace=0.02)
     fig.savefig(E.OUT / f'plan_montage_{n:02d}.png', dpi=90); pdf.savefig(fig); plt.close(fig)
+
+ORDRE = ['Le servo de', 'Les 17 inserts', 'Le berceau du coude', 'Le servo et le haut', 'La bride', 'Le bloc épaule', 'Le coude,', 'Essai à la main', 'Le ressort', 'Premier essai']
+ETAPES = [next(e for e in ETAPES if e[0].startswith(o)) for o in ORDRE]
 
 if __name__ == '__main__':
     with PdfPages(E.OUT / 'plan_montage_epaule.pdf') as pdf:
