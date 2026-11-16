@@ -31,6 +31,8 @@ Ordre prévu :
 
 ## La tête (commencée le 11/11/2026)
 
+**Corps de la tête (16/11/2026) : une tête de poney palomino**, crâne imprimé habillé de tissu, yeux lumineux, oreilles mobiles, cou à 2 STS3215 : voir `tete-poney/LISEZ-MOI.md`.
+
 Dossier `tete/`, voir `tete/LISEZ-MOI.md`. Étape 1 **voir** : `vision.py`, essayé sur le PC (80 objets
 fixes, ou sa propre liste avec YOLO-World). Étape 2 **entendre** : `ecouter.py` (Whisper, en français,
 sur le PC), **validé le 11/11/2026**. Étape 3 **répondre** : `parler.py`, conversation
