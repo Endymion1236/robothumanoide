@@ -16,6 +16,22 @@ rien n'est encore dessiné en pièces.**
 - **Cou** : les 2 STS3215 de rechange (tourner, hocher) ; tête de 400 à 500 g.
 - Plus tard, en option : mâchoire qui s'ouvre un peu quand il parle (un petit servo de plus).
 
+## Choix du 16/11/2026 (Nicolas : « fais comme tu le sens »)
+- **Style peluche** plutôt que réaliste : front bombé, nez plus court et rond. Plus rassurant pour les enfants, plus
+  facile à habiller, et la tête est plus compacte (moins lourde au bout du cou).
+- **Grands yeux tournés de 35° vers l'avant** (au lieu des côtés comme un vrai poney) : Câlin a l'air de regarder
+  la personne en face.
+
+## Matériel envisagé (à confirmer avec ce que Nicolas a déjà)
+| Quoi | Proposition | Pourquoi |
+|---|---|---|
+| Caméra | la webcam USB déjà utilisée par `tete/` (caméra 1), sortie de son boîtier si possible | logiciel déjà réglé ; à mesurer |
+| Yeux | 2 anneaux de LED adressables WS2812B, 12 ou 16 LED (Ø ext. 37 ou 44 mm), derrière un dôme imprimé en blanc translucide | couleurs et animations par programme |
+| Oreilles | 2 MG90S (du premier projet de main) | légers, assez forts pour des oreilles creuses |
+| Pilotage yeux + oreilles | l'ESP32 déjà en stock, relié au PC en USB | le PC reste le cerveau (vision, voix, IA) |
+| Haut-parleur, micro | pour commencer, ceux déjà branchés au PC ; plus tard un haut-parleur 40 mm 3 W + petit ampli, et un micro USB dans la tête | rien à acheter tout de suite |
+| Cou | les 2 STS3215 de rechange (n° 7 tourner, n° 8 hocher, sur le bus des servos) | même carte, mêmes sécurités |
+
 ## Ce que le cou permettra
 Tourner la tête vers la personne qui parle ou un visage reconnu, faire oui / non, regarder l'objet que le bras va saisir.
 

@@ -24,9 +24,9 @@ def mesh(m):
     g = m.to_mesh(); return tm.Trimesh(np.asarray(g.vert_properties)[:, :3], np.asarray(g.tri_verts))
 
 # --- forme de la tête (≈ 23 cm du chignon au bout du nez), un peu inclinée nez vers le bas ---
-CRANE = [(0, 0, 75, 52), (25, 0, 95, 42)]                 # front et chignon
-CHANFREIN = [(95, 0, 70, 34), (125, 0, 52, 33)]           # le long du nez
-BOUT_NEZ = [(170, 0, 30, 30), (165, 0, 10, 26)]           # bout du nez, menton
+CRANE = [(0, 0, 78, 58), (30, 0, 100, 48)]                # front bombé (style peluche)
+CHANFREIN = [(90, 0, 72, 36), (115, 0, 55, 35)]           # nez plus court
+BOUT_NEZ = [(150, 0, 35, 33), (145, 0, 15, 29)]           # bout du nez rond, menton
 GANACHE = [(20, 0, 30, 46)]                               # joues (ganaches)
 tete = coque(*[boule(*b) for b in CRANE + CHANFREIN + BOUT_NEZ + GANACHE])
 def oreille(s, angle_av=15):
@@ -36,8 +36,9 @@ def oreille(s, angle_av=15):
 OREILLES = [oreille(1), oreille(-1)]
 COU = coque(boule(-30, 0, 40, 40), boule(-55, 0, -80, 45), boule(-20, 0, -80, 45))
 CRINIERE = coque(*[boule(-10 - 12 * k, 0, 128 - 25 * k, 9) for k in range(8)]) + coque(boule(15, 0, 125, 10), boule(40, 0, 118, 6))   # crinière + toupet
-OEIL_POS = [(58, s * 44, 92) for s in (1, -1)]
-NASEAUX = [boule(193, s * 12, 20, 6) for s in (1, -1)]
+OEIL_POS = [(66, s * 41, 100) for s in (1, -1)]           # yeux grands, tournés de 35° vers l'avant
+AXE_OEIL = {s: np.array([math.sin(math.radians(35)), s * math.cos(math.radians(35)), 0]) for s in (1, -1)}
+NASEAUX = [boule(178, s * 13, 25, 6) for s in (1, -1)]
 
 PALOMINO, CREME, SOMBRE = '#d9a441', '#f3e6c4', '#3a2a1a'
 def dessiner(ax, pieces, vue=(12, -60), titre=''):
@@ -59,22 +60,22 @@ def etiq(ax, xyz, txt, d):
                 bbox=dict(boxstyle='round,pad=0.3', fc='white', ec='#333'), arrowprops=dict(arrowstyle='-|>', color='#333', lw=1.3), zorder=50)
 
 fig = plt.figure(figsize=(17, 9)); fig.patch.set_facecolor('white')
-fig.suptitle('Câlin, tête de poney palomino : aperçu de la forme (rien n\'est encore dessiné en pièces)', fontsize=17, weight='bold')
+fig.suptitle('Câlin, tête de poney palomino : style peluche (aperçu de la forme, pas encore les pièces)', fontsize=17, weight='bold')
 
 # 1. habillée
 ax = fig.add_subplot(1, 2, 1, projection='3d')
-anneaux = [cyl((x, y - 4 * np.sign(y), z), (x, y + 3 * np.sign(y), z), 13) for x, y, z in OEIL_POS]
+anneaux = [cyl(np.array(p) - 4 * AXE_OEIL[int(np.sign(p[1]))], np.array(p) + 4 * AXE_OEIL[int(np.sign(p[1]))], 16) for p in OEIL_POS]
 pieces = [(tete, PALOMINO, 1), (COU, PALOMINO, 1), (CRINIERE, CREME, 1)] + [(o, PALOMINO, 1) for o in OREILLES]
 pieces += [(a, '#5ad1ff', 1) for a in anneaux] + [(n, SOMBRE, 1) for n in NASEAUX]
-pieces += [(coque(boule(100, 0, 103, 8), boule(150, 0, 81, 7), boule(185, 0, 57, 6)), CREME, 1)]          # liste blanche sur le chanfrein
-pieces += [(boule(56, 0, 124, 6), '#222', 1)]                                        # caméra discrète dans le front
+pieces += [(coque(boule(95, 0, 106, 8), boule(130, 0, 88, 7), boule(165, 0, 66, 6)), CREME, 1)]          # liste blanche sur le chanfrein
+pieces += [(boule(62, 0, 134, 6), '#222', 1)]                                        # caméra discrète dans le front
 dessiner(ax, pieces, vue=(22, -38), titre='Habillée : tissu doré, crinière crème')
-etiq(ax, (58, 47, 92), 'yeux lumineux\n(anneaux de LED)', (-100, -60))
-etiq(ax, (56, 0, 128), 'caméra\n(dans le front)', (60, 90))
+etiq(ax, (69, 45, 100), 'grands yeux lumineux\n(tournés vers l\'avant)', (-110, -70))
+etiq(ax, (62, 0, 138), 'caméra\n(dans le front)', (60, 90))
 etiq(ax, (4, 34, 160), 'oreilles mobiles', (-60, 60))
-etiq(ax, (150, 0, 86), 'liste blanche', (110, 50))
+etiq(ax, (130, 0, 93), 'liste blanche', (110, 50))
 etiq(ax, (-40, 0, 105), 'crinière crème', (-90, 40))
-etiq(ax, (193, 12, 20), 'naseaux', (90, -50))
+etiq(ax, (178, 13, 25), 'naseaux', (90, -50))
 
 # 2. dedans
 ax = fig.add_subplot(1, 2, 2, projection='3d')
@@ -82,18 +83,18 @@ pieces = [(tete, '#cfcfcf', 0.18), (COU, '#cfcfcf', 0.12)] + [(o, '#cfcfcf', 0.2
 pieces += [(boite((-35, 0, -60), (24, 45, 33)), '#222', 1)]                          # servo du cou : tourner (axe vertical)
 pieces += [(boite((-20, 0, 0), (45, 33, 24)), '#333', 1)]                            # servo du cou : hocher (axe gauche-droite)
 pieces += [(boite((0, s * 26, 105), (23, 12, 29)), '#3f86d6', 1) for s in (1, -1)]  # 2 MG90S des oreilles
-pieces += [(boite((48, 0, 107), (10, 26, 26)), '#e2783a', 1)]                        # caméra
-pieces += [(cyl((x, y - 4 * np.sign(y), z), (x, y, z), 11), '#5ad1ff', 1) for x, y, z in OEIL_POS]
+pieces += [(boite((55, 0, 122), (10, 26, 26)), '#e2783a', 1)]                        # caméra
+pieces += [(cyl(np.array(p) - 6 * AXE_OEIL[int(np.sign(p[1]))], np.array(p), 16), '#5ad1ff', 1) for p in OEIL_POS]
 pieces += [(cyl((60, 0, 30), (60, 0, 50), 22), '#7fbf6a', 1)]                         # haut-parleur (sous la tête, vers le bas)
-pieces += [(boule(130, 0, 15, 5), '#b57cc4', 1)]                                      # micro
+pieces += [(boule(120, 0, 2, 5), '#b57cc4', 1)]                                      # micro
 dessiner(ax, pieces, titre='Dedans : ce que porte le crâne imprimé')
 etiq(ax, (-35, 0, -60), 'cou : tourner\n(STS3215)', (-100, -40))
 etiq(ax, (-20, 0, 0), 'cou : hocher\n(STS3215)', (-110, 30))
 etiq(ax, (0, 26, 105), 'servos des oreilles\n(MG90S)', (-80, 80))
-etiq(ax, (48, 0, 112), 'caméra', (40, 90))
-etiq(ax, (58, 44, 92), 'yeux LED', (100, 60))
+etiq(ax, (55, 0, 127), 'caméra', (40, 90))
+etiq(ax, (66, 41, 100), 'yeux LED', (100, 60))
 etiq(ax, (60, 0, 40), 'haut-parleur', (120, -40))
-etiq(ax, (130, 0, 15), 'micro', (90, -70))
+etiq(ax, (120, 0, 2), 'micro', (90, -70))
 fig.subplots_adjust(left=0, right=1, top=0.9, bottom=0, wspace=0)
 fig.savefig(OUT / 'apercu_tete_poney.png', dpi=100)
 print('ok')
