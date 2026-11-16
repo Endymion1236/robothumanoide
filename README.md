@@ -128,8 +128,14 @@ cou au centre du dessus, pied large en croix.
 | Support du cou / montant du cou | 1 / 1 | 110 / 120 mm |
 | Pied en croix | 2 | 350 mm |
 
-≈ 4 m de profilé 20 × 20 rainure 6 (tout du même type, par exemple type B), coupé à longueur par le vendeur ;
-30 équerres, 60 écrous marteau M5, 60 vis M5 × 10, embouts. Environ 50 à 80 €.
+≈ 4 m de profilé 20 × 20 (≈ 1,9 kg), coupé à longueur par le vendeur. **Choix du 16/11/2026 : item, ligne 5**
+(rainure de 5, système fermé : ne pas mélanger avec des accessoires génériques « rainure 6 / type B ») :
+- profilé **5 20x20, naturel, 0.0.370.03** (coupe sur mesure, jusqu'à 6000 mm ; 0,48 kg/m ; 4 rainures ouvertes) ;
+  barres entières : 0.0.448.04 (3000 mm), 0.0.611.45 (6000 mm) ;
+- **kit équerre 5 20x20, 0.0.425.02** (≈ 30) : équerre Zn + cache + 2 vis M5 × 8 + 2 écrous 5 St M5 ;
+- **embout 5 20x20, noir, 0.0.370.09** pour les bouts de profilés ;
+- écrous 5 St M5 en plus pour visser les pièces imprimées (supports d'épaule, cou, boîtiers) ;
+- le kit raccord 5 20x20x20 (0.0.437.96) demande de tarauder les profilés : pas retenu.
 
 **Dedans** : 2 épaules symétriques, cou (2 servos) et tête (caméra, micro, haut-parleur), carte(s) servos,
 alimentation 12 V et interrupteur d'arrêt d'urgence accessible, plus tard l'ordinateur embarqué (Raspberry Pi 5 / Jetson).
