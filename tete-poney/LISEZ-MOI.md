@@ -25,12 +25,18 @@ rien n'est encore dessiné en pièces.**
 ## Matériel envisagé (à confirmer avec ce que Nicolas a déjà)
 | Quoi | Proposition | Pourquoi |
 |---|---|---|
-| Caméra | la webcam USB déjà utilisée par `tete/` (caméra 1), sortie de son boîtier si possible | logiciel déjà réglé ; à mesurer |
+| Caméra | **Logitech C270** (720p, **micro intégré** : le micro de la tête est réglé), déjà utilisée par `tete/` | mesurée le 16/11/2026, voir plus bas |
 | Yeux | 2 anneaux de LED adressables WS2812B, 12 ou 16 LED (Ø ext. 37 ou 44 mm), derrière un dôme imprimé en blanc translucide | couleurs et animations par programme |
 | Oreilles | 2 MG90S (du premier projet de main) | légers, assez forts pour des oreilles creuses |
 | Pilotage yeux + oreilles | l'ESP32 déjà en stock, relié au PC en USB | le PC reste le cerveau (vision, voix, IA) |
 | Haut-parleur, micro | pour commencer, ceux déjà branchés au PC ; plus tard un haut-parleur 40 mm 3 W + petit ampli, et un micro USB dans la tête | rien à acheter tout de suite |
 | Cou | les 2 STS3215 de rechange (n° 7 tourner, n° 8 hocher, sur le bus des servos) | même carte, mêmes sécurités |
+
+## Mesures de la caméra (Logitech C270, sans son pied, 16/11/2026)
+- Face avant : **70,5 × 31** mm ; épaisseur **18,1** mm ; l'arrière est bombé et se rétrécit jusqu'à **26,1** mm.
+- Objectif : rond noir **Ø 12**, centre à **17,3 mm du bord gauche** (pas au milieu) ; trous du micro à côté.
+- Logement prévu : poche rectangulaire 71,5 × 32 × 19 (0,5 mm de jeu), couchée derrière le front ; l'objectif et le micro
+  passent par une ouverture dans la liste blanche du tissu.
 
 ## Ce que le cou permettra
 Tourner la tête vers la personne qui parle ou un visage reconnu, faire oui / non, regarder l'objet que le bras va saisir.
