@@ -72,6 +72,11 @@ bordure de 8 mm, plateau 85–90 °C, enceinte fermée, colle en bâton sur tout
 
 ## Montage, dans l'ordre
 
+**Plan illustré, une page par étape : `sortie/plan_montage_epaule.pdf`** (images `sortie/plan_montage_00.png` à `_10.png`,
+refait par `python plan_montage.py`). Trou du mât conseillé pour le ressort 70 × 10 × 1,2 : rangée du haut, colonne la plus
+en arrière (x = −46, z = 50 ; `calcul_ressort.py`).
+
+
 1. Inserts. Dans le socle des berceaux : **au ras du dessous**, jamais au-dessus du socle.
 2. Berceau de l'épaule sur le mur du bâti : 4 vis M3 × 10 par-derrière. Le servo ira vers l'arrière.
 3. Berceau du coude sur la platine de la moitié haute : 4 vis M3 × 10 par-dessous. **À faire avant de monter le bras.**
