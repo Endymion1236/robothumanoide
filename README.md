@@ -115,6 +115,22 @@ plus léger, plus sûr).
 - **Habillage à la fin**, au choix : coque imprimée en panneaux, mousse et tissu (costume de Câlin), ou plaques
   thermoformées. L'habillage ne porte rien.
 
+**Ossature en profilés (estimation du 16/11/2026, à confirmer quand le buste sera dessiné : ne pas commander avant)** :
+boîte de 20 × 15 × 40 cm (largeur, profondeur, hauteur), épaules sur les côtés en haut (≈ 31 cm de large au total),
+cou au centre du dessus, pied large en croix.
+
+| Rôle | Nombre | Longueur |
+|---|---|---|
+| Montants (4 coins) | 4 | 400 mm |
+| Traverses largeur (haut, bas, devant, derrière) | 4 | 160 mm |
+| Traverses profondeur (haut, bas, côtés) | 4 | 110 mm |
+| Traverses du milieu (électronique) | 2 | 160 mm |
+| Support du cou / montant du cou | 1 / 1 | 110 / 120 mm |
+| Pied en croix | 2 | 350 mm |
+
+≈ 4 m de profilé 20 × 20 rainure 6 (tout du même type, par exemple type B), coupé à longueur par le vendeur ;
+30 équerres, 60 écrous marteau M5, 60 vis M5 × 10, embouts. Environ 50 à 80 €.
+
 **Dedans** : 2 épaules symétriques, cou (2 servos) et tête (caméra, micro, haut-parleur), carte(s) servos,
 alimentation 12 V et interrupteur d'arrêt d'urgence accessible, plus tard l'ordinateur embarqué (Raspberry Pi 5 / Jetson).
 Pied lesté ou vissé : bras tendus, il ne doit jamais basculer.
