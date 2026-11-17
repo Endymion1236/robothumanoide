@@ -152,6 +152,9 @@ pince de 205 g, voir `epaule/calcul_poignet.py`).
   de petits axes, ressorts ou élastiques de rappel.
 - 5 petits servos (un par doigt), dans la paume ou dans l'avant-bras ; 250 à 350 g au bout du bras.
 - Reprend le premier projet de main de Nicolas (ESP32, MG90S, gestes).
+- Servos des doigts envisagés : **Feetech SCS0009** (bus série comme les STS, 2,3 kg·cm, 23 × 12 × 25 mm, retour de
+  position ; **6 V : jamais sur le bus 12 V**, il leur faut leur propre carte alimentée en 6 V). Moins cher mais sans
+  retour : MG90S. Bras qui porte la main : STS3095-C002 à l'épaule (et au coude si besoin).
 - Avant : poignet (rotation, puis flexion), STS3095-C002 à l'épaule, 2e bras, buste.
 
 ## Feuille de route du premier bras
