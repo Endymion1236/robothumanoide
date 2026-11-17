@@ -18,6 +18,12 @@ Aperçu : `sortie/apercu_socle.png` (`apercu_socle.py`).
   décalé de 53,5 mm de cet axe : le programme en tiendra compte.
 - Axe de l'épaule à **179 mm** au-dessus de la table (101 sans le socle).
 
+## Plan de travail surélevé (choix du 17/11/2026)
+Le socle rehausse le bras de **78 mm**. Épaule au plus bas (−30°), avant-bras à plat : le bas des mâchoires arrive à 6 mm de
+la table sans socle, à **84 mm** avec. Les objets à saisir se posent donc sur un **plan de travail surélevé de 78 mm**
+(planche sur cales, caisse, support de la station café) : on retrouve la géométrie d'origine. Autres pistes écartées pour
+l'instant : base fixée 78 mm sous la table, socle plus bas (gain ≈ 1 cm seulement), flexion du poignet.
+
 ## À imprimer (PETG, 4 périmètres, gyroïde 40 %, sans support, déjà orientées)
 | Pièce | Fichier (`sortie/`) | Environ |
 |---|---|---|
