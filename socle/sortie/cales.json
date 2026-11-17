@@ -1,0 +1,35 @@
+{
+ "dessus_de_la_planche_mm": 78.0,
+ "cales": {
+  "planche de 5 mm": {
+   "hauteur_cale_mm": 73.0,
+   "fichier": "cale_planche_5mm.stl",
+   "vis_a_bois": "4 x 13 au plus",
+   "masse_g_environ_a_15_pourcent": 49
+  },
+  "planche de 10 mm": {
+   "hauteur_cale_mm": 68.0,
+   "fichier": "cale_planche_10mm.stl",
+   "vis_a_bois": "4 x 18 au plus",
+   "masse_g_environ_a_15_pourcent": 46
+  },
+  "planche de 12 mm": {
+   "hauteur_cale_mm": 66.0,
+   "fichier": "cale_planche_12mm.stl",
+   "vis_a_bois": "4 x 20 au plus",
+   "masse_g_environ_a_15_pourcent": 44
+  },
+  "planche de 15 mm": {
+   "hauteur_cale_mm": 63.0,
+   "fichier": "cale_planche_15mm.stl",
+   "vis_a_bois": "4 x 23 au plus",
+   "masse_g_environ_a_15_pourcent": 42
+  },
+  "planche de 18 mm": {
+   "hauteur_cale_mm": 60.0,
+   "fichier": "cale_planche_18mm.stl",
+   "vis_a_bois": "4 x 25 au plus",
+   "masse_g_environ_a_15_pourcent": 40
+  }
+ }
+}

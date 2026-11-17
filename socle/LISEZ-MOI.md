@@ -24,6 +24,20 @@ la table sans socle, à **84 mm** avec. Les objets à saisir se posent donc sur 
 (planche sur cales, caisse, support de la station café) : on retrouve la géométrie d'origine. Autres pistes écartées pour
 l'instant : base fixée 78 mm sous la table, socle plus bas (gain ≈ 1 cm seulement), flexion du poignet.
 
+**Cales à imprimer** (`generer_cales.py`) : 4 cales par planche, une à chaque coin. C'est le DESSUS DE LA PLANCHE qui doit
+être à 78 mm : la hauteur de la cale dépend donc de l'épaisseur de la planche.
+
+| Planche | Cale | Fichier (`sortie/`) | Vis à bois Ø 4, longueur maxi |
+|---|---|---|---|
+| 5 mm | 73 mm | `cale_planche_5mm.stl` | 13 mm |
+| 10 mm | 68 mm | `cale_planche_10mm.stl` | 18 mm |
+| 12 mm | 66 mm | `cale_planche_12mm.stl` | 20 mm |
+| 15 mm | 63 mm | `cale_planche_15mm.stl` | 23 mm |
+| 18 mm | 60 mm | `cale_planche_18mm.stl` | 25 mm |
+
+Pied carré de 40 mm, imprimé debout sans support, 15 % de remplissage et 3 périmètres suffisent (environ 45 g pièce).
+La vis à bois entre par-dessous, dans un puits de 9 mm, et traverse les 10 derniers mm avant d'entrer dans la planche.
+
 ## À imprimer (PETG, 4 périmètres, gyroïde 40 %, sans support, déjà orientées)
 | Pièce | Fichier (`sortie/`) | Environ |
 |---|---|---|
