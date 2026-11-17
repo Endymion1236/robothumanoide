@@ -1,0 +1,78 @@
+{
+ "version": "socle V1",
+ "validation_physique": false,
+ "hauteurs_mm": {
+  "dessus du servo (partie haute)": 40.0,
+  "dessus du palonnier": 40.1,
+  "roulement du bas": [
+   42.0,
+   48.8
+  ],
+  "roulement du haut": [
+   62.0,
+   68.8
+  ],
+  "dessus du plateau (le pied du bâti se pose là)": 78.0,
+  "axe de l'épaule au-dessus de la table": 179.0
+ },
+ "pieces": {
+  "socle_base": {
+   "fermee": true,
+   "blocs": 1,
+   "encombrement_mm": [
+    110.0,
+    104.0,
+    39.5
+   ],
+   "masse_g_environ": 86
+  },
+  "socle_palier": {
+   "fermee": true,
+   "blocs": 1,
+   "encombrement_mm": [
+    82.0,
+    70.0,
+    29.0
+   ],
+   "masse_g_environ": 32
+  },
+  "socle_entretoise": {
+   "fermee": true,
+   "blocs": 1,
+   "encombrement_mm": [
+    46.7,
+    46.7,
+    13.1
+   ],
+   "masse_g_environ": 4
+  },
+  "socle_plateau": {
+   "fermee": true,
+   "blocs": 1,
+   "encombrement_mm": [
+    129.0,
+    110.0,
+    37.9
+   ],
+   "masse_g_environ": 124
+  }
+ },
+ "contacts_mm3": {
+  "base / servo": 0.0,
+  "palier / base": 0.0,
+  "palier / roulements": -0.0,
+  "entretoise / roulements": 0.0,
+  "entretoise / palier": 0.0,
+  "palier / servo (appui voulu, sans pénétration)": -0.0,
+  "plateau tourné de -90 à +90° contre tout le reste": 0.0
+ },
+ "vis": {
+  "M2,5 du palonnier : plastique traversé (mm)": 3.4,
+  "M3 × 10 du palier : prise dans l'insert (mm)": 6.0,
+  "M3 × 12 du pied du bâti (6 mm) : prise dans l'insert du plateau (mm)": 6,
+  "jeu du moyeu dans les roulements (mm, au diamètre)": 0.1,
+  "jeu des roulements dans le tube (mm, au diamètre)": 0.1,
+  "jour plaque du palier / poteaux avant serrage (mm)": 0.5,
+  "jour plateau / tube (mm)": 1.0
+ }
+}
