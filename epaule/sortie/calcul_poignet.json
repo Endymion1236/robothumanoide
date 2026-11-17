@@ -1,0 +1,122 @@
+{
+ "aujourd'hui (sans poignet)": {
+  "longueur épaule → milieu des mâchoires (mm)": 350,
+  "masse ajoutée au bout (g)": 0,
+  "trou du ressort": [
+   -46.0,
+   50.0
+  ],
+  "épaule": {
+   "pince vide": {
+    "sans ressort": 8.3,
+    "avec ressort": 5.6
+   },
+   "objet léger (100 g)": {
+    "sans ressort": 11.8,
+    "avec ressort": 8.4
+   },
+   "gobelet plein (300 g)": {
+    "sans ressort": 18.8,
+    "avec ressort": 14.0
+   }
+  },
+  "coude": {
+   "pince vide": 3.6,
+   "objet léger (100 g)": 5.9,
+   "gobelet plein (300 g)": 10.5
+  },
+  "flexion du poignet": {}
+ },
+ "avec la rotation": {
+  "longueur épaule → milieu des mâchoires (mm)": 400,
+  "masse ajoutée au bout (g)": 85,
+  "trou du ressort": [
+   -46.0,
+   50.0
+  ],
+  "épaule": {
+   "pince vide": {
+    "sans ressort": 11.6,
+    "avec ressort": 8.3
+   },
+   "objet léger (100 g)": {
+    "sans ressort": 15.6,
+    "avec ressort": 11.6
+   },
+   "gobelet plein (300 g)": {
+    "sans ressort": 23.6,
+    "avec ressort": 18.6
+   }
+  },
+  "coude": {
+   "pince vide": 5.9,
+   "objet léger (100 g)": 8.7,
+   "gobelet plein (300 g)": 14.3
+  },
+  "flexion du poignet": {}
+ },
+ "avec la flexion": {
+  "longueur épaule → milieu des mâchoires (mm)": 395,
+  "masse ajoutée au bout (g)": 95,
+  "trou du ressort": [
+   -46.0,
+   50.0
+  ],
+  "épaule": {
+   "pince vide": {
+    "sans ressort": 11.8,
+    "avec ressort": 8.4
+   },
+   "objet léger (100 g)": {
+    "sans ressort": 15.8,
+    "avec ressort": 11.7
+   },
+   "gobelet plein (300 g)": {
+    "sans ressort": 23.7,
+    "avec ressort": 18.7
+   }
+  },
+  "coude": {
+   "pince vide": 6.0,
+   "objet léger (100 g)": 8.7,
+   "gobelet plein (300 g)": 14.2
+  },
+  "flexion du poignet": {
+   "pince vide": 1.3,
+   "objet léger (100 g)": 2.6,
+   "gobelet plein (300 g)": 5.2
+  }
+ },
+ "avec rotation + flexion": {
+  "longueur épaule → milieu des mâchoires (mm)": 445,
+  "masse ajoutée au bout (g)": 180,
+  "trou du ressort": [
+   -40.0,
+   50.0
+  ],
+  "épaule": {
+   "pince vide": {
+    "sans ressort": 15.5,
+    "avec ressort": 12.1
+   },
+   "objet léger (100 g)": {
+    "sans ressort": 19.9,
+    "avec ressort": 15.9
+   },
+   "gobelet plein (300 g)": {
+    "sans ressort": 28.8,
+    "avec ressort": 23.6
+   }
+  },
+  "coude": {
+   "pince vide": 8.6,
+   "objet léger (100 g)": 11.9,
+   "gobelet plein (300 g)": 18.4
+  },
+  "flexion du poignet": {
+   "pince vide": 2.7,
+   "objet léger (100 g)": 4.5,
+   "gobelet plein (300 g)": 8.1
+  }
+ }
+}
