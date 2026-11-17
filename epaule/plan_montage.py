@@ -157,11 +157,11 @@ def e_berceau_mur(fig):
     for x, z in E.TROUS_MUR: guide(a2, (x, -E.EP_MUR - 6, z), (x, 0, z))
     etiquette(a2, (E.TROUS_MUR[1][0], -E.EP_MUR - 20, E.TROUS_MUR[1][1]), '4 vis M3 × 10', (-90, -60))
 
-@etape('Le berceau du coude sur la platine', ['la moitié haute (avec son insert)', 'le 2e berceau à inserts', '4 vis M3 × 10'],
-       ['La platine est le bout LARGE de la moitié haute.',
-        'Le socle du berceau se pose sur la face EXTÉRIEURE de la platine : celle qui porte l\'insert du ressort (dessin A).',
-        'Les 4 vis M3 × 10 entrent par l\'autre face (dessin B) et se vissent dans les inserts du socle.',
-        'À faire AVANT de monter le bras sur l\'épaule.'],
+@etape('Le berceau du coude sur la platine (APRÈS les 4 vis M3 × 30)', ['le haut du bras déjà fermé par ses 4 vis M3 × 30', 'le 2e berceau à inserts', '4 vis M3 × 10'],
+       ['Pas avant : le socle de ce berceau recouvre 2 des 4 têtes de vis M3 × 30. Elles doivent être serrées AVANT.',
+        'Le socle du berceau se pose sur la face EXTÉRIEURE de la platine (le bout large), par-dessus ces 2 têtes de vis (dessin A).',
+        'Les 4 vis M3 × 10 entrent par la face intérieure (dessin B), de chaque côté de la moitié basse, et se vissent dans les inserts du socle.',
+        'Sur les dessins, la moitié basse et le servo ne sont pas montrés, pour y voir clair.'],
        'Ce berceau remplace le support de table du coude.', [(C['haut'], 'moitié haute'), (C['berceau'], 'berceau du coude')])
 def e_berceau_platine(fig):
     a1, a2 = panneaux(fig, 2, ['A. Face extérieure (avec l\'insert du ressort)', 'B. Face intérieure : les vis'])
@@ -177,12 +177,12 @@ def e_berceau_platine(fig):
     etiquette(a2, (E.TROUS_PLATINE[1][0], E.Y_PL_HAUT - 20, E.TROUS_PLATINE[1][1]), '4 vis M3 × 10', (110, 30))
     etiquette(a2, (60, E.Y_PL_HAUT, 0), 'moitié haute,\nface intérieure', (-90, -60))
 
-@etape('Câbles, servo et haut du bras, À PLAT SUR LA TABLE', ['le 2e berceau à inserts (pas encore sur le mur)', 'le servo n° 2, son disque libre, 2 câbles', 'les 2 moitiés du haut du bras', '8 vis M2,5 (fournies avec le servo)', '4 vis M3 × 30'],
+@etape('Câbles, servo et haut du bras, À PLAT SUR LA TABLE', ['un berceau à inserts (pas encore sur le mur)', 'le servo n° 2, son disque libre, 2 câbles', 'les 2 moitiés du haut du bras', '8 vis M2,5 (fournies avec le servo)', '4 vis M3 × 30'],
        ['D\'ABORD LES CÂBLES : branche 2 câbles sur les 2 prises du servo (vers la carte, vers le coude). Après, on ne les atteint plus.',
         'Couche-les dans la rainure du berceau, un qui sort de chaque côté, puis pose le servo dessus, palonnier vers le haut. Aucun câble pincé ni posé sur le socle.',
         'Moitié BASSE (orange clair) côté socle du berceau, sur le disque libre : 4 vis M2,5.',
         'Moitié HAUTE (orange foncé) : elle se POSE À PLAT SUR le palonnier (il n\'entre pas dedans ; le trou du milieu laisse passer sa vis centrale). 4 vis M2,5 dans les trous du palonnier.',
-        '4 vis M3 × 30 par la face extérieure (dessin B), dans les inserts de la moitié basse. Serre en croix, arrête dès que les entretoises se touchent.'],
+        '4 vis M3 × 30 par la face extérieure (dessin B) : 2 près du servo, 2 au milieu de la platine. Le berceau du coude ne doit PAS encore être sur la platine. Serre en croix, arrête dès que les entretoises se touchent.'],
        'Chaîne : carte → épaule (n° 2) → coude (n° 1) → pince (n° 4). Une fois sur le mur : câble de la carte vers le bas, câble du coude vers le haut.',
        [(CABLE, 'câbles'), (C['berceau'], 'berceau'), (C['servo'], 'servo'), (C['bas'], 'moitié basse'), (C['haut'], 'moitié haute')])
 def e_bras(fig):
@@ -304,7 +304,7 @@ def page_pieces(pdf, n):
     fig.subplots_adjust(left=0.01, right=0.99, top=0.92, bottom=0.08, hspace=0.25, wspace=0.02)
     fig.savefig(E.OUT / f'plan_montage_{n:02d}.png', dpi=90); pdf.savefig(fig); plt.close(fig)
 
-ORDRE = ['Le servo de', 'Les 17 inserts', 'Le berceau du coude', 'Câbles, servo', 'La bride', 'Le bloc épaule', 'Le coude,', 'Essai à la main', 'Le ressort', 'Premier essai']
+ORDRE = ['Le servo de', 'Les 17 inserts', 'Câbles, servo', 'Le berceau du coude', 'La bride', 'Le bloc épaule', 'Le coude,', 'Essai à la main', 'Le ressort', 'Premier essai']
 ETAPES = [next(e for e in ETAPES if e[0].startswith(o)) for o in ORDRE]
 
 if __name__ == '__main__':

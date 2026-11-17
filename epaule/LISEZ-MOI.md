@@ -73,7 +73,12 @@ bordure de 8 mm, plateau 85–90 °C, enceinte fermée, colle en bâton sur tout
 ## Montage, dans l'ordre
 
 **Plan illustré, une page par étape : `sortie/plan_montage_epaule.pdf`** (images `sortie/plan_montage_00.png` à `_10.png`,
-refait par `python plan_montage.py`). **Ordre (16/11/2026)** : le bloc épaule (berceau + servo + haut du bras + bride) se monte À PLAT SUR LA TABLE, comme le
+refait par `python plan_montage.py`). **Attention (17/11/2026, trouvé au montage)** : le socle du berceau du coude recouvre 2 des 4 têtes de vis M3 × 30 du haut
+du bras (celles de l'entretoise B, au milieu de la platine). Il faut donc fermer le haut du bras AVANT de visser ce berceau ;
+ses 4 vis M3 × 10 restent accessibles par la face intérieure, de chaque côté de la moitié basse (large de 24 mm, vis à ± 22).
+L'ordre ci-dessous (berceau du coude en 3) est faux sur ce point : suivre le plan illustré.
+
+**Ordre (16/11/2026)** : le bloc épaule (berceau + servo + haut du bras + bride) se monte À PLAT SUR LA TABLE, comme le
 coude, puis se visse au mur par derrière (4 vis M3 × 10, accessibles même bras monté). Trou du mât conseillé pour le ressort 70 × 10 × 1,2 : rangée du haut, colonne la plus
 en arrière (x = −46, z = 50 ; `calcul_ressort.py`).
 
