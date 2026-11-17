@@ -144,6 +144,16 @@ Pied lesté ou vissé : bras tendus, il ne doit jamais basculer.
 **Ordre** : 1) un bras complet sur le bâti (épaule, socle, poignet) ; 2) le 2e bras en symétrique ; 3) dessin du buste
 (ossature + liaisons) ; 4) tête installée et reliée aux bras ; 5) habillage.
 
+## Plus tard : une vraie main à doigts (17/11/2026)
+
+À la place de la pince, sur le bras à servos plus forts (pas sur le bras actuel : l'épaule est déjà à la limite avec la
+pince de 205 g, voir `epaule/calcul_poignet.py`).
+- Main simple à 5 doigts tirés par des fils : environ 15 phalanges (3 par doigt), une paume en 2 pièces, une quinzaine
+  de petits axes, ressorts ou élastiques de rappel.
+- 5 petits servos (un par doigt), dans la paume ou dans l'avant-bras ; 250 à 350 g au bout du bras.
+- Reprend le premier projet de main de Nicolas (ESP32, MG90S, gestes).
+- Avant : poignet (rotation, puis flexion), STS3095-C002 à l'épaule, 2e bras, buste.
+
 ## Feuille de route du premier bras
 
 | # | Étape | État |
