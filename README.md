@@ -162,6 +162,20 @@ pince de 205 g, voir `epaule/calcul_poignet.py`).
   retour : MG90S. Bras qui porte la main : STS3095-C002 à l'épaule (et au coude si besoin).
 - Avant : poignet (rotation, puis flexion), STS3095-C002 à l'épaule, 2e bras, buste.
 
+## Projet lointain : un petit chien robot autonome (18/11/2026)
+
+Après Câlin. Pas un Spot (30 kg, moteurs spéciaux) : un quadrupède de 2 à 3 kg, taille d'un chat.
+- 12 STS3215 (3 par patte : écarter, avancer, genou), même bus et mêmes programmes de base que le bras ; batterie
+  embarquée (15 à 30 min) ; centrale inertielle pour l'équilibre. Modèles libres à étudier : SpotMicro, Stanford Pupper,
+  Mini Pupper, Petoi Bittle.
+- **Autonomie en trois étages** : 1) la marche et l'équilibre, programme rapide embarqué (réflexes, sans IA de conversation) ;
+  2) se repérer et éviter les obstacles : lidar 2D et caméra, carte des lieux ; 3) l'IA (Claude) pour comprendre la voix
+  et décider où aller (« va à l'accueil », « suis-moi »), pas pour commander chaque pas (trop lente).
+- Difficultés : équilibre, marche, chocs sur les servos et les pièces imprimées, terrain (sol dur et plat seulement au début).
+- **Chevaux** : un engin à quatre pattes qui marche seul peut effrayer un poney ; accueil et club-house seulement, loin des
+  écuries et des carrières, ou habituation très progressive.
+- Pour un chien qui se promène vraiment au club, un modèle du commerce (Unitree Go2…) serait plus raisonnable que le fabriquer.
+
 ## Feuille de route du premier bras
 
 | # | Étape | État |
