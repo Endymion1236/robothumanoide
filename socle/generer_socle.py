@@ -130,5 +130,7 @@ if __name__ == '__main__':
         d = {'fermee': bool(t.is_watertight), 'blocs': len(t.split(only_watertight=False)), 'encombrement_mm': [round(float(v), 1) for v in t.extents],
              'masse_g_environ': round(t.volume / 1000 * 0.98)}
         r['pieces'][nom] = d; assert d['fermee'] and d['blocs'] == 1, (nom, d)
+    # pièce d'essai : une bague au diamètre du moyeu (34,9), pour vérifier l'ajustement dans un roulement avant d'imprimer le plateau
+    t = mesh(anneau(0, 12, MOYEU_DE, MOYEU_DI)); t.export(OUT / 'socle_essai_moyeu.stl')
     json.dump(r, open(OUT / 'verification_socle.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print(json.dumps(r, ensure_ascii=False, indent=1))

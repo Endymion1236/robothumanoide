@@ -48,6 +48,14 @@ La vis à bois entre par-dessous, dans un puits de 9 mm, et traverse les 10 dern
 
 Le fond du moyeu (le voile vissé sur le palonnier) s'imprime en pont de 22 mm : normal s'il est un peu rugueux dessous.
 
+## Ordre d'impression conseillé (premier essai des ajustements)
+1. `socle_essai_moyeu.stl` (bague de 12 mm de haut, 5 g) : elle doit entrer à la main dans un roulement 6807, sans jeu sensible.
+2. `socle_palier.stl` : les 2 roulements doivent y entrer en appuyant, sans forcer ni flotter.
+3. `socle_base.stl` : le servo doit s'y poser à plat, palonnier libre.
+4. `socle_entretoise.stl`, puis `socle_plateau.stl` (le plus gros) seulement si 1 et 2 sont bons ; sinon donner l'écart
+   constaté, les diamètres seront corrigés.
+Avant le montage : le servo du socle porte le n° 1, donc le coude doit d'abord passer au n° 3.
+
 ## Visserie
 8 inserts M3 (4 en haut des poteaux de la base, 4 dans le plateau), 4 vis M3 × 10 (palier), 4 vis M3 × 12 (pied du bâti),
 4 vis M2,5 du palonnier (3,4 mm de plastique traversé, comme au coude), 2 roulements 6807.
