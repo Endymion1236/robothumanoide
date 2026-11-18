@@ -30,7 +30,8 @@ MUR = 3.0; SERRAGE = 0.5                                     # les murs s'arrêt
 EP_PLAQUE, LEVRE = 4.0, 2.0                                  # plaque du palier ; lèvre sous le roulement du bas
 ECART = 20.0                                                 # entre les milieux des 2 roulements
 Z_RA = Z_HAUT + LEVRE; Z_RB = Z_RA + ECART; Z_TUBE = Z_RB + ROUL_EP + 0.2
-TUBE_DE = 55.0; MOYEU_DE, MOYEU_DI = ROUL_DI - 0.1, 22.0
+TUBE_DE = 55.0; MOYEU_DE, MOYEU_DI = ROUL_DI - 0.1, 19.0     # creux de 19 : passage du tournevis, pont plus court à l'impression
+PEAU = 0.4                                                   # peau pleine au fond du creux : le pont s'imprime sans trou, on la perce ensuite
 PATIN, VOILE = 1.0, 2.4                                      # sous le moyeu : patin Ø 18 sur le palonnier + voile
 Z_PLATEAU = Z_TUBE + 1.0; EP_PLATEAU = 8.0
 POTEAUX = [(-42.0, 28.0), (-42.0, -28.0), (26.0, 28.0), (26.0, -28.0)]
@@ -91,8 +92,8 @@ def plateau():
     m += cyl(0, 0, Z_PAL + PATIN, Z_PLATEAU, MOYEU_DE, 128) + cyl(0, 0, Z_PAL, Z_PAL + PATIN, 18.0)
     m -= cyl(0, 0, Z_PAL + PATIN + VOILE, Z_PLATEAU + EP_PLATEAU + 0.1, MOYEU_DI, 96)          # creux : passage du tournevis
     for k in range(4):
-        a = math.radians(45 + 90 * k); m -= cyl(CERCLE_TROUS / 2 * math.cos(a), CERCLE_TROUS / 2 * math.sin(a), Z_PAL - 0.1, Z_PAL + PATIN + VOILE + 0.1, M2_5, 24)
-    m -= cyl(0, 0, Z_PAL - 0.1, Z_PAL + PATIN + VOILE + 0.1, 7.0, 32)                           # vis centrale du palonnier
+        a = math.radians(45 + 90 * k); m -= cyl(CERCLE_TROUS / 2 * math.cos(a), CERCLE_TROUS / 2 * math.sin(a), Z_PAL - 0.1, Z_PAL + PATIN + VOILE - PEAU, M2_5, 24)
+    m -= cyl(0, 0, Z_PAL - 0.1, Z_PAL + PATIN + VOILE - PEAU, 7.0, 32)                           # vis centrale du palonnier (trou borgne : la peau reste)
     for x, y in TROUS_PIED: m -= cyl(x - ax, y - ay, Z_PLATEAU - 0.1, Z_PLATEAU + EP_PLATEAU + 0.1, INSERT, 24)   # 4 inserts M3 : le bâti se visse dessus
     return m
 

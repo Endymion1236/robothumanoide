@@ -46,7 +46,10 @@ La vis à bois entre par-dessous, dans un puits de 9 mm, et traverse les 10 dern
 | Entretoise des roulements | `socle_entretoise.stl` | 4 g |
 | Plateau + moyeu (imprimé retourné, plaque sur le plateau de l'imprimante) | `socle_plateau.stl` | 124 g, 129 × 110 × 38 mm |
 
-Le fond du moyeu (le voile vissé sur le palonnier) s'imprime en pont de 22 mm : normal s'il est un peu rugueux dessous.
+Le fond du moyeu s'imprime en pont de 19 mm **sans support** : une peau pleine de 0,4 mm ferme les 5 trous du côté du creux
+(sans elle, le pont n'a rien où s'accrocher autour des trous : alerte de PrusaSlicer du 18/11/2026). Après l'impression,
+percer cette peau en passant un foret de 2,5 à 3 mm par les 4 petits trous, depuis le bout du moyeu ; le trou du centre
+peut rester fermé (il ne sert qu'à dégager la vis centrale du palonnier).
 
 ## Ordre d'impression conseillé (premier essai des ajustements)
 1. `socle_essai_moyeu.stl` (bague de 12 mm de haut, 5 g) : elle doit entrer à la main dans un roulement 6807, sans jeu sensible.
