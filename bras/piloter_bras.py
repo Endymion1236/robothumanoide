@@ -1,0 +1,164 @@
+"""Piloter le bras entier : épaule (n° 2), coude (n° 1), pince (n° 4), sur le même câble.
+
+Avant : tester_epaule.bat (étalonnage de l'épaule), tester_coude.bat et tester_pince.bat au moins une fois.
+Au premier lancement, le programme apprend le sens du coude, à la main, sans moteur.
+
+Angles : épaule = angle du haut du bras par rapport à l'horizontale (−30° à +90°) ;
+         coude  = angle de l'avant-bras par rapport au haut du bras (0° = dans le prolongement, + = il remonte).
+Commandes (plusieurs à la suite, séparées par des espaces) :
+  e30   épaule à +30°            c-45  coude à −45°           plat  avant-bras remis à l'horizontale
+  n20   épaule à +20° en gardant l'avant-bras à l'horizontale (les deux servos bougent ensemble)
+  o     ouvrir la pince          s / S serrer doucement / plus fort
+  repos bras à la verticale      i     infos                  q     quitter
+Sécurités : butées de chaque servo, chaleur, blocage (le servo RETIENT le bras au lieu de le lâcher), et refus
+d'un geste qui enverrait la pince dans la table. Avec le socle tournant : ajouter --hauteur 179."""
+import argparse, json, math, re, sys, time
+from pathlib import Path
+from servos import Bus, ErreurServo, degres, pas, TEMP_MAX, CHARGE_MAX, VITESSE_DOUCE, ACCEL_DOUCE, SMS_STS_MOVING
+import test_epaule as E, test_pince as P
+
+MILIEU = 2048
+ID_EPAULE, ID_COUDE, ID_PINCE = 2, 1, 4
+BUTEES_COUDE = (908, 3188); COUDE_MAX = 90            # ± 90° utilisés (vérifiés sans contact dans epaule/verifier_epaule.py)
+L_BRAS, L_AVANT, SOUS_PINCE = 120.0, 230.0, 40.0       # épaule→coude, coude→milieu des mâchoires, bas des mâchoires sous l'axe (mm)
+SENS_COUDE = Path(__file__).with_name('sens_coude.json')
+TOL = E.TOLERANCE
+
+def bas_de_pince(h, a, g):
+    """Hauteur du bas des mâchoires au-dessus de la table (mm), pour épaule a et coude g (degrés)."""
+    return h + L_BRAS * math.sin(math.radians(a)) + L_AVANT * math.sin(math.radians(a + g)) - SOUS_PINCE
+
+def apprendre_sens_coude(bus):
+    print('\n--- Sens du coude (le moteur ne bouge pas) ---')
+    input('TIENS l\'avant-bras d\'une main (la force du coude va être coupée), puis Entrée... ')
+    bus.relacher(ID_COUDE)
+    while True:
+        avant = bus.etat(ID_COUDE)['position']
+        input('PLIE le coude pour que l\'avant-bras REMONTE d\'environ 20° (la pince monte), garde-le là, puis Entrée... ')
+        ecart = bus.etat(ID_COUDE)['position'] - avant
+        if abs(ecart) >= pas(10): break
+        print(f'   il n\'a presque pas bougé ({degres(ecart):+.0f}°). Recommence franchement.')
+    sens = 1 if ecart > 0 else -1
+    SENS_COUDE.write_text(json.dumps({'haut': sens}), encoding='utf-8')
+    bus.retenir(ID_COUDE)
+    print(f"   compris : quand l'avant-bras remonte, la position du coude {'augmente' if sens > 0 else 'diminue'}. Le coude tient : tu peux lâcher doucement.")
+    return sens
+
+def aller_ensemble(bus, cibles, delai_max=14.0, synchro=False):
+    """Envoie plusieurs servos à leur cible EN MÊME TEMPS (même vitesse) et les surveille. Renvoie un compte rendu.
+    synchro : les servos doivent avancer ENSEMBLE (geste « n » : l'avant-bras reste à l'horizontale). Si l'un prend
+    plus de 80 pas (7°) de retard sur l'autre, tout s'arrête : sinon le coude continuerait seul et pencherait la pince."""
+    depart = {i: bus.etat(i)['position'] for i, _ in cibles}
+    for i, c in cibles:
+        e = bus.etat(i)
+        if not e['butee_min'] <= c <= e['butee_max']: raise ErreurServo(f"servo n° {i} : cible {c} hors des butées {e['butee_min']}–{e['butee_max']}")
+        if bus.trop_chaud(i, e): raise ErreurServo(f"servo n° {i} trop chaud ({e['temperature']} °C)")
+    for i, c in cibles:
+        res, err = bus.p.WritePosEx(i, c, VITESSE_DOUCE, ACCEL_DOUCE); bus._ok(res, err, 'ordre de position')
+    debut = time.time(); suivi = {i: {'avant': None, 'immobile': None, 'effort': None, 'fini': False} for i, _ in cibles}
+    def stop(cause):
+        for i, _ in cibles: bus.retenir(i, 40)
+        return f'ARRÊT : {cause}. Les servos RETIENNENT le bras sur place (force réduite à 40 %).'
+    while True:
+        time.sleep(0.1)
+        for i, c in cibles:
+            e, s = bus.etat(i), suivi[i]
+            if bus.trop_chaud(i, e): return stop(f"servo n° {i} trop chaud ({e['temperature']} °C)")
+            if abs(e['charge']) >= CHARGE_MAX:
+                s['effort'] = s['effort'] or time.time()
+                if time.time() - s['effort'] > 0.5: return stop(f"le servo n° {i} force ({e['charge']:.0f} %)")
+            else: s['effort'] = None
+            loin = abs(e['position'] - c) > TOL
+            if s['avant'] is not None and abs(e['position'] - s['avant']) <= 2:
+                s['immobile'] = s['immobile'] or time.time()
+                if loin and time.time() - s['immobile'] > 0.7: return stop(f"le servo n° {i} n'avance plus (position {e['position']}, charge {e['charge']:.0f} %)")
+            else: s['immobile'] = None
+            s['avant'] = e['position']
+            s['fini'] = not loin and not bus.lire1(i, SMS_STS_MOVING, 'en mouvement'); s['fait'] = abs(e['position'] - depart[i])
+        if synchro:
+            faits = [s.get('fait', 0) for s in suivi.values()]
+            if max(faits) - min(faits) > 80: return stop(f'les servos n\'avancent plus ensemble (écart de {degres(max(faits) - min(faits)):.0f}°)')
+        if all(s['fini'] for s in suivi.values()): return f'arrivé en {time.time() - debut:.1f} s'
+        if time.time() - debut > delai_max: return stop(f"pas arrivé en {delai_max:.0f} s")
+
+def main():
+    ap = argparse.ArgumentParser(description='Piloter le bras : épaule, coude, pince')
+    ap.add_argument('--port'); ap.add_argument('--hauteur', type=float, default=101.0, help='hauteur de l\'axe de l\'épaule au-dessus de la table (101 ; 179 avec le socle)')
+    a = ap.parse_args()
+    try: bus = Bus(a.port)
+    except ErreurServo as e: sys.exit(str(e))
+    tenus = []
+    try:
+        trouves = bus.chercher(); print('Servos trouvés :', trouves or 'aucun')
+        for i, nom in ((ID_EPAULE, 'épaule'), (ID_COUDE, 'coude'), (ID_PINCE, 'pince')):
+            if i not in trouves: sys.exit(f'Servo n° {i} ({nom}) introuvable : vérifier les câbles.')
+        if not E.SENS.exists(): sys.exit('Épaule pas encore étalonnée : lancer d\'abord tester_epaule.bat --coude 1')
+        haut = json.loads(E.SENS.read_text(encoding='utf-8'))['haut']
+        ee, ec, ep = bus.etat(ID_EPAULE), bus.etat(ID_COUDE), bus.etat(ID_PINCE)
+        if (ee['butee_min'], ee['butee_max']) != E.butees(haut): sys.exit('Butées de l\'épaule différentes : relancer tester_epaule.bat --coude 1 (étalonnage).')
+        if (ec['butee_min'], ec['butee_max']) != BUTEES_COUDE: sys.exit('Butées du coude pas réglées : lancer tester_coude.bat --id 1')
+        if (ep['butee_min'], ep['butee_max']) != P.BUTEES_PINCE or not P.SENS.exists(): sys.exit('Pince pas réglée : lancer tester_pince.bat')
+        ouvert = json.loads(P.SENS.read_text())['ouvert']; ferme = sum(P.BUTEES_PINCE) - ouvert
+        for i in (ID_EPAULE, ID_COUDE):
+            bus.limiter_force(i, 100); bus.retenir(i); tenus.append(i)
+        print('L\'épaule et le coude tiennent le bras là où il est.')
+        sc = json.loads(SENS_COUDE.read_text(encoding='utf-8'))['haut'] if SENS_COUDE.exists() else apprendre_sens_coude(bus)
+        ang_e = lambda: E.angle(bus.etat(ID_EPAULE)['position'], haut)
+        ang_c = lambda: degres(bus.etat(ID_COUDE)['position'] - MILIEU) * sc
+        pos_e = lambda x: E.position(x, haut); pos_c = lambda x: MILIEU + sc * pas(x)
+        def etat():
+            ae, ac = ang_e(), ang_c(); e1, e2, e3 = bus.etat(ID_EPAULE), bus.etat(ID_COUDE), bus.etat(ID_PINCE)
+            print(f"   épaule {ae:+.0f}° · coude {ac:+.0f}° · avant-bras {ae + ac:+.0f}° par rapport à l'horizontale · bas de la pince à {bas_de_pince(a.hauteur, ae, ac):.0f} mm de la table"
+                  f" · mâchoires ≈ {P.ecart_mm(e3['position'], ouvert):.0f} mm")
+            print(f"   charges : épaule {e1['charge']:+.0f} %, coude {e2['charge']:+.0f} %, pince {e3['charge']:+.0f} % · températures : {e1['temperature']}, {e2['temperature']}, {e3['temperature']} °C")
+        def verifier(ae, ac):
+            if not E.BAS <= ae <= E.HAUT: raise ErreurServo(f'épaule à {ae:+.0f}° : hors de −30° à +90°')
+            if abs(ac) > COUDE_MAX: raise ErreurServo(f'coude à {ac:+.0f}° : hors de ±{COUDE_MAX}°')
+            z = bas_de_pince(a.hauteur, ae, ac)
+            if z < 3: raise ErreurServo(f'la pince irait dans la table (bas des mâchoires à {z:.0f} mm)')
+        etat()
+        print('\nCommandes : e30 = épaule à 30° · c-45 = coude à −45° · n20 = épaule à 20°, avant-bras gardé à l\'horizontale · plat = avant-bras à l\'horizontale')
+        print('            o = ouvrir · s / S = serrer doucement / fort · repos = bras à la verticale · i = infos · q = quitter. Plusieurs à la suite : « n0 o s n40 ».')
+        while True:
+            mots = input('> ').replace(',', ' ').split()
+            faux = [m for m in mots if not re.fullmatch(r'[ecn]-?\d+|plat|repos|[osSiq]', m)]
+            if faux: print('   commande inconnue :', ' '.join(faux), '(rien n\'a bougé)'); continue
+            if 'q' in mots: break
+            for m in mots:
+                try:
+                    if m == 'i': pass
+                    elif m == 'o':
+                        bus.tenir(ID_PINCE); bus.limiter_force(ID_PINCE, P.FORCE_MOUVEMENT); print('   ouvrir...', bus.aller(ID_PINCE, ouvert, charge_max=P.CHARGE_BLOCAGE))
+                    elif m in 'sS':
+                        bus.tenir(ID_PINCE); texte, pos, tenu = bus.serrer(ID_PINCE, ferme, P.FORCE_DOUCE if m == 's' else P.FORCE_FERME); print('   serrer...', texte)
+                    else:
+                        ae, ac = ang_e(), ang_c()
+                        if m == 'plat': cible = [(ID_COUDE, pos_c(-ae))]; verifier(ae, -ae); nom = 'avant-bras à l\'horizontale'
+                        elif m == 'repos': cible = [(ID_EPAULE, pos_e(90)), (ID_COUDE, pos_c(0))]; nom = 'bras à la verticale'
+                        elif m[0] == 'e': v = int(m[1:]); verifier(v, ac); cible = [(ID_EPAULE, pos_e(v))]; nom = f'épaule à {v:+d}°'
+                        elif m[0] == 'c': v = int(m[1:]); verifier(ae, v); cible = [(ID_COUDE, pos_c(v))]; nom = f'coude à {v:+d}°'
+                        else:
+                            v = int(m[1:]); verifier(v, -v); verifier(ae, -ae); nom = f'épaule à {v:+d}°, avant-bras à l\'horizontale'
+                            if abs(ae + ac) > 3: print('   d\'abord l\'avant-bras à l\'horizontale...', aller_ensemble(bus, [(ID_COUDE, pos_c(-ae))]))
+                            cible = [(ID_EPAULE, pos_e(v)), (ID_COUDE, pos_c(-v))]
+                        for i, _ in cible: bus.limiter_force(i, 100)
+                        texte = aller_ensemble(bus, cible, synchro=(m[0] == 'n')); print(f'   {nom}...', texte)
+                        if texte.startswith('ARRÊT'): etat(); print('   La suite est annulée. Regarde ce qui coince.'); break
+                except ErreurServo as err:
+                    print('   refusé :', err, '— la suite est annulée'); break
+                etat()
+    except KeyboardInterrupt: print()
+    except ErreurServo as e: print('Problème :', e)
+    finally:
+        try:
+            if tenus:
+                print('\nLa force va être coupée : le bras va TOMBER s\'il n\'est pas tenu.')
+                input('TIENS le bras (haut du bras ET avant-bras), ou pose-le, puis Entrée... ')
+                for i in tenus + [ID_PINCE]: bus.relacher(i)
+                print('Force coupée. Pose le bras doucement. Au revoir.')
+        except (Exception, KeyboardInterrupt):
+            print('\n⚠️  Les servos RETIENNENT peut-être encore le bras. TIENS LE BRAS, puis coupe le 12 V.')
+        bus.fermer()
+
+if __name__ == '__main__':
+    main()

@@ -91,3 +91,30 @@ et dit lequel lancer.
 
 Sur le support de table, le coude est couché : la pince saisit de côté. Simulé ici (geste complet, coude
 bloqué en route, rien entre les doigts) ; **réussi en vrai le 15/11/2026** (gobelet tenu à 47 mm, avant-bras à +89°, 31 °C max).
+
+## Piloter le bras entier (`piloter_bras.bat`) — épaule, coude et pince ensemble
+
+Avant : `tester_epaule.bat --coude 1` (étalonnage), `tester_coude.bat --id 1` et `tester_pince.bat` au moins une fois ; sinon le
+programme refuse et dit lequel lancer. Premier lancement : il apprend le **sens du coude à la main**, sans moteur (on tient
+l'avant-bras, on le fait remonter d'environ 20°), retenu dans `sens_coude.json`.
+
+Angles : **épaule** = haut du bras par rapport à l'horizontale (−30° à +90°) ; **coude** = avant-bras par rapport au haut
+du bras (0° = dans le prolongement, + = il remonte, ± 90°).
+
+| Commande | Effet |
+|---|---|
+| `e30` | épaule à +30° (le coude ne bouge pas) |
+| `c-45` | coude à −45° |
+| `plat` | avant-bras remis à l'horizontale |
+| `n20` | épaule à +20° **en gardant l'avant-bras à l'horizontale** : les deux servos bougent ensemble (pour porter un gobelet) |
+| `o` · `s` · `S` | pince : ouvrir · serrer doucement · serrer fort |
+| `repos` | bras à la verticale (il ne force presque plus) |
+| `i` · `q` | infos · quitter (en tenant le bras) |
+
+Plusieurs à la suite : `n0 o s n40`. Après chaque geste : angles, hauteur du bas de la pince au-dessus de la table, charges, températures.
+
+Sécurités : butées de chaque servo, chaleur, blocage (les servos **retiennent** le bras au lieu de le lâcher) ; **refus d'un
+geste qui enverrait la pince dans la table** ; pendant `n`, si un servo prend plus de 7° de retard sur l'autre, tout s'arrête
+(sinon le coude continuerait seul et pencherait la pince). Avec le socle tournant : `piloter_bras.bat --hauteur 179`.
+
+Simulé ici sur trois faux servos (premier lancement, gestes, refus, blocage) ; **pas encore essayé sur le vrai bras.**
