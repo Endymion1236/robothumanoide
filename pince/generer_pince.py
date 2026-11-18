@@ -155,6 +155,14 @@ def chapeau_b():
     m += cyl(AX, -AY, Z0 + ROUL_EP + 0.75, z, 5.8, 48) + cyl(AX, -AY, Z0 + ROUL_EP, Z0 + ROUL_EP + 0.75, 5.0, 48)   # pied : appuie sur la bague intérieure seulement
     return m - cyl(AX, -AY, Z0 + ROUL_EP - 0.1, z + CHAPEAU_EP + 0.1, M3, 24)
 
+def chapeau_libre(x=0.0, y=0.0):
+    """Chapeau des bras libres (× 4 : un par roulement). Le roulement est enfoncé par-dessous : rien d'autre que le
+    serrage du plastique n'empêche le bras de se SOULEVER et de quitter son roulement (essai du 18/11/2026 : les bras
+    libres sortent de leur logement). Disque de 14 mm serré par la vis sur la bague intérieure, 0,25 mm au-dessus du bras."""
+    z = Z_LIBRE + EP_LIBRE + CHAPEAU_JEU
+    m = cyl(x, y, z, z + CHAPEAU_EP, 14.0, 64) + cyl(x, y, Z_LIBRE + ROUL_EP + 0.5, z, 5.8, 48) + cyl(x, y, Z_LIBRE + ROUL_EP, Z_LIBRE + ROUL_EP + 0.5, 5.0, 48)
+    return m - cyl(x, y, Z_LIBRE + ROUL_EP - 0.1, z + CHAPEAU_EP + 0.1, M3, 24)
+
 def bras_libre(s):
     """Bras libre (s = +1 côté +Y, -1 côté -Y) : un roulement 623 à chaque bout, enfoncé par-dessous.
     Au pivot comme au doigt, la tête de vis descend dans le passage de 6,5 et serre la bague intérieure :
@@ -387,6 +395,13 @@ if __name__ == '__main__':
     # chapeau de l'engrenage B : aucun contact avec les pièces mobiles sur toute la course (butées dépassées de 3°), exporté pied en l'air
     for th in np.linspace(TH_FERME - 3, TH_OUVERT + 3, 40):
         for nom, m in pose(th).items(): assert (CHAPEAU_B ^ m).volume() < 0.01, ('chapeau', nom, round(th, 1))
+    for th in np.linspace(TH_FERME - 3, TH_OUVERT + 3, 40):          # chapeaux des bras libres : au pivot (fixe) et au bout (suit le bras)
+        p = pose(th); p.update({'base': BASE, 'bride': BRIDE})
+        for sg in (1, -1):
+            piv = P_LIBRE[0 if sg > 0 else 1]; bout = (piv[0] + L_BRAS * math.cos(math.radians(th)), piv[1] + sg * L_BRAS * math.sin(math.radians(th)))
+            for c in (chapeau_libre(*piv), chapeau_libre(*bout)):
+                for nom, m in p.items(): assert (c ^ m).volume() < 0.01, ('chapeau libre', nom, round(th, 1))
+    t = mesh(chapeau_libre()); t.apply_transform(tm.transformations.rotation_matrix(math.pi, (1, 0, 0))); t.apply_translation(-t.bounds[0]); t.export(OUT / 'pince_chapeau_bras_libre.stl')
     t = mesh(CHAPEAU_B); t.apply_transform(tm.transformations.rotation_matrix(math.pi, (1, 0, 0))); t.apply_translation(-t.bounds[0]); t.export(OUT / 'pince_chapeau_B.stl')
     masse = 0
     variantes = ('_insert',)

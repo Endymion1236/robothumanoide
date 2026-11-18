@@ -58,6 +58,16 @@ serré par la vis du pivot sur la bague intérieure du roulement ; B tourne dess
 basculer de plus de ± 0,4 mm aux dents. Vis **M3 × 16** à la place de la M3 × 10, sans rondelle. Imprimé pied en l'air,
 100 % de remplissage. Rayon limité à 10 mm par la plaque du doigt, qui passe à 0,8 mm pince fermée. Pas encore essayé.
 
+## Chapeaux des bras libres (18/11/2026)
+
+Les bras libres sortent souvent de leur logement : le roulement est enfoncé par-dessous, et seul le serrage du plastique
+retient le bras vers le haut (la tête de vis passe dans le trou de 6,5). `pince_chapeau_bras_libre.stl` **× 4** (un par
+roulement, aux deux bouts de chaque bras) : disque de 14 mm serré par la vis sur la bague intérieure, 0,25 mm au-dessus du
+bras. Vis : **M3 × 12 partout** (au lieu de M3 × 10 aux pivots et M3 × 8 au bout côté doigt) : 3,85 mm de prise dans l'insert
+du poteau comme dans celui du doigt, et la pointe reste 0,15 mm à l'intérieur de la plaque du doigt (rien ne dépasse dessous).
+100 % de remplissage, pied en l'air.
+Aucun contact sur toute la course. Pas encore essayé.
+
 ## Doigts en deux pièces (15/11/2026)
 
 Le doigt d'un bloc s'imprimait debout : une mâchoire de 11 mm d'épaisseur sur 65 mm de haut. À l'impression, la buse l'a
