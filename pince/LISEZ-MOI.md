@@ -49,6 +49,15 @@ et `generer_pince.py` refuse toute paroi de moins de 1,8 mm autour d'un roulemen
 Ce que les calculs ne disent pas : la tenue réelle des poteaux (hauts de 52 mm) quand la pince serre, et le
 frottement des pièces imprimées. C'est l'essai à la main de l'étape 9 du plan de montage qui le dira.
 
+## Chapeau de l'engrenage B (18/11/2026)
+
+Essai réel avec un verre de 25 cl tenu à 20 % : l'engrenage B monte ou descend par rapport à A, les dents ne se touchent
+plus sur toute leur hauteur. B ne tient que sur un roulement 623 de 4 mm : l'effort sur la mâchoire, 20 mm plus bas que
+les engrenages, le fait basculer (A, lui, est sur l'arbre du servo). `pince_chapeau_B.stl` : un disque fixe de 20 mm,
+serré par la vis du pivot sur la bague intérieure du roulement ; B tourne dessous avec 0,25 mm de jeu et ne peut plus
+basculer de plus de ± 0,4 mm aux dents. Vis **M3 × 16** à la place de la M3 × 10, sans rondelle. Imprimé pied en l'air,
+100 % de remplissage. Rayon limité à 10 mm par la plaque du doigt, qui passe à 0,8 mm pince fermée. Pas encore essayé.
+
 ## Doigts en deux pièces (15/11/2026)
 
 Le doigt d'un bloc s'imprimait debout : une mâchoire de 11 mm d'épaisseur sur 65 mm de haut. À l'impression, la buse l'a

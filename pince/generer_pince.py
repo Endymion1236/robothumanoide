@@ -143,6 +143,18 @@ def engrenage_b():
     m -= cyl(AX + L_BRAS, -AY, Z0 - 0.1, Z0 + EP_ENG + 0.1, M3, 24)
     return m
 
+CHAPEAU_R, CHAPEAU_EP, CHAPEAU_JEU = 10.0, 2.4, 0.25
+def chapeau_b():
+    """Chapeau fixe au-dessus de l'engrenage B (18/11/2026). B ne tient que sur un roulement 623 de 4 mm : quand la
+    pince serre, l'effort sur la mâchoire (20 mm plus bas que les engrenages) le fait basculer, et ses dents montent
+    ou descendent par rapport à celles de A. Le chapeau, serré par la vis du pivot sur la bague intérieure du
+    roulement, ne tourne pas : B tourne dessous avec 0,25 mm de jeu et ne peut plus basculer.
+    Rayon 10 : la plaque du doigt (même hauteur) passe à 0,8 mm pince fermée ; à 11, elle le touche. Vis M3 x 16 au lieu de M3 x 10."""
+    z = Z0 + EP_ENG + CHAPEAU_JEU
+    m = cyl(AX, -AY, z, z + CHAPEAU_EP, 2 * CHAPEAU_R, 96)
+    m += cyl(AX, -AY, Z0 + ROUL_EP + 0.75, z, 5.8, 48) + cyl(AX, -AY, Z0 + ROUL_EP, Z0 + ROUL_EP + 0.75, 5.0, 48)   # pied : appuie sur la bague intérieure seulement
+    return m - cyl(AX, -AY, Z0 + ROUL_EP - 0.1, z + CHAPEAU_EP + 0.1, M3, 24)
+
 def bras_libre(s):
     """Bras libre (s = +1 côté +Y, -1 côté -Y) : un roulement 623 à chaque bout, enfoncé par-dessous.
     Au pivot comme au doigt, la tête de vis descend dans le passage de 6,5 et serre la bague intérieure :
@@ -315,6 +327,7 @@ EA, EB = engrenage_a(), engrenage_b()
 BL = {1: bras_libre(1), -1: bras_libre(-1)}
 DG = {1: doigt(1), -1: doigt(-1)}
 BASE, BRIDE, SERVO, AVB = base(), bride(), servo_ref(), avant_bras_ref()
+CHAPEAU_B = chapeau_b()
 
 if __name__ == '__main__':
     rapport = {'version': 'V3', 'validation_physique': False, 'angles_bras_deg': {'ferme': round(TH_FERME, 1), 'ouvert': round(TH_OUVERT, 1)},
@@ -371,6 +384,10 @@ if __name__ == '__main__':
               'pince_doigt_machoire_+Y': doigt_machoire(1), 'pince_doigt_machoire_-Y': doigt_machoire(-1), 'pince_bouchon_doigt': bouchon_doigt(),
               'pince_bouchon_doigt_insert': bouchon_doigt(True),
               'pince_doigt_plaque_+Y_insert': doigt_plaque(1, True), 'pince_doigt_plaque_-Y_insert': doigt_plaque(-1, True)}
+    # chapeau de l'engrenage B : aucun contact avec les pièces mobiles sur toute la course (butées dépassées de 3°), exporté pied en l'air
+    for th in np.linspace(TH_FERME - 3, TH_OUVERT + 3, 40):
+        for nom, m in pose(th).items(): assert (CHAPEAU_B ^ m).volume() < 0.01, ('chapeau', nom, round(th, 1))
+    t = mesh(CHAPEAU_B); t.apply_transform(tm.transformations.rotation_matrix(math.pi, (1, 0, 0))); t.apply_translation(-t.bounds[0]); t.export(OUT / 'pince_chapeau_B.stl')
     masse = 0
     variantes = ('_insert',)
     for nom, m in pieces.items():
