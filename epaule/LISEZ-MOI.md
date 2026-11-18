@@ -114,6 +114,28 @@ Ce que fait le programme, et pourquoi il diffère de ceux du coude et de la pinc
 
 Essayé ici sur un faux servo (étalonnage, mouvements, blocage, double Ctrl+C) ; **pas encore sur le vrai.**
 
+## Premier essai réel, sans ressort (18/11/2026)
+
+Bras complet (haut du bras, coude tenu raide, avant-bras, pince V3), pied serré sur la table, `tester_epaule.bat --coude 1`.
+Étalonnage sans moteur réussi (2048 à l'horizontale, butées 1707–3072), mouvements de −20° à +90° sans incident.
+
+| Hauteur (commande `m`) | Charge | Courant | Température |
+|---|---|---|---|
+| −20° | +7 % | 20 mA | 26 °C |
+| 0° | −10 % | 28 mA | 28 °C |
+| +20° | −17 % | 94 mA | 26 °C |
+| +40° | −14 % | 61 mA | 27 °C |
+| +60° | −10 % | 31 mA | 27 °C |
+| +80° | −6 % | 14 mA | 31 °C |
+
+À retenir :
+- Effort maxi **17–18 %** (seuil de vigilance du programme : 35 %), servo froid : **l'épaule lève et tient le bras à vide sans ressort**.
+- Le servo s'arrête 1 à 2° sous la position demandée (le poids le fait fléchir) : tolérance d'arrivée portée à 70 pas pour l'épaule.
+- La « charge » lue suit l'écart entre position demandée et position atteinte (≈ 0,85 % par pas) : elle dépend du sens d'arrivée
+  (0° : −18 % en descendant, −10 % en montant). Pour comparer deux réglages, toujours utiliser `m` (même enchaînement).
+- Courant de maintien très faible (136 mA au plus) : à l'arrêt, les frottements du réducteur portent une bonne part du poids.
+  Le calcul (8,3 kg·cm à tenir) est donc pessimiste pour le maintien ; reste à mesurer la LEVÉE avec une charge dans la pince.
+
 ## Vérifications
 
 | Programme | Ce qu'il vérifie | Résultat |
