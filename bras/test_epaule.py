@@ -21,6 +21,8 @@ BAS, HAUT = -30, 90            # course de l'épaule, en degrés par rapport à 
 SENS = Path(__file__).with_name('sens_epaule.json')
 POSES = {'b': ('un peu sous l\'horizontale (−20°)', -20), 'h': ('à l\'horizontale (0°)', 0), '3': ('à 30°', 30), '6': ('à 60°', 60), 'v': ('à la verticale (90°)', 90)}
 
+TOLERANCE = 70      # pas (≈ 6°) : le bras qui pèse fait fléchir le servo sous la position demandée, ce n'est pas un blocage
+
 def butees(haut): return (MILIEU + pas(BAS), MILIEU + pas(HAUT)) if haut > 0 else (MILIEU - pas(HAUT), MILIEU - pas(BAS))
 def angle(position, haut): return degres(position - MILIEU) * haut
 def position(angle_, haut): return MILIEU + haut * pas(angle_)
@@ -74,7 +76,7 @@ def mesurer(bus, ident, haut):
     lignes = []
     for a in (-20, 0, 20, 40, 60, 80):
         bus.limiter_force(ident, 100)
-        r = bus.aller(ident, position(a, haut), delai_max=10, si_arret='retenir')
+        r = bus.aller(ident, position(a, haut), delai_max=10, si_arret='retenir', tolerance=TOLERANCE)
         if r.startswith('ARRÊT'):
             print('  ', r); return
         time.sleep(1.5)
@@ -146,7 +148,7 @@ def main():
                 print(f'   vers {nom}...')
                 try:
                     bus.limiter_force(ident, 100)
-                    texte = bus.aller(ident, position(vise, haut), delai_max=10, si_arret='retenir')
+                    texte = bus.aller(ident, position(vise, haut), delai_max=10, si_arret='retenir', tolerance=TOLERANCE)
                 except ErreurServo as err:
                     print('   refusé :', err, '— la suite de la série est annulée'); break
                 print('  ', texte); afficher_etat(bus.etat(ident), haut)
