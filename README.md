@@ -148,8 +148,13 @@ Pied lesté ou vissé : bras tendus, il ne doit jamais basculer.
 
 À la place de la pince, sur le bras à servos plus forts (pas sur le bras actuel : l'épaule est déjà à la limite avec la
 pince de 205 g, voir `epaule/calcul_poignet.py`).
-- Main simple à 5 doigts tirés par des fils : environ 15 phalanges (3 par doigt), une paume en 2 pièces, une quinzaine
-  de petits axes, ressorts ou élastiques de rappel.
+- Main à 5 doigts : environ 15 phalanges (3 par doigt), une paume en 2 pièces, une quinzaine de petits axes.
+- **Mécanisme retenu le 18/11/2026 : deux fils par doigt (« tirer-tirer »), sans élastique ni ressort de rappel.**
+  Un fil côté paume ferme le doigt, un fil côté dos l'ouvre ; les deux s'enroulent en sens inverse sur la même poulie
+  du servo, qui commande donc le doigt dans les deux sens. Fil de pêche tressé, guides arrondis, un petit tendeur par
+  fil ; différence de longueur des deux fils compensée par le diamètre de la poulie (ou un petit ressort sur le fil du dos).
+  Écartés : élastiques (vieillissent, se détendent). En réserve : biellettes rigides (plus robustes, moins adaptables).
+- À faire d'abord : **un doigt d'essai** avec un seul servo, avant de dessiner la main entière.
 - 5 petits servos (un par doigt), dans la paume ou dans l'avant-bras ; 250 à 350 g au bout du bras.
 - Reprend le premier projet de main de Nicolas (ESP32, MG90S, gestes).
 - Servos des doigts envisagés : **Feetech SCS0009** (bus série comme les STS, 2,3 kg·cm, 23 × 12 × 25 mm, retour de
