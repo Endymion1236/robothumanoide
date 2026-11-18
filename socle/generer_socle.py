@@ -132,5 +132,11 @@ if __name__ == '__main__':
         r['pieces'][nom] = d; assert d['fermee'] and d['blocs'] == 1, (nom, d)
     # pièce d'essai : une bague au diamètre du moyeu (34,9), pour vérifier l'ajustement dans un roulement avant d'imprimer le plateau
     t = mesh(anneau(0, 12, MOYEU_DE, MOYEU_DI)); t.export(OUT / 'socle_essai_moyeu.stl')
+    # trois bagues d'essai d'un coup : 34,8 (basse, 6 mm), 34,7 (moyenne, 9 mm), 34,6 (haute, 12 mm), reliées par une languette
+    essai = mf.Manifold()
+    for k, (d, h) in enumerate(((34.8, 6.0), (34.7, 9.0), (34.6, 12.0))):
+        essai += (cyl(0, 0, 0, h, d, 128) - cyl(0, 0, -0.1, h + 0.1, MOYEU_DI, 64)).translate((k * 38.0, 0, 0))
+    essai += box(0, -3, 0, 76, 3, 1.2) - cyl(0, 0, -0.1, 2, MOYEU_DI, 64) - cyl(38, 0, -0.1, 2, MOYEU_DI, 64) - cyl(76, 0, -0.1, 2, MOYEU_DI, 64)
+    t = mesh(essai); assert t.is_watertight; t.export(OUT / 'socle_essai_moyeu_3_tailles.stl')
     json.dump(r, open(OUT / 'verification_socle.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print(json.dumps(r, ensure_ascii=False, indent=1))
