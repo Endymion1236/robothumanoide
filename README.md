@@ -212,6 +212,9 @@ Règles désormais :
 
 - **Servos** : 8 STS3215-12V (C018, 30 kg·cm, 1/345) de plus, chez Feetech (Shenzhen Feite Model, Alibaba) →
   9 en tout : bras de table complet à 6 axes + rechanges. Vérifier que disques, vis et câble sont inclus.
+  **Reçus le 18/11/2026 : 6 servos de plus (9 en tout).** Numéros : socle 1, épaule 2, coude 3 (encore au n° 1 tant que le
+  socle n'est pas monté), pince 4, rotation du poignet 5, flexion du poignet 6, cou 7 (tourner) et 8 (hocher) ; 1 de rechange.
+  Chaque servo neuf est testé seul dans FD, numéroté et étiqueté avant montage ; butées réglées au moment du montage.
 - **Carte** : la Waveshare Bus Servo Adapter (A) suffit pour tous les servos (en chaîne, un ID par servo).
   **À racheter** (USB de la première carte mort le 08/11/2026).
 - **Alimentation** : prévoir 12 V, 5 A minimum (6 à 10 A conseillé) pour 6 servos.
