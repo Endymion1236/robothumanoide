@@ -195,3 +195,5 @@ Pour vérifier le montage : `sortie/vue_dessus_montee.png` (vue de dessus, quel 
 - **Force de serrage** : le servo peut écraser un gobelet en carton. Il faudra limiter son couple
   (réglage dans le servo) avant les essais avec de vrais gobelets.
 - Le sens « ouvrir » (vers la butée min ou max) se vérifie au premier essai.
+
+**Plan de montage de la V4** : `sortie/plan_montage_pince_v4.pdf` (6 étapes, une page chacune), produit par `plan_montage_v4.py`.
