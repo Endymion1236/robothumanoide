@@ -201,7 +201,7 @@ class Bus:
         """Force maximale du servo, en % (oubliée quand on coupe le 12 V)."""
         self.ecrire2(ident, LIMITE_COUPLE, max(0, min(100, round(pourcent))) * 10, 'limite de force')
 
-    def serrer(self, ident, cible, force=25, delai_max=6.0, afficher=None):
+    def serrer(self, ident, cible, force=25, delai_max=6.0, afficher=None, maintien=None):
         """Avance vers `cible` avec une force limitée (en %) et s'arrête de lui-même sur un objet.
         Renvoie (compte rendu, position, objet_tenu). L'objet reste serré avec cette force."""
         e = self.etat(ident)
@@ -226,7 +226,12 @@ class Bus:
             if abs(e['position'] - avant) <= 2:
                 immobile_depuis = immobile_depuis or time.time()
                 if time.time() - immobile_depuis > 0.4 and abs(e['charge']) >= force * 0.5:
-                    return f"objet tenu (force {abs(e['charge']):.0f} % sur {force} % permis)", e['position'], True
+                    texte = f"objet tenu (force {abs(e['charge']):.0f} % sur {force} % permis)"
+                    if maintien is not None and maintien < force:
+                        # une fois l'objet saisi, on ne garde que la force de maintien : le servo, qui pousse sans tourner,
+                        # chauffe beaucoup moins (42 °C en tenant un verre à 20 %, essai du 18/11/2026)
+                        self.limiter_force(ident, maintien); texte += f', puis tenu à {maintien} %'
+                    return texte, e['position'], True
             else:
                 immobile_depuis = None
             avant = e['position']

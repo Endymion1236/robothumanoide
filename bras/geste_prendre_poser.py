@@ -49,7 +49,7 @@ def geste(bus, ouvert, cote):
     etape('Présente le gobelet entre les mâchoires, au creux de l\'arrondi')
     if input('   Entrée pour serrer (a pour annuler) : ').strip().lower().startswith('a'):
         print('   annulé'); return
-    texte, pos, tenu = bus.serrer(ID_PINCE, ferme, P.FORCE_FERME)
+    texte, pos, tenu = bus.serrer(ID_PINCE, ferme, P.FORCE_FERME, maintien=P.FORCE_MAINTIEN)
     print('  ', texte)
     if not tenu:
         print('   Rien de tenu : j\'ouvre la pince et j\'arrête ce geste.')

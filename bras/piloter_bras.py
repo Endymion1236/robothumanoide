@@ -86,6 +86,7 @@ def aller_ensemble(bus, cibles, delai_max=14.0, synchro=False):
 
 def main():
     ap = argparse.ArgumentParser(description='Piloter le bras : épaule, coude, pince')
+    ap.add_argument('--maintien', type=int, default=P.FORCE_MAINTIEN, help='force gardée une fois l\'objet saisi, en %% (0 = pas de baisse)')
     ap.add_argument('--port'); ap.add_argument('--hauteur', type=float, default=101.0, help='hauteur de l\'axe de l\'épaule au-dessus de la table (101 ; 179 avec le socle)')
     a = ap.parse_args()
     try: bus = Bus(a.port)
@@ -156,7 +157,7 @@ def main():
                             bus.tenir(ID_PINCE); bus.limiter_force(ID_PINCE, P.FORCE_MOUVEMENT); print('   ouvrir...', bus.aller(ID_PINCE, ouvert, charge_max=P.CHARGE_BLOCAGE))
                             h = min(E.HAUT, v + 20); print('   remonter...', aller_ensemble(bus, [(ID_EPAULE, pos_e(h)), (ID_COUDE, pos_c(-h))], synchro=True))
                     elif m in 'sS':
-                        bus.tenir(ID_PINCE); texte, pos, tenu = bus.serrer(ID_PINCE, ferme, P.FORCE_DOUCE if m == 's' else P.FORCE_FERME); print('   serrer...', texte)
+                        bus.tenir(ID_PINCE); texte, pos, tenu = bus.serrer(ID_PINCE, ferme, P.FORCE_DOUCE if m == 's' else P.FORCE_FERME, maintien=a.maintien or None); print('   serrer...', texte)
                     else:
                         ae, ac = ang_e(), ang_c()
                         if m == 'plat': cible = [(ID_COUDE, pos_c(-ae))]; verifier(ae, -ae); nom = 'avant-bras à l\'horizontale'

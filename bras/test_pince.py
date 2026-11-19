@@ -15,6 +15,7 @@ ID_PINCE = 4
 FORCE_MOUVEMENT = 50          # % : la pince n'a jamais besoin de plus
 CHARGE_BLOCAGE = 35           # % : au-delà pendant 0,5 s en ouvrant ou en allant au milieu, la pince est coincée → force coupée
 FORCE_DOUCE, FORCE_FERME = 20, 35
+FORCE_MAINTIEN = 12           # % gardés une fois l'objet saisi, pour que le servo chauffe moins (--maintien N pour essayer une autre valeur ; 0 = pas de baisse)
 SENS = Path(__file__).with_name('sens_pince.json')
 
 # géométrie de la pince (V2 et V3 : mêmes bras, mêmes butées ; pince/generer_pince.py) : écart au creux des mâchoires selon l'angle du bras
@@ -74,6 +75,7 @@ def main():
     ap = argparse.ArgumentParser(description='Essai de la pince')
     ap.add_argument('--port', help='port COM (trouvé tout seul sinon)')
     ap.add_argument('--id', type=int, help='numéro du servo (cherché tout seul sinon)')
+    ap.add_argument('--maintien', type=int, default=FORCE_MAINTIEN, help='force gardée une fois l\'objet saisi, en %% (0 = garder la force de serrage)')
     a = ap.parse_args()
     try:
         bus = Bus(a.port)
@@ -142,7 +144,7 @@ def main():
                     else:
                         force = {'s': FORCE_DOUCE, 'S': FORCE_FERME, 'f': FORCE_FERME}[choix]
                         print(f"   {'fermer' if choix == 'f' else 'serrer'} (force limitée à {force} %)...")
-                        texte, pos, tenu = bus.serrer(ident, ferme, force)
+                        texte, pos, tenu = bus.serrer(ident, ferme, force, maintien=(a.maintien or None) if choix != 'f' else None)
                         print('  ', texte)
                         if texte.startswith('ARRÊT'):
                             print('   La suite de la série est annulée.'); afficher_etat(bus.etat(ident), ouvert); break

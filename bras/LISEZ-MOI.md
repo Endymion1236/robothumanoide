@@ -75,6 +75,11 @@ ne coupe jamais la force sans demander de tenir le bras, et une sécurité qui s
 
 `python test_securites.py` : douze sécurités vérifiées sur un faux servo (`servo_simule.py`), en 6 secondes : refus sans butées, hors butées, servo trop chaud, **pince coincée → force coupée en 1 s**, serrage sur un objet, étalonnage. À relancer après chaque modification de `servos.py`.
 
+**Force de maintien (19/11/2026)** : une fois l'objet saisi (20 % avec `s`, 35 % avec `S`), la pince ne garde que **12 %** pour
+le tenir : le servo, qui pousse sans tourner, chauffe moins (42 °C relevés en tenant un verre à 20 %). Valable dans
+`tester_pince`, `piloter_bras` et `geste_prendre_poser`. Pour essayer une autre valeur : `tester_pince.bat --maintien 15`
+(0 = pas de baisse). Si un verre plein glisse, augmenter ; du caoutchouc sur les mâchoires permet de baisser. Simulé seulement.
+
 ## Premier geste : prendre et poser (`geste_prendre_poser.bat`)
 
 Coude (n° 1) et pince (n° 4) sur le même câble, pince sur l'avant-bras, FD fermé. Avant : `tester_coude.bat`
