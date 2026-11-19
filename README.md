@@ -4,6 +4,9 @@ Premier objectif : **un petit bras de table** avec un coude en servo Feetech STS
 **pince** au bout. La main robotique (ESP32, servos MG90S, gestes préenregistrés, puis gant à
 capteurs et voix) viendra ensuite.
 
+**Règle de conception (19/11/2026)** : avant de modéliser, demander à Nicolas la mesure de tout élément dont la cote n'est pas
+déjà notée (vis, inserts, roulements, planches, câbles). Détail dans `CLAUDE.md`.
+
 ## Vision d'ensemble (09/11/2026)
 
 À terme : **deux bras à 6 axes et une tête**, avec **reconnaissance vocale**, une **IA qui répond**
