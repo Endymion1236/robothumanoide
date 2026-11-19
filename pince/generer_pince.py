@@ -239,9 +239,11 @@ BRIDE_X0, BRIDE_X1, BRIDE_Z = 9.0, 19.5, H_HAUT - 0.5   # commence à 9 (1 mm ap
                                                         # à 22, il ne restait que 1,5 mm avant les dents de l'engrenage A (15/11/2026)
 D_POTEAU_B, D_POTEAU_LIBRE = 16.0, 12.0
 
-def base():
-    b = box(XF - ENT_B, -25, Z_BASE, 55, 39, Z_BASE + 4)                       # plaque
-    b += box(XF - ENT_B, -(PIV_LIBRE[1] + 7), Z_BASE, PIV_LIBRE[0] + 8, PIV_LIBRE[1] + 7, Z_BASE + 4)   # élargie sous les poteaux des bras libres
+def base(manchon=True):
+    """manchon=False : base pour le poignet (poignet/generer_poignet.py), sans le manchon de l'avant-bras."""
+    xa = XF - ENT_B if manchon else PIV_LIBRE[0] - 6.5
+    b = box(xa, -25, Z_BASE, 55, 39, Z_BASE + 4)                       # plaque
+    b += box(xa, -(PIV_LIBRE[1] + 7), Z_BASE, PIV_LIBRE[0] + 8, PIV_LIBRE[1] + 7, Z_BASE + 4)   # élargie sous les poteaux des bras libres
     # logement du servo : rails d'appui sous ses bords, murs
     for y0, y1 in ((SY0 - JEU, SY0 + 2), (SY1 - 2, SY1 + JEU)):
         b += box(X0S - JEU, y0, -3, X0S + SL + JEU, y1, 0)
@@ -264,6 +266,7 @@ def base():
     for (x, y, zt, d) in ((AX, -AY, Z0, D_POTEAU_B), (*P_LIBRE[0], Z_LIBRE, D_POTEAU_LIBRE), (*P_LIBRE[1], Z_LIBRE, D_POTEAU_LIBRE)):
         b += cyl(x, y, Z_BASE, zt - EP_RONDELLE, d)
         b -= cyl(x, y, zt - 9, zt + 0.1, M3_INSERT, 24)
+    if not manchon: return b
     # manchon sur le bout de l'avant-bras (entretoise du bout), vis M3 par le côté +Y
     yi, zi = FOURCHE_EP / 2 + JEU, FOURCHE_L / 2 + JEU
     b += box(XF - ENT_B, -yi - 3, Z_BASE, XF + 3, yi + 3, ZC + zi + 3)
