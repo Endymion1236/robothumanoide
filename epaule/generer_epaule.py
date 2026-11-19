@@ -48,7 +48,10 @@ _ns = {'__file__': str(RACINE / 'coude-sts3215' / 'BrasV1' / 'verify_bras.py')}
 exec(_src[:_src.index('p,b,brace,servo,cable=build()')], _ns)
 # berceau « à inserts » : les 4 trous de fixation passent de 4,5 à 4,0 mm pour recevoir des inserts M3. Les vis
 # viennent par-derrière : aucune tête de vis sur le socle, donc rien sous la fourche qui passe 2 mm au-dessus.
-B, BERCEAU_C, BRIDE_C, SERVO_C, CABLE_C = _ns['build']({'mount_D': '4.0 mm'})
+# nervure qui retient le bossage du servo : 3,4 mm au lieu de 1,2. Sur le support de table rien ne tirait dessus ; sur le
+# bras, le poids de l'avant-bras tire le servo du coude hors du berceau et la nervure de 1,2 a cassé (19/11/2026).
+# 3,4 = le maximum sans entrer dans la zone balayée par la plaque basse de la fourche.
+B, BERCEAU_C, BRIDE_C, SERVO_C, CABLE_C = _ns['build']({'mount_D': '4.0 mm', 'nervure_T': '3.4 mm'})
 B = type('P', (), B)
 
 # ---------------- Cotes de l'épaule ----------------

@@ -136,6 +136,15 @@ Bras complet (haut du bras, coude tenu raide, avant-bras, pince V3), pied serré
 - Courant de maintien très faible (136 mA au plus) : à l'arrêt, les frottements du réducteur portent une bonne part du poids.
   Le calcul (8,3 kg·cm à tenir) est donc pessimiste pour le maintien ; reste à mesurer la LEVÉE avec une charge dans la pince.
 
+## Servo du coude sorti de son berceau (19/11/2026)
+
+Ce qui retient le servo dans le sens de sa longueur : la bride, qui le plaque au fond, et une **nervure** qui bute contre le
+bossage du dessous. Sur le bras, le poids de l'avant-bras tire le servo du coude vers le bout ouvert du berceau (bras
+baissé) : la nervure de 1,2 mm a cassé et le servo a glissé. `berceau_a_inserts.stl` a maintenant une nervure de **3,4 mm**
+(environ 8 fois plus résistante en flexion), le maximum sans entrer dans la zone balayée par la fourche (vérifié de −109° à +109°).
+**À réimprimer : le berceau du coude** ; celui de l'épaule quand l'occasion se présente (même nervure fine).
+Au remontage : bossage du servo bien DERRIÈRE la nervure, servo au fond, bride serrée.
+
 ## Vérifications
 
 | Programme | Ce qu'il vérifie | Résultat |
