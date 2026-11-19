@@ -62,6 +62,10 @@ Avant le montage : le servo du socle porte le n° 1, donc le coude doit d'abord 
 **Plan de montage illustré : `sortie/plan_montage_socle.pdf`** (8 étapes, `plan_montage.py` ; outils de dessin partagés dans
 `epaule/plan_montage_epaule_outils.py`). Servo du socle : n° 1, butées 1024–3072, monté à 2048. Le coude passe au n° 3 (étape 8).
 
+**Vis du palonnier (19/11/2026)** : les vis fournies avec le servo font 5 mm. Fond du moyeu aminci de 3,4 à **2,5 mm** : elles
+entrent de 2,5 mm dans le palonnier. Le palonnier reste sur le servo (vis centrale) ; les 4 vis passent par le creux du moyeu,
+têtes dans le creux. Plateau à réimprimer si imprimé avant cette date (ou vis M2,5 × 6 avec l'ancien plateau).
+
 ## Visserie
 8 inserts M3 (4 en haut des poteaux de la base, 4 dans le plateau), 4 vis M3 × 10 (palier), 4 vis M3 × 12 (pied du bâti),
 4 vis M2,5 du palonnier (3,4 mm de plastique traversé, comme au coude), 2 roulements 6807.

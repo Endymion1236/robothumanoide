@@ -32,7 +32,8 @@ ECART = 20.0                                                 # entre les milieux
 Z_RA = Z_HAUT + LEVRE; Z_RB = Z_RA + ECART; Z_TUBE = Z_RB + ROUL_EP + 0.2
 TUBE_DE = 55.0; MOYEU_DE, MOYEU_DI = ROUL_DI - 0.1, 19.0     # creux de 19 : passage du tournevis, pont plus court à l'impression
 PEAU = 0.4                                                   # peau pleine au fond du creux : le pont s'imprime sans trou, on la perce ensuite
-PATIN, VOILE = 1.0, 2.4                                      # sous le moyeu : patin Ø 18 sur le palonnier + voile
+PATIN, VOILE = 1.0, 1.5        # 2,5 mm de plastique sous les têtes : une vis M2,5 x 5 (celles du servo) entre de 2,5 mm dans le palonnier (2,4 jusqu'au 19/11/2026 : 1,6 mm de prise seulement)
+_ANCIEN = 1.0, 2.4                                      # sous le moyeu : patin Ø 18 sur le palonnier + voile
 Z_PLATEAU = Z_TUBE + 1.0; EP_PLATEAU = 8.0
 POTEAUX = [(-42.0, 28.0), (-42.0, -28.0), (26.0, 28.0), (26.0, -28.0)]
 X0S = AXE_BOUT - SL                                          # arrière du servo : -37,1
@@ -118,7 +119,7 @@ if __name__ == '__main__':
             v = (pl ^ f).volume(); pire = max(pire, v); assert v < 0.01, (deg, nom, v)
     r['contacts_mm3']['plateau tourné de -90 à +90° contre tout le reste'] = round(pire, 2)
     # 2. jeux et vis
-    r['vis'] = {'M2,5 du palonnier : plastique traversé (mm)': PATIN + VOILE, 'M3 × 10 du palier : prise dans l\'insert (mm)': 10 - EP_PLAQUE,
+    r['vis'] = {'M2,5 du palonnier : plastique traversé (mm)': PATIN + VOILE, 'vis M2,5 x 5 : prise dans le palonnier (mm)': 5 - PATIN - VOILE, 'M3 × 10 du palier : prise dans l\'insert (mm)': 10 - EP_PLAQUE,
                 'M3 × 12 du pied du bâti (6 mm) : prise dans l\'insert du plateau (mm)': 12 - 6,
                 'jeu du moyeu dans les roulements (mm, au diamètre)': round(ROUL_DI - MOYEU_DE, 2), 'jeu des roulements dans le tube (mm, au diamètre)': 0.1,
                 'jour plaque du palier / poteaux avant serrage (mm)': SERRAGE, 'jour plateau / tube (mm)': Z_PLATEAU - Z_TUBE}

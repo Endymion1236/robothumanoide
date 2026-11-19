@@ -71,11 +71,11 @@ def e5(fig):
     for x, y in S.POTEAUX: PM.guide(ax, (x, y, S.Z_HAUT + dz + 12), (x, y, ZT))
     PM.etiquette(ax, (S.POTEAUX[2][0], S.POTEAUX[2][1], S.Z_HAUT + dz + 25), '4 vis M3 × 10', (90, 40))
 
-@etape('Le plateau', ['le plateau (avec ses inserts)', '4 vis M2,5 (fournies avec le servo)', 'un tournevis long, un foret de 2,5 à 3 mm'],
+@etape('Le plateau', ['le plateau (avec ses inserts)', '4 vis M2,5 × 5 (fournies avec le servo)', 'un tournevis long, un foret de 2,5 à 3 mm'],
        ['Si le fond du moyeu est fermé par une fine peau : perce les 4 petits trous au foret, à la main, par le bout du moyeu.',
-        'Descends le moyeu dans les 2 roulements, jusqu\'à ce qu\'il se pose sur le palonnier.',
+        'Le palonnier RESTE sur le servo, avec sa vis centrale. Descends le moyeu dans les 2 roulements, jusqu\'à ce qu\'il se pose sur le palonnier.',
         'Oriente le plateau : côtés parallèles à ceux de la base (dessin B). Le bras pointera du côté où le moyeu est le plus près du bord.',
-        '4 vis M2,5 dans le palonnier, tournevis passé par le creux du moyeu. Serre à tour de rôle, sans forcer.'],
+        '4 vis M2,5 × 5 par le CREUX du moyeu (têtes dans le creux, jamais côté servo) : elles traversent le fond et se vissent dans le palonnier. Tournevis long, serrage à tour de rôle.'],
        'Le moyeu doit entrer à la main, sans jeu. S\'il force, ponce-le légèrement.', [(C['plateau'], 'plateau')])
 def e6(fig):
     a1, a2 = PM.panneaux(fig, 2, ['A. Le moyeu descend dans les roulements, 4 vis M2,5 par le creux', 'B. Vu de dessus : plateau aligné sur la base'])

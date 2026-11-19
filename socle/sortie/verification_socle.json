@@ -67,7 +67,8 @@
   "plateau tourné de -90 à +90° contre tout le reste": 0.0
  },
  "vis": {
-  "M2,5 du palonnier : plastique traversé (mm)": 3.4,
+  "M2,5 du palonnier : plastique traversé (mm)": 2.5,
+  "vis M2,5 x 5 : prise dans le palonnier (mm)": 2.5,
   "M3 × 10 du palier : prise dans l'insert (mm)": 6.0,
   "M3 × 12 du pied du bâti (6 mm) : prise dans l'insert du plateau (mm)": 6,
   "jeu du moyeu dans les roulements (mm, au diamètre)": 0.1,
