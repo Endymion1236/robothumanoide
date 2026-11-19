@@ -133,7 +133,8 @@ servo de la pince à 42 °C en tenant le verre). Corrigé : geste refusé quand 
 Avec le socle : **socle n° 1, épaule n° 2, coude n° 3, pince n° 4**. Les programmes trouvent tout seuls le coude : n° 3 s'il
 existe, sinon n° 1 (`numero_coude`, `numero_socle` dans `servos.py`). Rien à changer tant que le socle n'est pas monté.
 
-- **`tester_socle.bat`** : butées 1024–3072 (propose de les régler), puis `c` en face, `g` / `d` = ± 30°, `G` / `D` = ± 90°.
+- **`tester_socle.bat`** : au premier lancement, **étalonnage à la main** (plateau tourné parallèle à la base, cette position
+  devient 2048 ; commande `e` pour le refaire) : les trous du palonnier ne tombent pas forcément « en face » à 2048. Butées 1024–3072, puis `c` en face, `g` / `d` = ± 30°, `G` / `D` = ± 90°.
   Refuse de démarrer si le n° 1 est encore le coude (pas de servo n° 3).
 - **`piloter_bras.bat`** : commande **`t45`** = socle tourné à +45° (de −90 à +90), `t0` = en face. Hauteur de l'épaule prise
   à 179 mm quand le socle est là (101 sinon). `tester_epaule.bat --coude 3` pour retenir le coude à son nouveau numéro.
