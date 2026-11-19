@@ -59,6 +59,9 @@ peut rester fermé (il ne sert qu'à dégager la vis centrale du palonnier).
    constaté, les diamètres seront corrigés.
 Avant le montage : le servo du socle porte le n° 1, donc le coude doit d'abord passer au n° 3.
 
+**Plan de montage illustré : `sortie/plan_montage_socle.pdf`** (8 étapes, `plan_montage.py` ; outils de dessin partagés dans
+`epaule/plan_montage_epaule_outils.py`). Servo du socle : n° 1, butées 1024–3072, monté à 2048. Le coude passe au n° 3 (étape 8).
+
 ## Visserie
 8 inserts M3 (4 en haut des poteaux de la base, 4 dans le plateau), 4 vis M3 × 10 (palier), 4 vis M3 × 12 (pied du bâti),
 4 vis M2,5 du palonnier (3,4 mm de plastique traversé, comme au coude), 2 roulements 6807.
