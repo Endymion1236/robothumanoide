@@ -12,7 +12,10 @@ Exemples de ce que cette règle aurait évité : vis M2,5 du servo trop courtes 
 socle (elles font 5,3 mm sous tête), inserts trop longs pour les doigts, câble de la pince trop court.
 
 Mesures déjà connues : voir « Repères sur le servo » et « Matériel » dans `README.md` ; vis M2,5 fournies avec les
-servos : 5,3 mm sous tête ; inserts courts M3 × 5 × 4 ; roulements 6807 : 47 × 35 × 6,8 ; 623 : 10 × 3 × 4.
+servos : 5,3 mm sous tête ; roulements 6807 : 47 × 35 × 6,8 ; 623 : 10 × 3 × 4 (cotes standard, non mesurées).
+Mesuré le 19/11/2026 : **inserts M3 de Nicolas : Ø 4,7 × 3,8 mm de haut** (pas d'inserts longs : ne pas compter sur plus de
+3,8 mm de filet) ; **câble de servo : 152 mm** d'une fiche à l'autre ; vis M3 : coffret jusqu'à M3 × 30 et M3 × 35 à vérifier,
+Nicolas dit n'avoir que des **M3 × 30** au plus long ; tapis antidérapant pour les mâchoires : **2 mm**.
 
 ## Autres habitudes du projet
 
