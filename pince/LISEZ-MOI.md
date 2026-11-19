@@ -1,5 +1,35 @@
 # Pince à mâchoires parallèles (V3)
 
+## Pince V4, sans engrenages (19/11/2026) — prototype, pas encore imprimée
+
+Les deux engrenages de la V3 se décalent en hauteur et sautent des dents ; l'engrenage B bascule sur son petit roulement ;
+les bras libres sortent. La V4 supprime tout cela : **une mâchoire fixe, une mâchoire mobile vissée sur le palonnier**.
+Fichiers : `generer_pince_v4.py`, `apercu_pince_v4.py`, `sortie/apercu_pince_v4.png`, `sortie/verification_pince_v4.json`.
+
+**On garde** : la base, la bride, le servo, les **deux mâchoires** (identiques, avec leurs inserts).
+**On retire** : engrenages A et B, bras libres, plaques des doigts, roulements 623, bouchons, chapeaux.
+**À imprimer (2 pièces, PETG, 100 % de remplissage, à plat, sans support)** : `pince_v4_plaque_mobile.stl` (≈ 14 g),
+`pince_v4_plaque_fixe.stl` (≈ 12 g).
+
+| Vis | Où |
+|---|---|
+| 4 × M2,5 de 5,3 mm (celles du servo) | plaque mobile sur le palonnier, têtes au fond de 4 puits (2,8 mm de plastique, 2,5 mm dans le palonnier) |
+| 4 × M3 × 10 | les 2 mâchoires sous leurs plaques (4 mm dans l'insert) |
+| 1 × M3 × 16 | plaque fixe sur le poteau de l'ancien engrenage B, tête noyée |
+| 1 × M3 × 10 | plaque fixe sur le poteau du bras libre du même côté |
+
+Montage : 1) démonter engrenages, bras libres et plaques des doigts ; dévisser les 2 mâchoires de leurs plaques. 2) Une
+mâchoire sous la plaque fixe, creux vers l'intérieur, puis la plaque fixe sur ses 2 poteaux. 3) L'autre mâchoire sous la
+plaque mobile, puis la plaque mobile sur le palonnier, là où les trous tombent. 4) Coller le tapis antidérapant de 2 mm sur
+les deux creux. 5) `tester_pince.bat`, commande **e**, répondre **4** : régler à la main **58 mm** entre les deux mâchoires
+au creux (54 mm avec les tapis), valider. Les butées restent 1663–2433.
+
+Vérifié par le calcul : course de 54° (67,7 permis) ; mâchoires parallèles à 72 mm ; inclinaison de la mâchoire mobile :
+−14° à 53 mm, +6° à 80 mm, +14° à 90 mm ; fermée à vide, les bouts se touchent (petits objets pris en pincette) ; aucun
+contact avec la base, la bride et le servo sur toute la course ; un verre haut de 53 à 90 mm ne touche que les mâchoires
+(bras coudés pour lui laisser la place). L'objet de 72 mm est centré sur l'axe de l'avant-bras ; les autres sont décalés vers
+la mâchoire fixe. Non vérifié : la rigidité, la tenue du palonnier seul face au serrage, l'effet de l'inclinaison sur un verre plein.
+
 **V3 (14/11/2026) : sans point mort.** Essai réel de la V2 le 14/11/2026 : en se refermant à vide, un doigt s'est
 retourné d'un quart de tour ; à la réouverture la pince s'est coincée et les dents des engrenages ont sauté
 (« clac clac »). Cause : en V2, le pivot du bras libre était juste **derrière** celui du bras de l'engrenage.

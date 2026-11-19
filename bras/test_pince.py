@@ -24,9 +24,22 @@ TH_FERME = math.degrees(math.asin((14 / 2 + E_DOIGT - AY) / L_BRAS))
 TH_OUVERT = math.degrees(math.asin((110 / 2 + E_DOIGT - AY) / L_BRAS))
 TH_MILIEU = (TH_FERME + TH_OUVERT) / 2
 
+# pince V4 (sans engrenages, pince/generer_pince_v4.py) : la mâchoire mobile tourne autour de l'axe du servo.
+VERSION_FICHIER = Path(__file__).with_name('version_pince.json')
+V4_R, V4_PHI0, V4_YF, V4_TAPIS = 80.36, 16.63, -38.0, 2.0     # rayon et angle du milieu de la mâchoire mobile, face fixe, tapis
+V4_MILIEU, V4_FERME = -13.1, -40.2                             # angles (depuis la position parallèle) : milieu de course, bouts qui se touchent
+V4_ECART_MILIEU = 58                                           # mm entre les mâchoires SANS tapis au milieu de course (54 avec les tapis)
+
+def version_pince():
+    try: return int(json.loads(VERSION_FICHIER.read_text())['version'])
+    except Exception: return 3
+
 def ecart_mm(position, ouvert):
-    """Écart estimé entre les mâchoires (mm) ; `ouvert` = la butée du côté ouvert."""
+    """Écart estimé entre les mâchoires (mm) ; `ouvert` = la butée du côté ouvert. V4 : écart entre les tapis, au milieu."""
     signe = 1 if ouvert > MILIEU else -1
+    if version_pince() == 4:
+        d = V4_MILIEU + signe * degres(position - MILIEU)
+        return AY + V4_R * math.sin(math.radians(V4_PHI0 + d)) - V4_YF - 2 * V4_TAPIS
     th = TH_MILIEU + signe * degres(position - MILIEU)
     return 2 * (AY + L_BRAS * math.sin(math.radians(th)) - E_DOIGT)
 
@@ -40,10 +53,17 @@ def etalonner(bus, ident):
     puis on règle la pince à mi-ouverture et le servo prend cette position comme milieu (2048)."""
     bus.relacher(ident)
     print('\nÉtalonnage du milieu. La force est coupée : tu peux tourner la pince à la main (ça résiste un peu).')
-    print('Règle-la à MI-OUVERTURE, au pied à coulisse :')
-    print('  - doigts montés : 71 mm entre les mâchoires, au creux de l\'arrondi ;')
-    print('  - doigts pas encore montés : 81 mm entre les 2 trous au bout des bras des engrenages.')
-    print('Les deux bras doivent être bien symétriques.')
+    v = input('Quelle pince est montée ? 3 = à engrenages, 4 = sans engrenages (Entrée = %d) : ' % version_pince()).strip() or str(version_pince())
+    if v not in ('3', '4'): print('   réponse inconnue : étalonnage annulé'); return False
+    VERSION_FICHIER.write_text(json.dumps({'version': int(v)}))
+    if v == '4':
+        print(f'Pince V4. Règle la mâchoire mobile à la main, au pied à coulisse : {V4_ECART_MILIEU} mm entre les deux mâchoires, au creux')
+        print(f'de l\'arrondi, au milieu de leur longueur ({V4_ECART_MILIEU - 4} mm si les tapis antidérapants sont déjà collés).')
+    else:
+        print('Règle-la à MI-OUVERTURE, au pied à coulisse :')
+        print('  - doigts montés : 71 mm entre les mâchoires, au creux de l\'arrondi ;')
+        print('  - doigts pas encore montés : 81 mm entre les 2 trous au bout des bras des engrenages.')
+        print('Les deux bras doivent être bien symétriques.')
     if not input('Réglée ? Taper o puis Entrée (autre chose pour annuler) : ').strip().lower().startswith('o'):
         print('   étalonnage annulé'); return False
     pos = bus.etalonner_milieu(ident)
@@ -148,7 +168,9 @@ def main():
                         print('  ', texte)
                         if texte.startswith('ARRÊT'):
                             print('   La suite de la série est annulée.'); afficher_etat(bus.etat(ident), ouvert); break
-                        if tenu:
+                        if tenu and version_pince() == 4 and ecart_mm(pos, ouvert) < 16:
+                            print('   les bouts des mâchoires se touchent : rien de tenu (ou un objet de moins de 15 mm, pris en pincette).')
+                        elif tenu:
                             print(f'   largeur de l\'objet ≈ {ecart_mm(pos, ouvert):.0f} mm · « o » ou « l » pour le lâcher.'
                                   ' Ne pas le laisser serré plusieurs minutes.')
                 except ErreurServo as err:

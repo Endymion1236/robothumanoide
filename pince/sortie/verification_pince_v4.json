@@ -1,0 +1,40 @@
+{
+ "version": "pince V4 (sans engrenages)",
+ "validation_physique": false,
+ "course": {
+  "fermée à vide (les bouts des tapis se touchent)": -40.2,
+  "ouverte à 90 mm": 14.1,
+  "course totale (°)": 54.3,
+  "course permise par les butées 1663–2433 (°)": 67.7,
+  "milieu de course : écart entre les tapis (mm)": 54.0,
+  "milieu de course : écart entre les mâchoires SANS tapis (mm)": 58.0,
+  "angle du milieu depuis la position parallèle": -13.1
+ },
+ "inclinaison de la mâchoire mobile selon l'objet (°)": {
+  "20 mm": -37.7,
+  "40 mm": -23.0,
+  "53 mm": -13.7,
+  "70 mm": -1.4,
+  "72 mm": 0.0,
+  "80 mm": 6.1,
+  "90 mm": 14.1
+ },
+ "contacts sur toute la course (mm3)": "aucun",
+ "verre haut contre les plaques et la base (mm3)": {
+  "53 mm": 0.0,
+  "60 mm": 0.0,
+  "72 mm": 0.0,
+  "80 mm": 0.0,
+  "90 mm": 0.0
+ },
+ "vis": {
+  "palonnier : 4 × M2,5 de 5,3 mm (fournies)": "2.8 mm de plastique, 2,5 mm dans le palonnier",
+  "mâchoires : 4 × M3 × 10": "4 mm dans l'insert",
+  "plaque fixe sur le poteau de B : 1 × M3 × 16": "4 mm dans l'insert",
+  "plaque fixe sur le poteau du bras libre : 1 × M3 × 10": "5 mm dans le poteau"
+ },
+ "masse des 2 pièces nouvelles (g, environ)": {
+  "pince_v4_plaque_mobile": 14,
+  "pince_v4_plaque_fixe": 12
+ }
+}

@@ -157,3 +157,9 @@ En fermant la fenêtre : message « tiens le bras », puis force coupée.
 
 La logique (mouvements, refus, arrêt, réglages) est essayée sur des servos simulés. **La fenêtre elle-même n'a pas pu être
 ouverte ici** (pas d'affichage) : premier essai chez Nicolas.
+
+## Pince V4 (19/11/2026)
+
+`tester_pince.bat`, commande **e** : il demande quelle pince est montée (3 = engrenages, 4 = sans engrenages), gardé dans
+`version_pince.json`. V4 : étalonnage à **58 mm** entre les mâchoires (54 avec les tapis), largeur affichée = écart entre les
+tapis au milieu des mâchoires ; bouts qui se touchent = « rien de tenu ». Formule vérifiée contre le modèle ; pas encore essayé.
