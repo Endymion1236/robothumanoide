@@ -15,7 +15,7 @@ ID_PINCE = 4
 FORCE_MOUVEMENT = 50          # % : la pince n'a jamais besoin de plus
 CHARGE_BLOCAGE = 35           # % : au-delà pendant 0,5 s en ouvrant ou en allant au milieu, la pince est coincée → force coupée
 FORCE_DOUCE, FORCE_FERME = 20, 35
-FORCE_MAINTIEN = 12           # % gardés une fois l'objet saisi, pour que le servo chauffe moins (--maintien N pour essayer une autre valeur ; 0 = pas de baisse)
+FORCE_MAINTIEN = 20           # % gardés une fois l'objet saisi, (20 depuis le 19/11/2026 : demande de Nicolas pour le verre plein ; 12 suffit pour un gobelet à moitié plein et chauffe moins) (--maintien N pour essayer une autre valeur ; 0 = pas de baisse)
 SENS = Path(__file__).with_name('sens_pince.json')
 
 # géométrie de la pince (V2 et V3 : mêmes bras, mêmes butées ; pince/generer_pince.py) : écart au creux des mâchoires selon l'angle du bras

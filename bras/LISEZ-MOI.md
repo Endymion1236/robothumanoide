@@ -80,7 +80,9 @@ le tenir : le servo, qui pousse sans tourner, chauffe moins (42 °C relevés en 
 `tester_pince`, `piloter_bras` et `geste_prendre_poser`. Pour essayer une autre valeur : `tester_pince.bat --maintien 15`
 (0 = pas de baisse). Si un verre plein glisse, augmenter ; du caoutchouc sur les mâchoires permet de baisser.
 **Essai réel du 19/11/2026** : gobelet à moitié plein tenu à 12 % pendant toute une série de montées et descentes
-(mâchoires stables à 54 mm), pince à 33–34 °C au lieu de 42 ; épaule ≤ 18 %, coude ≤ 15 %. Reste à essayer : gobelet plein.
+(mâchoires stables à 54 mm), pince à 33–34 °C au lieu de 42 ; épaule ≤ 18 %, coude ≤ 15 %. **Valeur par défaut portée à 20 % le 19/11/2026** (demande de Nicolas, pour le verre plein) : `s` tient donc à 20 %, `S` serre à 35 %
+puis tient à 20 %. Pour un objet léger, `--maintien 12` chauffe moins. Essai du même jour, bras sans socle, coude au n° 3 :
+verre saisi à 56 mm, monté à +60° et redescendu deux fois, épaule ≤ 24 %, 26 °C.
 
 ## Premier geste : prendre et poser (`geste_prendre_poser.bat`)
 
