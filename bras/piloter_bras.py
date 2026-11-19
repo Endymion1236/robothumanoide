@@ -10,17 +10,20 @@ Commandes (plusieurs à la suite, séparées par des espaces) :
   n20   épaule à +20° en gardant l'avant-bras à l'horizontale (les deux servos bougent ensemble)
   o     ouvrir la pince          s / S serrer doucement / plus fort
   poser descend lentement, avant-bras à l'horizontale, jusqu'à sentir la table, ouvre la pince et remonte
+  t45   socle tourné à +45° (de −90 à +90 ; seulement si le socle est monté : servo n° 1, coude au n° 3)
   repos bras à la verticale      i     infos                  q     quitter
 Sécurités : butées de chaque servo, chaleur, blocage (le servo RETIENT le bras au lieu de le lâcher), et refus
 d'un geste qui enverrait la pince dans la table. Avec le socle tournant : ajouter --hauteur 179."""
 import argparse, json, math, re, sys, time
 from pathlib import Path
+from servos import numero_coude, numero_socle
 from servos import Bus, ErreurServo, degres, pas, TEMP_MAX, CHARGE_MAX, VITESSE_DOUCE, ACCEL_DOUCE, SMS_STS_MOVING
 import test_epaule as E, test_pince as P
 
 MILIEU = 2048
 ID_EPAULE, ID_COUDE, ID_PINCE = 2, 1, 4
-BUTEES_COUDE = (908, 3188); COUDE_MAX = 90            # ± 90° utilisés (vérifiés sans contact dans epaule/verifier_epaule.py)
+BUTEES_COUDE = (908, 3188); COUDE_MAX = 90
+BUTEES_SOCLE = (1024, 3072); SOCLE_MAX = 90           # un quart de tour de chaque côté            # ± 90° utilisés (vérifiés sans contact dans epaule/verifier_epaule.py)
 L_BRAS, L_AVANT, SOUS_PINCE = 120.0, 230.0, 40.0       # épaule→coude, coude→milieu des mâchoires, bas des mâchoires sous l'axe (mm)
 SENS_COUDE = Path(__file__).with_name('sens_coude.json')
 TOL = E.TOLERANCE
@@ -87,20 +90,28 @@ def aller_ensemble(bus, cibles, delai_max=14.0, synchro=False):
 def main():
     ap = argparse.ArgumentParser(description='Piloter le bras : épaule, coude, pince')
     ap.add_argument('--maintien', type=int, default=P.FORCE_MAINTIEN, help='force gardée une fois l\'objet saisi, en %% (0 = pas de baisse)')
-    ap.add_argument('--port'); ap.add_argument('--hauteur', type=float, default=101.0, help='hauteur de l\'axe de l\'épaule au-dessus de la table (101 ; 179 avec le socle)')
+    ap.add_argument('--port'); ap.add_argument('--hauteur', type=float, default=None, help='hauteur de l\'axe de l\'épaule au-dessus de la table (101 ; 179 avec le socle)')
     a = ap.parse_args()
     try: bus = Bus(a.port)
     except ErreurServo as e: sys.exit(str(e))
     tenus = []
+    global ID_COUDE
     try:
         trouves = bus.chercher(); print('Servos trouvés :', trouves or 'aucun')
+        ID_COUDE, socle = numero_coude(trouves), numero_socle(trouves)
+        if a.hauteur is None: a.hauteur = 179.0 if socle else 101.0
+        print(f"Coude : n° {ID_COUDE} · socle tournant : {'n° 1' if socle else 'pas monté'} · axe de l'épaule à {a.hauteur:.0f} mm de la table")
         for i, nom in ((ID_EPAULE, 'épaule'), (ID_COUDE, 'coude'), (ID_PINCE, 'pince')):
             if i not in trouves: sys.exit(f'Servo n° {i} ({nom}) introuvable : vérifier les câbles.')
         if not E.SENS.exists(): sys.exit('Épaule pas encore étalonnée : lancer d\'abord tester_epaule.bat --coude 1')
         haut = json.loads(E.SENS.read_text(encoding='utf-8'))['haut']
         ee, ec, ep = bus.etat(ID_EPAULE), bus.etat(ID_COUDE), bus.etat(ID_PINCE)
         if (ee['butee_min'], ee['butee_max']) != E.butees(haut): sys.exit('Butées de l\'épaule différentes : relancer tester_epaule.bat --coude 1 (étalonnage).')
-        if (ec['butee_min'], ec['butee_max']) != BUTEES_COUDE: sys.exit('Butées du coude pas réglées : lancer tester_coude.bat --id 1')
+        if (ec['butee_min'], ec['butee_max']) != BUTEES_COUDE: sys.exit('Butées du coude pas réglées : lancer tester_coude.bat')
+        if socle:
+            es = bus.etat(socle)
+            if (es['butee_min'], es['butee_max']) != BUTEES_SOCLE: sys.exit('Butées du socle pas réglées (1024–3072) : lancer tester_socle.bat')
+            bus.limiter_force(socle, 100); bus.retenir(socle)
         if (ep['butee_min'], ep['butee_max']) != P.BUTEES_PINCE or not P.SENS.exists(): sys.exit('Pince pas réglée : lancer tester_pince.bat')
         ouvert = json.loads(P.SENS.read_text())['ouvert']; ferme = sum(P.BUTEES_PINCE) - ouvert
         for i in (ID_EPAULE, ID_COUDE):
@@ -114,6 +125,7 @@ def main():
             ae, ac = ang_e(), ang_c(); e1, e2, e3 = bus.etat(ID_EPAULE), bus.etat(ID_COUDE), bus.etat(ID_PINCE)
             print(f"   épaule {ae:+.0f}° · coude {ac:+.0f}° · avant-bras {ae + ac:+.0f}° par rapport à l'horizontale · bas de la pince à {bas_de_pince(a.hauteur, ae, ac):.0f} mm de la table"
                   f" · mâchoires ≈ {P.ecart_mm(e3['position'], ouvert):.0f} mm")
+            if socle: print(f"   socle {degres(bus.etat(socle)['position'] - MILIEU):+.0f}° · charge {bus.etat(socle)['charge']:+.0f} % · {bus.etat(socle)['temperature']} °C")
             print(f"   charges : épaule {e1['charge']:+.0f} %, coude {e2['charge']:+.0f} %, pince {e3['charge']:+.0f} % · températures : {e1['temperature']}, {e2['temperature']}, {e3['temperature']} °C")
         def verifier(ae, ac):
             # 3° de marge : un servo arrêté en butée lit parfois 90,3° (essai du 18/11/2026 : tout geste refusé bras à la verticale)
@@ -122,11 +134,12 @@ def main():
             z = bas_de_pince(a.hauteur, ae, ac)
             if z < 3: raise ErreurServo(f'la pince irait dans la table (bas des mâchoires à {z:.0f} mm)')
         etat()
+        if socle: print('\nSocle : t45 = tourner à +45° (de −90 à +90), t0 = revenir en face.', end='')
         print('\nCommandes : e30 = épaule à 30° · c-45 = coude à −45° · n20 = épaule à 20°, avant-bras gardé à l\'horizontale · plat = avant-bras à l\'horizontale')
         print('            poser = descendre jusqu\'à la table, lâcher, remonter · o = ouvrir · s / S = serrer doucement / fort · repos = bras à la verticale · i = infos · q = quitter. Plusieurs à la suite : « n0 o s n40 ».')
         while True:
             mots = input('> ').replace(',', ' ').split()
-            faux = [m for m in mots if not re.fullmatch(r'[ecn]-?\d+|plat|repos|poser|[osSiq]', m)]
+            faux = [m for m in mots if not re.fullmatch(r'[ecnt]-?\d+|plat|repos|poser|[osSiq]', m)]
             if faux: print('   commande inconnue :', ' '.join(faux), '(rien n\'a bougé)'); continue
             if 'q' in mots: break
             for m in mots:
@@ -163,6 +176,11 @@ def main():
                         if m == 'plat': cible = [(ID_COUDE, pos_c(-ae))]; verifier(ae, -ae); nom = 'avant-bras à l\'horizontale'
                         elif m == 'repos': cible = [(ID_EPAULE, pos_e(90)), (ID_COUDE, pos_c(0))]; nom = 'bras à la verticale'
                         elif m[0] == 'e': v = int(m[1:]); verifier(v, ac); cible = [(ID_EPAULE, pos_e(v))]; nom = f'épaule à {v:+d}°'
+                        elif m[0] == 't':
+                            v = int(m[1:])
+                            if not socle: raise ErreurServo('pas de socle tournant branché (servo n° 1, avec le coude au n° 3)')
+                            if abs(v) > SOCLE_MAX: raise ErreurServo(f'socle à {v:+d}° : hors de ±{SOCLE_MAX}°')
+                            cible = [(socle, MILIEU + pas(v))]; nom = f'socle à {v:+d}°'
                         elif m[0] == 'c': v = int(m[1:]); verifier(ae, v); cible = [(ID_COUDE, pos_c(v))]; nom = f'coude à {v:+d}°'
                         else:
                             v = int(m[1:]); verifier(v, -v); verifier(ae, -ae); nom = f'épaule à {v:+d}°, avant-bras à l\'horizontale'
@@ -181,7 +199,7 @@ def main():
             if tenus:
                 print('\nLa force va être coupée : le bras va TOMBER s\'il n\'est pas tenu.')
                 input('TIENS le bras (haut du bras ET avant-bras), ou pose-le, puis Entrée... ')
-                for i in tenus + [ID_PINCE]: bus.relacher(i)
+                for i in tenus + [ID_PINCE] + ([1] if ID_COUDE == 3 and bus.present(1) else []): bus.relacher(i)
                 print('Force coupée. Pose le bras doucement. Au revoir.')
         except (Exception, KeyboardInterrupt):
             print('\n⚠️  Les servos RETIENNENT peut-être encore le bras. TIENS LE BRAS, puis coupe le 12 V.')

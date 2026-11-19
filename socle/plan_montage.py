@@ -102,7 +102,7 @@ def e7(fig):
 
 @etape('Les numéros, puis le branchement', ['le bras monté sur le socle', 'FD'],
        ['Bras branché SANS le servo du socle : dans FD, Search montre 1, 2, 4.', 'Clique sur le n° 1 (le coude) : Programming, ligne 5 · ID = 3, Save. Search : 2, 3, 4.',
-        'Coupe le 12 V. Branche le servo du socle (n° 1) à la suite de la chaîne. Rallume : Search montre 1, 2, 3, 4.', 'Ferme FD. Les programmes mis à jour pour ces numéros seront sur GitHub.'],
+        'Coupe le 12 V. Branche le servo du socle (n° 1) à la suite de la chaîne. Rallume : Search montre 1, 2, 3, 4.', 'Ferme FD. Premier essai : bras\\tester_socle.bat (c, g, d, puis G, D), le bras replié à la verticale. Ensuite piloter_bras.bat : t45, t0.'],
        'Ne branche jamais le servo du socle tant que le coude porte encore le n° 1 : ils répondraient en même temps.', [])
 def e8(fig):
     ax, = PM.panneaux(fig, 1); dzb = ZP + E.H_AXE + E.EP_PIED; place = lambda m: m.translate((-AX, -AY, dzb))

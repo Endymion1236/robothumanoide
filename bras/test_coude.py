@@ -6,6 +6,7 @@
 3. Menu : centre, ± 30°, ± 90°, libre, infos. Chaque mouvement est lent et surveillé.
 En quittant, la force est coupée (le coude devient libre)."""
 import argparse, sys
+from servos import numero_coude
 from servos import Bus, ErreurServo, degres, pas
 
 MILIEU = 2048
@@ -33,9 +34,9 @@ def main():
             print('Servos trouvés :', trouves or 'aucun')
             if len(trouves) == 1:
                 ident = trouves[0]
-            elif ID_COUDE in trouves:
-                ident = ID_COUDE                      # coude + pince sur le même câble : on prend le coude
-                print(f'Plusieurs servos : je pilote le coude, n° {ID_COUDE}.')
+            elif numero_coude(trouves) in trouves:
+                ident = numero_coude(trouves)                      # coude + pince sur le même câble : on prend le coude
+                print(f'Plusieurs servos : je pilote le coude, n° {ident}.')
             else:
                 sys.exit(f'Servo du coude (n° {ID_COUDE}) introuvable : brancher le coude seul, ou préciser --id N.')
         e = bus.etat(ident); print(f'Servo n° {ident} :'); afficher_etat(e)

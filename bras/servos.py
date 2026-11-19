@@ -20,6 +20,14 @@ VITESSE_DOUCE, ACCEL_DOUCE = 300, 20      # comme les essais dans FD
 LIMITE_COUPLE = 48                        # registre « Torque Limit » (mémoire vive : 0 à 1000 = 0 à 100 %)
 FORCE_RETENUE = 40                        # % : force gardée pour RETENIR un bras sur place après un arrêt (épaule)
 
+def numero_coude(trouves):
+    """Le coude porte le n° 3 une fois le socle tournant monté (le socle prend le n° 1) ; avant, il porte le n° 1."""
+    return 3 if 3 in trouves else 1
+
+def numero_socle(trouves):
+    """Le socle tournant porte le n° 1, mais seulement si le coude est déjà passé au n° 3 (sinon le n° 1 est le coude)."""
+    return 1 if 3 in trouves and 1 in trouves else None
+
 class ErreurServo(Exception):
     pass
 

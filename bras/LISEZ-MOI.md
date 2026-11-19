@@ -127,3 +127,15 @@ geste qui enverrait la pince dans la table** ; pendant `n`, si un servo prend pl
 
 **Essai réel le 18/11/2026** : `e`, `n` et la pince fonctionnent (verre de 25 cl tenu, descente à plat de +20° à −10°, charges ≤ 14 %,
 servo de la pince à 42 °C en tenant le verre). Corrigé : geste refusé quand l'épaule lit un peu plus de 90°. `poser` : simulé seulement.
+
+## Socle tournant (19/11/2026) : numéros et programmes
+
+Avec le socle : **socle n° 1, épaule n° 2, coude n° 3, pince n° 4**. Les programmes trouvent tout seuls le coude : n° 3 s'il
+existe, sinon n° 1 (`numero_coude`, `numero_socle` dans `servos.py`). Rien à changer tant que le socle n'est pas monté.
+
+- **`tester_socle.bat`** : butées 1024–3072 (propose de les régler), puis `c` en face, `g` / `d` = ± 30°, `G` / `D` = ± 90°.
+  Refuse de démarrer si le n° 1 est encore le coude (pas de servo n° 3).
+- **`piloter_bras.bat`** : commande **`t45`** = socle tourné à +45° (de −90 à +90), `t0` = en face. Hauteur de l'épaule prise
+  à 179 mm quand le socle est là (101 sinon). `tester_epaule.bat --coude 3` pour retenir le coude à son nouveau numéro.
+
+Simulé seulement (avec et sans socle) ; pas encore essayé en vrai.

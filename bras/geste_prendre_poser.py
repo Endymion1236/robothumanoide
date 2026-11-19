@@ -11,6 +11,7 @@ milieu, sens d'ouverture). Toutes les sécurités de servos.py restent : butées
 Sur le support de table, le coude est couché : la pince saisit DE CÔTÉ ; garder une main sous le
 gobelet pour le recevoir quand elle le lâche. En quittant, la force des deux servos est coupée."""
 import argparse, json, sys
+from servos import numero_coude
 from servos import Bus, ErreurServo, degres, pas
 import test_pince as P
 
@@ -78,8 +79,10 @@ def geste(bus, ouvert, cote):
 
 def verifier(bus):
     """Refuse de bouger si un réglage manque, et dit quel programme lancer."""
+    global ID_COUDE
     trouves = bus.chercher()
     print('Servos trouvés :', trouves or 'aucun')
+    ID_COUDE = numero_coude(trouves)
     for ident, nom, prog in ((ID_COUDE, 'coude', 'tester_coude'), (ID_PINCE, 'pince', 'tester_pince')):
         if ident not in trouves:
             sys.exit(f'Servo de la {nom} (n° {ident}) introuvable : vérifier le branchement, ou lancer {prog}.bat.')
