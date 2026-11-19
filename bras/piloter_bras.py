@@ -49,7 +49,7 @@ def apprendre_sens_coude(bus):
     print(f"   compris : quand l'avant-bras remonte, la position du coude {'augmente' if sens > 0 else 'diminue'}. Le coude tient : tu peux lâcher doucement.")
     return sens
 
-def aller_ensemble(bus, cibles, delai_max=14.0, synchro=False):
+def aller_ensemble(bus, cibles, delai_max=14.0, synchro=False, vitesse=None, accel=None, arret=None):
     """Envoie plusieurs servos à leur cible EN MÊME TEMPS (même vitesse) et les surveille. Renvoie un compte rendu.
     synchro : les servos doivent avancer ENSEMBLE (geste « n » : l'avant-bras reste à l'horizontale). Si l'un prend
     plus de 80 pas (7°) de retard sur l'autre, tout s'arrête : sinon le coude continuerait seul et pencherait la pince."""
@@ -59,13 +59,15 @@ def aller_ensemble(bus, cibles, delai_max=14.0, synchro=False):
         if not e['butee_min'] <= c <= e['butee_max']: raise ErreurServo(f"servo n° {i} : cible {c} hors des butées {e['butee_min']}–{e['butee_max']}")
         if bus.trop_chaud(i, e): raise ErreurServo(f"servo n° {i} trop chaud ({e['temperature']} °C)")
     for i, c in cibles:
-        res, err = bus.p.WritePosEx(i, c, VITESSE_DOUCE, ACCEL_DOUCE); bus._ok(res, err, 'ordre de position')
+        res, err = bus.p.WritePosEx(i, c, vitesse or VITESSE_DOUCE, accel or ACCEL_DOUCE); bus._ok(res, err, 'ordre de position')
+    if vitesse: delai_max *= max(1.0, VITESSE_DOUCE / vitesse)          # plus lent : plus de temps laissé
     debut = time.time(); suivi = {i: {'avant': None, 'immobile': None, 'effort': None, 'fini': False} for i, _ in cibles}
     def stop(cause):
         for i, _ in cibles: bus.retenir(i, 40)
         return f'ARRÊT : {cause}. Les servos RETIENNENT le bras sur place (force réduite à 40 %).'
     while True:
         time.sleep(0.1)
+        if arret and arret(): return stop('arrêt demandé')
         for i, c in cibles:
             e, s = bus.etat(i), suivi[i]
             if bus.trop_chaud(i, e): return stop(f"servo n° {i} trop chaud ({e['temperature']} °C)")

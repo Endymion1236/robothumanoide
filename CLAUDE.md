@@ -16,6 +16,7 @@ servos : 5,3 mm sous tête ; roulements 6807 : 47 × 35 × 6,8 ; 623 : 10 × 3 �
 Mesuré le 19/11/2026 : **inserts M3 de Nicolas : Ø 4,7 × 3,8 mm de haut** (pas d'inserts longs : ne pas compter sur plus de
 3,8 mm de filet) ; **câble de servo : 152 mm** d'une fiche à l'autre ; vis M3 : coffret jusqu'à M3 × 30 et M3 × 35 à vérifier,
 Nicolas dit n'avoir que des **M3 × 30** au plus long ; tapis antidérapant pour les mâchoires : **2 mm**.
+Objets à saisir (pour la pince V4) : gobelet de **70 mm en haut, 53 mm en bas** ; téléphone de **80 × 157 mm** (épaisseur à demander).
 
 ## Autres habitudes du projet
 

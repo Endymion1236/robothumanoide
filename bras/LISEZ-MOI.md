@@ -142,3 +142,18 @@ existe, sinon n° 1 (`numero_coude`, `numero_socle` dans `servos.py`). Rien à c
   à 179 mm quand le socle est là (101 sinon). `tester_epaule.bat --coude 3` pour retenir le coude à son nouveau numéro.
 
 Simulé seulement (avec et sans socle) ; pas encore essayé en vrai.
+
+## Fenêtre de commande (`controle_bras.bat`) — 19/11/2026
+
+Une fenêtre Windows pour piloter le bras à la souris : curseurs **socle**, **épaule**, **coude** (le mouvement part quand on
+lâche le curseur), case « garder l'avant-bras à l'horizontale », boutons de la **pince** (ouvrir, serrer doux, serrer fort),
+**Repos**, **Poser sur la table**, gros bouton **ARRÊT** (le bras se fige, tenu). À côté de chaque curseur : angle réel,
+charge, température. **Réglages** par curseurs, gardés dans `reglages_bras.json` : vitesse (80 à 800, 300 par défaut),
+accélération, serrage doux, serrage fort, force de maintien.
+
+Mêmes sécurités que `piloter_bras` (butées, chaleur, blocage, pince dans la table). Il faut avoir fait une fois les
+étalonnages (`tester_epaule`, `tester_coude`, `tester_pince`, `piloter_bras`) : sinon un message dit lequel lancer.
+En fermant la fenêtre : message « tiens le bras », puis force coupée.
+
+La logique (mouvements, refus, arrêt, réglages) est essayée sur des servos simulés. **La fenêtre elle-même n'a pas pu être
+ouverte ici** (pas d'affichage) : premier essai chez Nicolas.
