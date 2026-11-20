@@ -113,13 +113,18 @@ class Essai:
         self.dire('1. Coude (épaule à la verticale)')
         if self.serie(c.coude, [45, 0, -45, 0, 90, -90, 0]): self.repetabilite(c.coude, 0, 45, n)
         self.dire('2. Épaule (bras tendu, coude à 0°)')
-        if self.serie(c.epaule, [60, 30, 0]):
-            self.dire('  Bras tendu à l\'horizontale : la position la plus dure pour l\'épaule.'); self.tenue(c.epaule, tenue)
+        # On arrive à l'horizontale EN MONTANT (depuis −15°) : après une descente, les frottements du réducteur portent une partie
+        # du poids et l'effort lu est trop flatteur (20/11/2026 : 3 % en tenue après la descente, 13 % après une montée).
+        if self.serie(c.epaule, [60, 30, 0, -15, 0]):
+            self.dire('  Bras tendu à l\'horizontale, atteint en montant : la position la plus dure pour l\'épaule.'); self.tenue(c.epaule, tenue)
             self.serie(c.epaule, [30, 60]); self.repetabilite(c.epaule, 60, 30, n)
         self.serie(c.epaule, [90])
         if c.socle and socle:
             self.dire('3. Socle (bras à la verticale)')
-            self.demander('Colle un repère (ruban) sur la table, en face du bras. Entrée... ')
+            # Le socle va d'abord à 0° : le repère se colle bras « en face » (le 20/11/2026 il était demandé socle encore à +65°,
+            # la réponse « pas revenu en face » ne voulait donc rien dire).
+            if not self.serie(c.socle, [0]): return self.fin()
+            self.demander('Le socle est à 0°. Colle un repère (ruban) sur la table, juste en face du bras. Entrée... ')
             if self.serie(c.socle, [45, 0, -45, 0, 90, -90, 0]):
                 self.repetabilite(c.socle, 0, 60, n)
                 if not self.question('Le bras est-il revenu exactement en face du repère ?'): self.avis.append('socle : le plateau a glissé sur le palonnier (bras plus en face du repère)')

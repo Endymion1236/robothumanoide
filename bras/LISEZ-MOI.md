@@ -183,3 +183,15 @@ effort 60 % en mouvement et 40 % en tenue, 55 °C, + 8 °C pendant la tenue, 11 
 
 Options : `--rapide` (2 allers-retours), `--sans-pince`, `--sans-socle`, `--tenue 60`.
 Un mouvement arrêté par une sécurité retient le bras ; Ctrl+C aussi, et le rapport déjà rempli est gardé.
+
+### Premier protocole sur le vrai bras (20/11/2026, complet, pince V3 à vide)
+
+Tout est BON : 26 à 28 °C partout à la fin, 12,1 V au plus bas.
+- **Coude** : écart ≤ 0,2°, effort 10 à 16 %, retours identiques.
+- **Épaule** (sans ressort) : écart ≤ 1,3°, effort 21 à 25 % en montant, 8 à 13 % pour tenir après une montée,
+  3 % après une descente (les frottements du réducteur portent alors le bras) ; aucun échauffement en 30 s.
+- **Socle** : effort 13 à 24 % ; s'arrête à +0,7° ou −0,7° de la cible selon le sens d'arrivée (jeu d'environ 1,4°) ;
+  à +90° : −1,6° et 15 % pour tenir → quelque chose retient de ce côté (câble ?), à regarder.
+- Une lecture de température isolée à 47 °C (fausse, déjà connue).
+- La question « revenu en face du repère » a été posée socle à +65° : réponse sans valeur, protocole corrigé
+  (le socle va à 0° avant le repère ; la tenue de l'épaule se fait après une montée).
