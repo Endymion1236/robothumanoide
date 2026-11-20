@@ -91,7 +91,10 @@ Puis bouger (2 servos).
 | Le gobelet est-il dans la pince | capteur de distance à un point (VL53L1X) dans la pince | station café |
 | Se déplacer dans le club | lidar 2D + base à roulettes (carte des lieux) | bien plus tard |
 
-## Bras de taille humaine (12/11/2026, pour plus tard)
+## Bras de taille humaine (12/11/2026) — MIS DE CÔTÉ le 20/11/2026
+
+**Décision de Nicolas (20/11/2026) : on garde le bras de table à 6 axes, le bras de taille humaine est abandonné pour l'instant.**
+Le buste et la tête recevront ce bras-ci. Ce qui suit reste pour mémoire.
 
 Couple continu à tenir (bras de 60 cm tendu, 300 g dans la pince) : épaule ≈ 65 kg·cm, coude ≈ 25, poignet ≈ 5.
 Le chiffre des fiches est le couple **de blocage** ; le couple **continu** est environ 3 fois plus faible.
@@ -178,6 +181,37 @@ Après Câlin. Pas un Spot (30 kg, moteurs spéciaux) : un quadrupède de 2 à 3
 - **Chevaux** : un engin à quatre pattes qui marche seul peut effrayer un poney ; accueil et club-house seulement, loin des
   écuries et des carrières, ou habituation très progressive.
 - Pour un chien qui se promène vraiment au club, un modèle du commerce (Unitree Go2…) serait plus raisonnable que le fabriquer.
+
+## Plus tard : une base à roues sous le buste (20/11/2026)
+
+Après le buste et la tête. Un buste sur roues est bien plus simple et stable qu'un robot qui marche ; tout ce qui est fait
+avant (bras, pince, vision, gestes, pilotage par IA) resservira tel quel, la base s'ajoute dessous.
+
+- **Principe** : 2 roues motrices + 1 ou 2 roulettes folles (tourne sur place), base large, batterie tout en bas (le bras
+  tendu avec une charge déplace le centre de gravité vers l'avant).
+- **À ajouter** : 2 motoréducteurs 12 V avec codeurs, une carte de commande des moteurs (les servos du bras ne conviennent
+  pas), une batterie (LiFePO4 12 V plutôt que LiPo : moins de risque d'incendie), un ordinateur embarqué (le bus des servos
+  a besoin d'un hôte sur le robot), le lidar (voir « Se repérer dans l'espace »), arrêt d'urgence et pare-chocs.
+- **Difficultés** : équilibre, se repérer en roulant (lidar + codeurs), sols (durs et plats seulement : club-house, pas le
+  sable ni les pavés), autonomie d'une à deux heures. **Loin des poneys** : pas d'engin qui roule seul près des écuries
+  et des carrières.
+- **Premier pas** : une base pilotée à la manette, sans rien d'automatique, pour vérifier la stabilité.
+- Rien n'est dessiné : moteurs et roues se choisiront d'après le poids final du buste.
+
+**Budget approximatif** (ordres de grandeur estimés de mémoire le 20/11/2026, prix non vérifiés chez un vendeur) :
+
+| Poste | Fourchette |
+|---|---|
+| 2 motoréducteurs 12 V avec codeurs | 40 à 80 € |
+| 2 roues (Ø 10 à 15 cm) avec moyeux + roulettes folles | 30 à 60 € |
+| Carte de commande des 2 moteurs | 15 à 35 € |
+| Batterie LiFePO4 12 V (6 à 10 Ah) + chargeur | 60 à 110 € |
+| Câblage, fusible, interrupteur, arrêt d'urgence, convertisseurs | 25 à 40 € |
+| Châssis (contreplaqué ou profilés, visserie) | 40 à 80 € |
+| **Base pilotée à la manette** | **≈ 210 à 400 €** |
+| Lidar 2D | 70 à 110 € |
+| Ordinateur embarqué (type Raspberry Pi 5, alimentation, carte mémoire) | 110 à 150 € |
+| **Base autonome complète** | **≈ 400 à 650 €** |
 
 ## Feuille de route du premier bras
 
