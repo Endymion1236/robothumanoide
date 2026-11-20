@@ -59,14 +59,19 @@ class Controleur:
     def _angles(self):
         return E.angle(self.bus.etat(self.epaule)['position'], self.haut), degres(self.bus.etat(self.coude)['position'] - MILIEU) * self.sc
 
+    def _etat(self, ident, nom):
+        """Lit un servo ; en cas de silence, dit LEQUEL ne répond pas (20/11/2026 : le message ne le disait pas)."""
+        try: return self.bus.etat(ident)
+        except ErreurServo as err: raise ErreurServo(f'le servo n° {ident} ({nom}) ne répond plus — {err}')
+
     def _lire(self):
-        b = self.bus; e1, e2, e3 = b.etat(self.epaule), b.etat(self.coude), b.etat(self.pince)
+        e1, e2, e3 = self._etat(self.epaule, 'épaule'), self._etat(self.coude, 'coude'), self._etat(self.pince, 'pince')
         ae, ac = E.angle(e1['position'], self.haut), degres(e2['position'] - MILIEU) * self.sc
         d = {'epaule': (ae, e1['charge'], e1['temperature']), 'coude': (ac, e2['charge'], e2['temperature']),
              'pince': (P.ecart_mm(e3['position'], self.ouvert), e3['charge'], e3['temperature']),
              'avant_bras': ae + ac, 'bas_pince': B.bas_de_pince(self.hauteur, ae, ac), 'tension': e1['tension']}
         if self.socle:
-            e0 = b.etat(self.socle); d['socle'] = (degres(e0['position'] - MILIEU), e0['charge'], e0['temperature'])
+            e0 = self._etat(self.socle, 'socle'); d['socle'] = (degres(e0['position'] - MILIEU), e0['charge'], e0['temperature'])
         self.etat = d
 
     # ---- demandes (appelées par la fenêtre) ----
@@ -77,8 +82,10 @@ class Controleur:
         while True:
             try: cmd = self.q.get(timeout=0.35)
             except queue.Empty:
-                try: self._lire()
-                except ErreurServo as err: self.dire(f'Lecture impossible : {err}')
+                try: self._lire(); self._muet = None
+                except ErreurServo as err:
+                    if str(err) != getattr(self, '_muet', None): self.dire(f'Lecture impossible : {err}')   # une seule fois, pas toutes les 0,35 s
+                    self._muet = str(err)
                 continue
             if cmd[0] == 'fin':
                 for i in [self.epaule, self.coude, self.pince] + ([self.socle] if self.socle else []):
