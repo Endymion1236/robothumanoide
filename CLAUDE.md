@@ -28,5 +28,5 @@ Objets à saisir (pour la pince V4) : gobelet de **70 mm en haut, 53 mm en bas**
 - Les clés d'API et les données personnelles (visages, souvenirs) restent sur le PC de Nicolas, jamais dans le dépôt.
 - Un commit par sujet, en français : le problème tel que Nicolas l'a vu, puis ce qui change.
 
-Dit par Nicolas le 20/11/2026 : il a **9 câbles de servo « de 90 cm »** (à confirmer : 90 cm ou 9 cm ? les câbles fournis font 152 mm)
+Dit par Nicolas le 20/11/2026 : il a **9 câbles de servo de 90 cm** (confirmé ; les câbles fournis avec les servos font 152 mm)
 et un tournevis fin. Ses mâchoires de pince V3 sont **d'un seul bloc** avec leur plaque (pas la version à inserts).

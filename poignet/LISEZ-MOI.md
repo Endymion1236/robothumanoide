@@ -30,9 +30,9 @@ Tout le reste de la pince V4 est gardé (bride, servo, 2 plaques, 2 mâchoires).
 ## Ce qui reste à vérifier en vrai
 
 - **Tournevis** : 2 des 4 vis du palonnier sont au fond d'un passage de 5,4 mm de large et d'environ 55 mm de long
-  (elles tombent à côté du logement du servo de la pince). Il faut un tournevis fin à tige longue.
-- **Câble coude → poignet** : 152 mm. Le servo du poignet est plus près du coude que ne l'était celui de la pince,
-  mais la longueur n'a pas été mesurée sur le bras monté.
+  (elles tombent à côté du logement du servo de la pince). Il faut un tournevis fin à tige longue (Nicolas en a un).
+- **Câble coude → poignet** : Nicolas a des câbles de 90 cm (20/11/2026) : la longueur n'est plus un souci, attacher le surplus
+  le long de l'avant-bras pour qu'il ne se prenne pas dans une articulation.
 - **Câble poignet → pince** : il doit garder une boucle pour laisser tourner la pince de ± 90°.
 - La pince ne tient que par les 4 vis du palonnier (comme sur le SO-101), pas des deux côtés du servo.
 - Programme d'essai du servo n° 5 : à écrire.
