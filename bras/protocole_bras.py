@@ -52,6 +52,10 @@ class Essai:
         c = self.c
         return E.angle(p, c.haut) if i == c.epaule else degres(p - MILIEU) * (c.sc if i == c.coude else 1)
 
+    def temperature(self, i):
+        """Température sûre : médiane de 3 lectures (le servo renvoie parfois une valeur fausse isolée : 47, 58, 75 °C)."""
+        return statistics.median(self.bus.etat(i)['temperature'] for _ in range(3))
+
     # ---- un mouvement mesuré ----
     def aller(self, i, a, pause=1.0):
         """Envoie l'articulation i à l'angle a. Renvoie l'écart à l'arrivée (°), ou None si le mouvement a été arrêté."""
@@ -65,6 +69,7 @@ class Essai:
         if texte.startswith('ARRÊT'):
             self.dire(f'  {nom} → {a:+.0f}° : {texte}'); self.avis.append(f'{nom} : mouvement vers {a:+.0f}° arrêté'); return None
         pic = self.stat[i]['effort']; time.sleep(pause); e = self.bus.etat(i)
+        e['temperature'] = self.temperature(i)
         ecart = self.angle(i, e['position']) - a
         v = self.juger(abs(ecart) <= SEUILS['ecart'][nom] and pic <= SEUILS['effort_mouvement'] and abs(e['charge']) <= SEUILS['effort_tenue']
                        and e['temperature'] <= SEUILS['temperature'] and self.stat[i]['tension'] >= SEUILS['tension_mini'],
@@ -89,14 +94,14 @@ class Essai:
 
     def tenue(self, i, secondes):
         """Garde la pose et regarde l'effort et l'échauffement."""
-        e0 = self.bus.etat(i); efforts = []; fin = time.time() + secondes
+        t0 = self.temperature(i); efforts = []; fin = time.time() + secondes
         while time.time() < fin:
             e = self.bus.etat(i); efforts.append(abs(e['charge']))
             if self.bus.trop_chaud(i, e): self.dire(f'  Tenue interrompue : {e["temperature"]} °C'); self.avis.append(f'{self.noms[i]} trop chaud en tenue'); break
             time.sleep(0.5)
-        e1 = self.bus.etat(i); gain = e1['temperature'] - e0['temperature']
-        v = self.juger(max(efforts) <= SEUILS['effort_tenue'] and gain <= SEUILS['echauffement'], f'{self.noms[i]} : tenue {secondes:.0f} s, effort {max(efforts):.0f} %, +{gain} °C')
-        self.dire(f'  Tenue {secondes:.0f} s : effort moyen {statistics.mean(efforts):.0f} %, maxi {max(efforts):.0f} % · {e0["temperature"]} → {e1["temperature"]} °C · {v}')
+        t1 = self.temperature(i); gain = t1 - t0
+        v = self.juger(max(efforts) <= SEUILS['effort_tenue'] and gain <= SEUILS['echauffement'], f'{self.noms[i]} : tenue {secondes:.0f} s, effort {max(efforts):.0f} %, +{gain:.0f} °C')
+        self.dire(f'  Tenue {secondes:.0f} s : effort moyen {statistics.mean(efforts):.0f} %, maxi {max(efforts):.0f} % · {t0:.0f} → {t1:.0f} °C · {v}')
 
     def question(self, texte):
         r = self.demander(texte + ' (o/n) : ').strip().lower()[:1]; self.lignes.append(f'  {texte} → {"oui" if r == "o" else "non"}'); return r == 'o'
@@ -143,7 +148,7 @@ class Essai:
     def fin(self):
         self.dire('BILAN')
         for i, nom in self.noms.items():
-            try: e = self.bus.etat(i); self.dire(f'  {nom} : {e["temperature"]} °C')
+            try: self.dire(f'  {nom} : {self.temperature(i):.0f} °C')
             except ErreurServo as err: self.dire(f'  {nom} : ne répond plus ({err})'); self.avis.append(f'{nom} ne répond plus')
         if self.avis:
             self.dire(f'  {len(self.avis)} point(s) À VOIR :')

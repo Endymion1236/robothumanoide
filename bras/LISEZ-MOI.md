@@ -198,3 +198,12 @@ Tout est BON : 26 à 28 °C partout à la fin, 12,1 V au plus bas.
 
 **Sens vérifiés par Nicolas le 20/11/2026** (fenêtre de contrôle) : ouvrir/serrer, coude, épaule dans le bon sens ;
 **socle : angle positif = à droite, vu de DERRIÈRE le bras** (la droite du robot ; vu de face, c'est à gauche). `tester_socle` : g et G vont à gauche, d et D à droite.
+
+### Deuxième protocole sur le vrai bras (20/11/2026, 21 h 10, protocole corrigé)
+
+Tout est bon ; le seul « À VOIR » (épaule 22 → 58 °C en 30 s) est une **fausse lecture de température** : la ligne suivante
+relit 22 °C. Le protocole prend maintenant la médiane de 3 lectures.
+- **Épaule, vrai effort bras tendu à l'horizontale (atteint en montant) : 14 %**, stable 30 s, sans échauffement (22 → 23 °C sur l'essai).
+- **Plateau du socle : ne glisse pas** (bras revenu en face du repère après tous les mouvements).
+- Socle à +90° : toujours −1,6° et 15 % pour tenir (rien de tel à −90°) ; ailleurs ±0,6° selon le sens d'arrivée.
+- Coude : inchangé, écart ≤ 0,3°.
