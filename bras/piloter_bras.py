@@ -23,7 +23,7 @@ import test_epaule as E, test_pince as P
 MILIEU = 2048
 ID_EPAULE, ID_COUDE, ID_PINCE = 2, 1, 4
 BUTEES_COUDE = (908, 3188); COUDE_MAX = 90
-# Socle : angle POSITIF = le bras part À DROITE quand on est en face de lui (constaté par Nicolas le 20/11/2026).
+# Socle : angle POSITIF = le bras part À DROITE quand on est DERRIÈRE lui : c'est la droite du robot (constaté par Nicolas le 20/11/2026). Vu de face, c'est donc à gauche.
 BUTEES_SOCLE = (1024, 3072); SOCLE_MAX = 90           # un quart de tour de chaque côté            # ± 90° utilisés (vérifiés sans contact dans epaule/verifier_epaule.py)
 L_BRAS, L_AVANT, SOUS_PINCE = 120.0, 230.0, 40.0       # épaule→coude, coude→milieu des mâchoires, bas des mâchoires sous l'axe (mm)
 SENS_COUDE = Path(__file__).with_name('sens_coude.json')
