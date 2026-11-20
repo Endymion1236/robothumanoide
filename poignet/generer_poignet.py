@@ -46,7 +46,7 @@ Z_MURS = Z_LOIN + JEU                                   # dessus des murs = dess
 X_LEVRE0, X_LEVRE1, LEVRE = X_HAUT + 0.2, X_HAUT + 3.0, 1.8      # lèvres devant la partie haute du servo
 Z_LEVRE = Z_HAUTE + 2.5
 CABLE_Z = (Z_LOIN - 29.0, Z_LOIN - 17.0)                # fenêtres des câbles (comme dans la base de la pince)
-BOSS = 8.0; X_BARRE = (15.0, 25.0); INSERT_PROF = 5.0   # bossages des inserts de la barre
+BOSS = 8.0; X_BARRE = (27.0, 37.0); INSERT_PROF = 5.0   # bossages des inserts de la barre (devant les fentes des câbles)
 def support():
     m = box(-ENT_B, -(YI + MUR), Z_FOND, 0, YI + MUR, ZI) - box(-ENT_B - 1, -YI, -ZI, 0.0, YI, ZI + 1)   # manchon : dessous + 2 joues
     m += box(0, -(YI + MUR), Z_FOND, EP_FOND, YI + MUR, ZI) + box(0, -(YP + MUR), Z_FOND, EP_FOND, YP + MUR, Z_MURS)   # fond
@@ -56,7 +56,7 @@ def support():
         m += box(0, y0, Z_FOND, X_LEVRE1, y1, Z_MURS)                                                     # mur
         y0, y1 = sorted((s * (YP - 2.2), s * YP)); m += box(EP_FOND, y0, Z_PRES - JEU, X_DOS, y1, Z_MURS)  # rail derrière le servo
         y0, y1 = sorted((s * (YP - LEVRE - JEU), s * YP)); m += box(X_LEVRE0, y0, Z_LEVRE, X_LEVRE1, y1, Z_MURS)   # lèvre devant
-        m -= box(EP_FOND, s * YP - 4 if s > 0 else -YP - MUR - 1, CABLE_Z[0], 22, YP + MUR + 1 if s > 0 else -YP + 4, CABLE_Z[1])   # fenêtre du câble
+        m -= box(EP_FOND, s * YP - 4 if s > 0 else -YP - MUR - 1, CABLE_Z[0], 22, YP + MUR + 1 if s > 0 else -YP + 4, Z_MURS + 1)   # fente du câble, OUVERTE VERS LE HAUT : le servo descend avec ses câbles branchés
         # bossage de l'insert de la barre (dessous en biais : s'imprime sans support)
         y0, y1 = sorted((s * (YP + MUR), s * (YP + MUR + BOSS)))
         b = box(X_BARRE[0] - 1, y0, Z_MURS - 20, X_BARRE[1] + 1, y1, Z_MURS)
@@ -67,8 +67,11 @@ def support():
     for dz in (-VIS_ENT_Y, VIS_ENT_Y): m -= cyl_y(YI - 1, YI + MUR + 1, -ENT_B / 2, dz, M3)             # 2 vis M3 × 30 par le côté +Y
     return m
 def barre():
+    """Ferme le haut du support. Une LANGUETTE descend derrière le haut du servo : les fentes des câbles ont supprimé
+    les rails à cet endroit, c'est elle qui empêche le haut du servo de reculer. S'imprime retournée (languette en l'air)."""
     y = YP + MUR + BOSS
-    m = box(X_BARRE[0] - 1, -y, Z_MURS, X_BARRE[1] + 1, y, Z_MURS + 4)
+    m = box(X_BARRE[0] - 1, -y, Z_MURS, X_BARRE[1] + 1, y, Z_MURS + 4) + box(EP_FOND, -(YP + MUR), Z_MURS, X_BARRE[0], YP + MUR, Z_MURS + 4)
+    m += box(EP_FOND + 0.2, -8.0, Z_MURS - 4.5, X_DOS - 0.2, 8.0, Z_MURS)                      # languette (au-dessus du bossage du servo)
     for s in (1, -1): m -= cyl_z(sum(X_BARRE) / 2, s * (YP + MUR + BOSS / 2), Z_MURS - 0.1, Z_MURS + 4.1, M3)
     return m
 
@@ -126,7 +129,7 @@ if __name__ == '__main__':
     r['ajout_au_bout_du_bras_g'] = r['masses_g']['support'] + round(r['masses_g']['barre']) + 55 + r['masses_g']['base de la pince (poignet)'] - r['masses_g']['base de la pince (ancienne)']
     r['visserie'] = ['2 vis M3 × 30 (celles de la pince, sur l\'avant-bras)', '2 vis M3 × 10 + 2 inserts M3 (barre)', '4 vis M2,5 du servo (palonnier)']
     # export, pièces posées pour l'impression
-    for nom, m in (('poignet_support', SUPPORT.translate((0, 0, -Z_FOND))), ('poignet_barre', BARRE.translate((0, 0, -Z_MURS))),
+    for nom, m in (('poignet_support', SUPPORT.translate((0, 0, -Z_FOND))), ('poignet_barre', BARRE.rotate((180, 0, 0)).translate((0, 0, Z_MURS + 4))),
                    ('poignet_base_pince', BASE.translate((0, 0, G.ZC - G.Z_BASE)))):
         assert len(m.decompose()) == 1, f'{nom} : pièce en plusieurs morceaux'
         mesh(m).export(OUT / f'{nom}.stl'); r.setdefault('stl', []).append(f'{nom}.stl')

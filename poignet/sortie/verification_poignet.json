@@ -5,8 +5,8 @@
  "prise_des_vis_dans_le_palonnier_mm": 2.5,
  "allongement_du_bras_mm": 48.7,
  "masses_g": {
-  "support": 42,
-  "barre": 2.7,
+  "support": 39,
+  "barre": 6.3,
   "base de la pince (poignet)": 71,
   "base de la pince (ancienne)": 81,
   "servo": 55

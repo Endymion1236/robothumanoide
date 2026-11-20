@@ -9,11 +9,16 @@ elle-même de −90° à +90°. Le bras s'allonge de **48,7 mm** et s'alourdit d
 
 | Fichier | Rôle | Pose |
 |---|---|---|
-| `poignet_support.stl` (42 g) | s'enfile sur le bout de l'avant-bras à la place de la pince ; le servo y glisse par le haut | telle quelle, sans support |
-| `poignet_barre.stl` (3 g) | ferme le haut du support, au-dessus du servo | à plat |
+| `poignet_support.stl` (39 g) | s'enfile sur le bout de l'avant-bras à la place de la pince ; le servo y glisse par le haut | telle quelle, sans support |
+| `poignet_barre.stl` (6 g) | ferme le haut du support ; sa languette cale le haut du servo par derrière | retournée, languette en l'air |
 | `poignet_base_pince.stl` (71 g) | remplace la base de la pince : plus de manchon, un moyeu rond vissé sur le palonnier | à plat sur sa plaque |
 
 Tout le reste de la pince V4 est gardé (bride, servo, 2 plaques, 2 mâchoires).
+
+**Plan de montage** : `sortie/plan_montage_poignet.pdf` (7 étapes), produit par `plan_montage.py`.
+
+Le servo n° 5 se monte **sans son second disque** (le disque libre du dos) : il ajouterait 3,3 mm et le servo ne
+descendrait plus entre les rails. Ses câbles se branchent avant de le glisser : les fentes des câbles sont ouvertes vers le haut.
 
 ## Visserie
 
