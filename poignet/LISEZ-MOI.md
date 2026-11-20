@@ -40,4 +40,4 @@ descendrait plus entre les rails. Ses câbles se branchent avant de le glisser :
   le long de l'avant-bras pour qu'il ne se prenne pas dans une articulation.
 - **Câble poignet → pince** : il doit garder une boucle pour laisser tourner la pince de ± 90°.
 - La pince ne tient que par les 4 vis du palonnier (comme sur le SO-101), pas des deux côtés du servo.
-- Programme d'essai du servo n° 5 : à écrire.
+- Programme d'essai du servo n° 5 : `bras/tester_poignet.bat` (essayé en simulation).

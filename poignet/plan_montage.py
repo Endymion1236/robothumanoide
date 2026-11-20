@@ -88,7 +88,7 @@ def e6(fig):
        ['Pose le servo n° 4 dans la base, puis la bride et ses 2 vis.', 'Remonte la plaque fixe et la plaque mobile comme sur le plan de la pince V4 (étapes 3 et 4).',
         'Câbles : coude → servo n° 5, puis servo n° 5 → servo n° 4.', 'Entre le n° 5 et le n° 4, laisse une BOUCLE souple d\'une dizaine de centimètres : c\'est elle qui laisse tourner la pince.',
         'Enroule le surplus et attache-le le long de l\'avant-bras, loin du coude.', 'Sans courant, tourne la pince à la main d\'un quart de tour de chaque côté : rien ne doit tirer ni se coincer.'],
-       'Ne mets pas encore le 12 V : le programme d\'essai du poignet (tester_poignet) arrive, il règlera le milieu.', [(C['pince'], 'pince V4'), (C['base'], 'base')])
+       'Ensuite : pose le bras à plat, mets le 12 V et lance bras\\tester_poignet.bat. Il te fait régler la pince droite à la main avant tout mouvement.', [(C['pince'], 'pince V4'), (C['base'], 'base')])
 def e7(fig):
     a1, a2 = PM.panneaux(fig, 2, ['Pince droite', 'Pince tournée d\'un quart de tour'])
     for ax, a in ((a1, 0), (a2, 90)):

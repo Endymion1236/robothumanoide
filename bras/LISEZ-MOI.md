@@ -207,3 +207,12 @@ relit 22 °C. Le protocole prend maintenant la médiane de 3 lectures.
 - **Plateau du socle : ne glisse pas** (bras revenu en face du repère après tous les mouvements).
 - Socle à +90° : toujours −1,6° et 15 % pour tenir (rien de tel à −90°) ; ailleurs ±0,6° selon le sens d'arrivée.
 - Coude : inchangé, écart ≤ 0,3°.
+
+## Poignet — `tester_poignet.bat` (20/11/2026)
+
+**Essayé sur un servo simulé seulement.** Servo n° 5, butées 1024–3072. Le programme ne parle qu'à ce servo : poser le
+bras à plat avant. Étalonnage à la main (pince droite → milieu), puis `c` (droite), `g` / `d` (45° d'un côté / de
+l'autre), `G` / `D` (90°), `e`, `i`, `q`. Force limitée à 50 % : un câble qui retient la pince arrête le mouvement.
+Le sens (quel côté est +) est à noter au premier essai.
+
+Pas encore fait : le poignet dans `piloter_bras`, `controle_bras` et `protocole_bras`.
