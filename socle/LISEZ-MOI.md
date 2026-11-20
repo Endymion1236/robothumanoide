@@ -79,3 +79,19 @@ Pièces fermées, d'un seul bloc ; aucune pénétration entre base, servo, palie
   léger ponçage du moyeu peut être nécessaire ; il doit entrer à la main, sans jeu sensible.
 - La rigidité réelle (jeu du bras en bout de course) et la tenue du serre-joint.
 - Le passage des câbles pendant la rotation.
+
+## Premier montage réel (20/11/2026)
+
+Le socle est monté et **tourne avec `tester_socle.bat`** (essai de Nicolas, sans détail de charge ni de température).
+
+Ce qui n'a pas marché comme dessiné :
+- le plateau restait environ 2 mm trop haut (3 mm de jour au-dessus du tube au lieu de 1) et les 4 vis M2,5 ne
+  prenaient pas dans le palonnier ;
+- les 4 petits trous du fond du moyeu sont sortis irréguliers à l'impression, mal alignés avec ceux du palonnier.
+
+Montage retenu par Nicolas : tout percé, **la vis centrale du palonnier passe par le moyeu avec une rondelle**, plus
+**une seule vis M2,5**. À surveiller : serrage modéré de la vis centrale (moins de filets en prise), glissement en
+rotation du plateau (le bras ne reviendrait plus « en face »).
+
+À corriger si le plateau est réimprimé : trou central traversant pour la vis du palonnier (hauteur de sa tête jamais
+mesurée : le logement de 2,1 mm était une supposition), petits trous agrandis.
