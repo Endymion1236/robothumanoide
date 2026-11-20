@@ -60,6 +60,9 @@ Principe : **un petit coude au bout de l'avant-bras**, avec les pièces déjà �
 Visserie : 2 vis M3 × 30 (manchon), 8 vis M2,5 du servo (4 par disque, **avec** le second disque cette fois), 2 vis M3 × 30
 + 2 inserts (bout de la fourche : ce sont elles qui tiennent aussi le support de rotation), 2 vis M3 × 10 + 2 inserts (bride).
 
+**Plan de montage** : `sortie/plan_montage_flexion.pdf` (7 étapes), produit par `plan_montage_flexion.py`. Le servo et sa fourche
+descendent dans le berceau sans rien toucher (vérifié). Programme d'essai du servo n° 6 : à écrire (il doit RETENIR la pince).
+
 Vérifié par le calcul (`generer_flexion.py`) : aucun contact de −90° à +90°, pince droite ou tournée de ± 90°, ouverte ou fermée.
 
 **Ce que ça coûte** : + 83 mm et + 131 g au bout du bras (axe de flexion à 41 mm du bout de l'avant-bras).
