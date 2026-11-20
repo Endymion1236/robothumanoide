@@ -48,7 +48,7 @@ def main():
         if not FAIT.exists() or not BUTEES[0] <= bus.etat(i)['position'] <= BUTEES[1]:
             if not etalonner(bus, i): sys.exit('Pas d\'étalonnage : aucun mouvement.')
         if not BUTEES[0] <= bus.etat(i)['position'] <= BUTEES[1]: sys.exit('Le plateau est hors de ses butées : ramène-le en face à la main (12 V coupé), puis relance.')
-        menu = {'c': ('en face', 0), 'g': ('30° d\'un côté', 30), 'd': ('30° de l\'autre côté', -30), 'G': ('90° d\'un côté', 90), 'D': ('90° de l\'autre côté', -90)}
+        menu = {'c': ('en face', 0), 'g': ('30° à gauche', -30), 'd': ('30° à droite', 30), 'G': ('90° à gauche', -90), 'D': ('90° à droite', 90)}   # + = à droite, vu en face du bras (constaté par Nicolas le 20/11/2026)
         print('\nCommandes :', ' · '.join(f'{k} = {v[0]}' for k, v in menu.items()), '· e = refaire l\'étalonnage · i = infos · q = quitter')
         while True:
             mots = input('> ').replace(',', ' ').split()

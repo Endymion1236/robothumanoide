@@ -195,3 +195,6 @@ Tout est BON : 26 à 28 °C partout à la fin, 12,1 V au plus bas.
 - Une lecture de température isolée à 47 °C (fausse, déjà connue).
 - La question « revenu en face du repère » a été posée socle à +65° : réponse sans valeur, protocole corrigé
   (le socle va à 0° avant le repère ; la tenue de l'épaule se fait après une montée).
+
+**Sens vérifiés par Nicolas le 20/11/2026** (fenêtre de contrôle) : ouvrir/serrer, coude, épaule dans le bon sens ;
+**socle : angle positif = à droite**, vu en face du bras. `tester_socle` : g et G vont à gauche, d et D à droite.
