@@ -216,3 +216,10 @@ l'autre), `G` / `D` (90°), `e`, `i`, `q`. Force limitée à 50 % : un câble qu
 Le sens (quel côté est +) est à noter au premier essai.
 
 Pas encore fait : le poignet dans `piloter_bras`, `controle_bras` et `protocole_bras`.
+
+## Flexion du poignet — `tester_flexion.bat` (20/11/2026)
+
+**Essayé sur un servo simulé seulement.** Servo n° 6, butées 1024–3072. Ce poignet porte la pince : il est RETENU par les
+sécurités, jamais lâché. Étalonnage à la main, pince soutenue : pince droite → milieu, puis on la lève pour apprendre le
+sens « haut » (`sens_flexion.json`). Commandes : `c` (droit), `h` / `b` (30° haut / bas), `H` / `B` (60°), `e`, `i`, `q`.
+En quittant, il demande de soutenir la pince avant de couper la force. Ctrl+C : le poignet reste tenu.

@@ -61,7 +61,7 @@ Visserie : 2 vis M3 × 30 (manchon), 8 vis M2,5 du servo (4 par disque, **avec**
 + 2 inserts (bout de la fourche : ce sont elles qui tiennent aussi le support de rotation), 2 vis M3 × 10 + 2 inserts (bride).
 
 **Plan de montage** : `sortie/plan_montage_flexion.pdf` (7 étapes), produit par `plan_montage_flexion.py`. Le servo et sa fourche
-descendent dans le berceau sans rien toucher (vérifié). Programme d'essai du servo n° 6 : à écrire (il doit RETENIR la pince).
+descendent dans le berceau sans rien toucher (vérifié). Programme d'essai du servo n° 6 : `bras/tester_flexion.bat` (essayé en simulation ; il RETIENT la pince).
 
 Vérifié par le calcul (`generer_flexion.py`) : aucun contact de −90° à +90°, pince droite ou tournée de ± 90°, ouverte ou fermée.
 

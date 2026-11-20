@@ -95,7 +95,7 @@ def e6(fig):
 @etape('Câbles et essai à la main', ['3 câbles de servo, des colliers'],
        ['Câbles : coude → servo n° 6 → servo n° 5 → servo n° 4 (pince).', 'À chaque articulation, laisse une boucle souple ; attache le surplus le long de l\'avant-bras.',
         'Sans courant, plie le poignet à la main : un quart de tour vers le haut, un quart de tour vers le bas. Rien ne doit toucher ni tirer.', 'Fais de même pour la rotation de la pince.'],
-       'Ne mets pas le 12 V pour bouger ce servo tant que le programme tester_flexion n\'est pas prêt : ce poignet porte la pince, il doit être RETENU, jamais lâché.', [(C['fourche'], 'fourche')])
+       'Ensuite : avant-bras posé à plat, 12 V allumé, lance bras\\tester_flexion.bat. Il te fait régler le milieu et le sens à la main, pince soutenue, avant tout mouvement.', [(C['fourche'], 'fourche')])
 def e7(fig):
     a1, a2 = PM.panneaux(fig, 2, ['Poignet droit', 'Plié de 60° vers le bas'])
     for ax, a in ((a1, 0), (a2, -60)):
