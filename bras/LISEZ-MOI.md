@@ -163,3 +163,23 @@ ouverte ici** (pas d'affichage) : premier essai chez Nicolas.
 `tester_pince.bat`, commande **e** : il demande quelle pince est montée (3 = engrenages, 4 = sans engrenages), gardé dans
 `version_pince.json`. V4 : étalonnage à **58 mm** entre les mâchoires (54 avec les tapis), largeur affichée = écart entre les
 tapis au milieu des mâchoires ; bouts qui se touchent = « rien de tenu ». Formule vérifiée contre le modèle ; pas encore essayé.
+
+## Protocole d'essai des articulations — `protocole_bras.bat` (20/11/2026)
+
+**Essayé sur 4 servos simulés seulement, pas encore sur le vrai bras.**
+
+Toujours les mêmes mouvements, tout est mesuré et rangé dans `bras/rapports/protocole_DATE.txt` (à envoyer) :
+
+| Étape | Mouvements | Ce qu'on regarde |
+|---|---|---|
+| 0 | état au départ | température, tension |
+| 1. Coude | épaule à la verticale ; +45, 0, −45, 0, +90, −90, 0 ; 5 allers-retours | écart à l'arrivée, effort, retours au même endroit |
+| 2. Épaule | bras tendu ; 60, 30, 0 ; **tenue 30 s à l'horizontale** ; 5 allers-retours 60 ↔ 30 | effort pour tenir, échauffement |
+| 3. Socle | bras à la verticale ; ±45, ±90 ; 5 allers-retours ; question « revenu en face du repère ? » ; puis bras à 30° | glissement du plateau sur le palonnier |
+| 4. Pince | ouvrir, serrer doux, serrer fort, à vide | fermeture complète |
+
+Seuils du jugement BON / À VOIR (dans `SEUILS`, à ajuster) : écart 3° (6° pour l'épaule), retours étalés sur 1,5° au plus,
+effort 60 % en mouvement et 40 % en tenue, 55 °C, + 8 °C pendant la tenue, 11 V au moins.
+
+Options : `--rapide` (2 allers-retours), `--sans-pince`, `--sans-socle`, `--tenue 60`.
+Un mouvement arrêté par une sécurité retient le bras ; Ctrl+C aussi, et le rapport déjà rempli est gardé.
