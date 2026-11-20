@@ -41,3 +41,36 @@ descendrait plus entre les rails. Ses câbles se branchent avant de le glisser :
 - **Câble poignet → pince** : il doit garder une boucle pour laisser tourner la pince de ± 90°.
 - La pince ne tient que par les 4 vis du palonnier (comme sur le SO-101), pas des deux côtés du servo.
 - Programme d'essai du servo n° 5 : `bras/tester_poignet.bat` (essayé en simulation).
+
+# Poignet : flexion (servo n° 6) — dessinée le 20/11/2026
+
+**Prototype : vérifié par le calcul, rien n'est imprimé ni monté.** Aperçu : `sortie/apercu_flexion.png`.
+
+Pourquoi : sans flexion, la pince n'est à plat que pour une seule distance (≈ 34 cm) ; la flexion la garde à plat quand la
+distance change, et permet la prise par le dessus.
+
+Principe : **un petit coude au bout de l'avant-bras**, avec les pièces déjà éprouvées au coude. La flexion vient AVANT la rotation.
+
+| Fichier (`sortie/`) | Rôle |
+|---|---|
+| `flexion_support.stl` (46 g) | manchon sur le bout de l'avant-bras + berceau du coude (socle raccourci), en une pièce |
+| `flexion_fourche_basse.stl`, `flexion_fourche_haute.stl` (14 g chacune) | fourche courte vissée sur les 2 disques du servo n° 6 ; son bout a la forme du bout de l'avant-bras : le support de rotation s'y enfile tel quel |
+| `epaule/sortie/bride_berceau.stl` | la même bride qu'au coude |
+
+Visserie : 2 vis M3 × 30 (manchon), 8 vis M2,5 du servo (4 par disque, **avec** le second disque cette fois), 2 vis M3 × 30
++ 2 inserts (bout de la fourche : ce sont elles qui tiennent aussi le support de rotation), 2 vis M3 × 10 + 2 inserts (bride).
+
+Vérifié par le calcul (`generer_flexion.py`) : aucun contact de −90° à +90°, pince droite ou tournée de ± 90°, ouverte ou fermée.
+
+**Ce que ça coûte** : + 83 mm et + 131 g au bout du bras (axe de flexion à 41 mm du bout de l'avant-bras).
+Avec la rotation : + 132 mm et + 221 g en tout. Estimation (`epaule/calcul_poignet.py`, mêmes hypothèses que le 17/11) :
+
+| Bras tendu à l'horizontale | aujourd'hui | avec rotation + flexion |
+|---|---|---|
+| Épaule, pince vide | 8,3 kg·cm (14 % mesurés) | ≈ 18 kg·cm, soit **2,1 fois plus** |
+| Épaule, gobelet plein (300 g) | 18,8 kg·cm | ≈ 32 kg·cm : **au-delà de ce que le servo peut donner** (30 en blocage) |
+| Coude, gobelet plein | 10,5 kg·cm | ≈ 21 kg·cm |
+
+Conclusion : avec le poignet complet, le bras de table porte des **objets légers** (gobelet vide, ≈ 100 g), pas un gobelet
+plein bras tendu, même avec le ressort. À confirmer par le protocole après le montage de la rotation.
+Piste pour raccourcir (non dessinée) : un avant-bras neuf qui loge le servo n° 6 entre ses deux plaques (≈ 40 mm et 40 g de moins).

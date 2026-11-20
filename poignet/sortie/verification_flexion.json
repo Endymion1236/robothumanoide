@@ -1,0 +1,26 @@
+{
+ "etat": "PROTOTYPE, aucune validation physique",
+ "flexion": "aucun contact de −90° à +90°, pince droite ou tournée de ±90°",
+ "masses_g": {
+  "support de flexion": 46,
+  "moitié basse": 14,
+  "moitié haute": 14,
+  "bride": 2,
+  "servo": 55
+ },
+ "ajout_au_bout_du_bras_g": 131,
+ "allongement_du_bras_mm": 83.0,
+ "axe_de_flexion_apres_le_bout_de_l_avant_bras_mm": 41.0,
+ "visserie": [
+  "2 vis M3 × 30 (manchon, sur l'avant-bras)",
+  "8 vis M2,5 du servo (4 par disque)",
+  "2 vis M3 × 30 + 2 inserts M3 (bout de la fourche)",
+  "2 vis M3 × 10 + 2 inserts M3 (bride)"
+ ],
+ "stl": [
+  "flexion_support.stl",
+  "flexion_fourche_basse.stl",
+  "flexion_fourche_haute.stl",
+  "bride : epaule/sortie/bride_berceau.stl (la même qu'au coude)"
+ ]
+}
