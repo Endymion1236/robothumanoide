@@ -30,3 +30,8 @@ Objets à saisir (pour la pince V4) : gobelet de **70 mm en haut, 53 mm en bas**
 
 Dit par Nicolas le 20/11/2026 : il a **9 câbles de servo de 90 cm** (confirmé ; les câbles fournis avec les servos font 152 mm)
 et un tournevis fin. Ses mâchoires de pince V3 sont **d'un seul bloc** avec leur plaque (pas la version à inserts).
+
+**21/11/2026 : Nicolas a commandé 2 servos « 3095 » en version 12 V** (pour l'épaule et le coude, qui limitent le bras avec le
+poignet complet). Rien n'est mesuré : à réception, demander boîtier (L × l × h), position de l'axe, palonnier (diamètre,
+hauteur, cercle et taille des trous), second disque, vis fournies (longueur sous tête), AVANT de dire qu'ils entrent dans
+les berceaux actuels. Vérifier aussi sur l'étiquette que c'est bien du 12 V avant de les brancher sur le bus.

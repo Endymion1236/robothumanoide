@@ -95,6 +95,7 @@ Puis bouger (2 servos).
 
 **Décision de Nicolas (20/11/2026) : on garde le bras de table à 6 axes, le bras de taille humaine est abandonné pour l'instant.**
 Le buste et la tête recevront ce bras-ci. Ce qui suit reste pour mémoire.
+**21/11/2026 : 2 servos 3095 en 12 V commandés** pour l'épaule et le coude du bras de table (à mesurer à réception, voir `CLAUDE.md`).
 
 Couple continu à tenir (bras de 60 cm tendu, 300 g dans la pince) : épaule ≈ 65 kg·cm, coude ≈ 25, poignet ≈ 5.
 Le chiffre des fiches est le couple **de blocage** ; le couple **continu** est environ 3 fois plus faible.
