@@ -260,3 +260,9 @@ Dès que le servo n° 6 répond (et que `tester_flexion.bat` a été lancé une 
 - `piloter_bras` : commande `f30` (pince relevée de 30°) ; fenêtre : curseur « Poignet (plier) » et case
   **« Garder la PINCE à l'horizontale avec le poignet »** : quand l'épaule ou le coude bougent, la flexion compense ;
 - protocole : étape « Poignet : flexion ».
+
+## Vérifier les butées de tous les servos — `verifier_butees.bat` (21/11/2026)
+
+**Essayé en simulation seulement.** Ne fait rien bouger. Affiche pour chaque servo qui répond : numéro, rôle, butées lues,
+butées attendues, position, verdict. Propose de régler celles qui manquent (réponse « o » exigée), sauf l'épaule
+(étalonnage par `tester_epaule.bat`) et un servo qui se trouve en dehors des butées à poser.
