@@ -16,7 +16,7 @@ from servos import Bus, ErreurServo, degres, pas
 import test_epaule as E, test_pince as P, piloter_bras as B
 from controle_bras import Controleur, MILIEU
 
-SEUILS = {'ecart': {'coude': 3.0, 'socle': 3.0, 'épaule': 6.0},      # ° d'écart à l'arrivée (l'épaule fléchit sous le poids)
+SEUILS = {'ecart': {'coude': 3.0, 'socle': 3.0, 'épaule': 6.0, 'poignet': 3.0},      # ° d'écart à l'arrivée (l'épaule fléchit sous le poids)
           'retour': 1.5,                                             # ° entre deux retours au même endroit
           'effort_mouvement': 60, 'effort_tenue': 40,                # % de la force du servo
           'temperature': 55, 'echauffement': 8,                      # °C ; °C gagnés pendant la tenue
@@ -37,6 +37,7 @@ class Essai:
         self.bus.etat = etat
         self.noms = {c.epaule: 'épaule', c.coude: 'coude', c.pince: 'pince'}
         if c.socle: self.noms[c.socle] = 'socle'
+        if c.poignet: self.noms[c.poignet] = 'poignet'
 
     # ---- écriture ----
     def dire(self, t=''): self.dire_(t); self.lignes.append(t)
@@ -136,6 +137,9 @@ class Essai:
                 self.dire('  Socle bras tendu (épaule à 30°) :')
                 if self.serie(c.epaule, [30]): self.serie(c.socle, [60, -60, 0]); self.serie(c.epaule, [90])
         elif socle: self.dire('3. Socle : pas branché, étape sautée')
+        if c.poignet:
+            self.dire('5. Poignet : rotation de la pince (bras à la verticale)')
+            if self.serie(c.poignet, [0, 45, 0, -45, 0, 90, -90, 0]): self.repetabilite(c.poignet, 0, 60, n)
         if pince:
             self.dire('4. Pince (à vide)')
             for action, nom in (('o', 'ouvrir'), ('s', 'serrer doux'), ('o', 'ouvrir'), ('S', 'serrer fort'), ('o', 'ouvrir')):
@@ -168,7 +172,7 @@ def main():
     try: essai.lancer(rapide='--rapide' in a, pince='--sans-pince' not in a, socle='--sans-socle' not in a, tenue=tenue)
     except KeyboardInterrupt:
         for i in essai.noms:
-            if i != essai.c.pince:
+            if i not in (essai.c.pince,):
                 try: essai.bus.retenir(i)
                 except Exception: pass
         essai.dire('INTERROMPU au clavier : le bras est retenu sur place.'); essai.ecrire()

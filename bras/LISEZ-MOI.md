@@ -223,3 +223,15 @@ Pas encore fait : le poignet dans `piloter_bras`, `controle_bras` et `protocole_
 sécurités, jamais lâché. Étalonnage à la main, pince soutenue : pince droite → milieu, puis on la lève pour apprendre le
 sens « haut » (`sens_flexion.json`). Commandes : `c` (droit), `h` / `b` (30° haut / bas), `H` / `B` (60°), `e`, `i`, `q`.
 En quittant, il demande de soutenir la pince avant de couper la force. Ctrl+C : le poignet reste tenu.
+
+### Poignet (rotation) : premier essai réel et intégration (21/11/2026)
+
+Essai réel de `tester_poignet` : ± 45° et ± 90° atteints, charge 0 à 3 %, 27–28 °C, 12,2 V. Sens du + à noter.
+Montage du jour : 3 vis sur 4 au palonnier (tournevis trop court pour la 4e), servo un peu libre dans son support.
+
+Le poignet est pris en compte **dès que le servo n° 5 répond** (essayé en simulation seulement) :
+- `piloter_bras`, `controle_bras` et `protocole_bras` comptent le bras plus long de 48,7 mm et le point bas de la pince à
+  60 mm sous l'axe (pince tournée) : la sécurité « la pince irait dans la table » reste juste ;
+- le poignet est tenu, force limitée à 50 % ; commande `p45` dans `piloter_bras`, curseur « Poignet » dans la fenêtre,
+  étape « Poignet » dans le protocole ;
+- il faut avoir lancé `tester_poignet.bat` une fois (étalonnage), sinon ces programmes le demandent.

@@ -26,6 +26,14 @@ BUTEES_COUDE = (908, 3188); COUDE_MAX = 90
 # Socle : angle POSITIF = le bras part À DROITE quand on est DERRIÈRE lui : c'est la droite du robot (constaté par Nicolas le 20/11/2026). Vu de face, c'est donc à gauche.
 BUTEES_SOCLE = (1024, 3072); SOCLE_MAX = 90           # un quart de tour de chaque côté            # ± 90° utilisés (vérifiés sans contact dans epaule/verifier_epaule.py)
 L_BRAS, L_AVANT, SOUS_PINCE = 120.0, 230.0, 40.0       # épaule→coude, coude→milieu des mâchoires, bas des mâchoires sous l'axe (mm)
+ID_POIGNET, BUTEES_POIGNET, POIGNET_MAX = 5, (1024, 3072), 90
+ALLONGE_POIGNET, SOUS_PINCE_POIGNET = 48.7, 60.0      # la rotation du poignet allonge le bras de 48,7 mm ; pince tournée, son point le plus bas est à 60 mm sous l'axe
+def regler_longueurs(trouves):
+    """Avec le poignet (servo n° 5), le bras est plus long : la sécurité « la pince irait dans la table » doit le savoir."""
+    global L_AVANT, SOUS_PINCE
+    poignet = ID_POIGNET in trouves
+    L_AVANT, SOUS_PINCE = (230.0 + ALLONGE_POIGNET, SOUS_PINCE_POIGNET) if poignet else (230.0, 40.0)
+    return poignet
 SENS_COUDE = Path(__file__).with_name('sens_coude.json')
 TOL = E.TOLERANCE
 SEUIL_CONTACT = 10          # points de charge : variation qui signale que le verre touche la table (à ajuster à l'essai)
@@ -103,6 +111,12 @@ def main():
         trouves = bus.chercher(); print('Servos trouvés :', trouves or 'aucun')
         ID_COUDE, socle = numero_coude(trouves), numero_socle(trouves)
         if a.hauteur is None: a.hauteur = 179.0 if socle else 101.0
+        poignet = regler_longueurs(trouves)
+        if poignet:
+            ew = bus.etat(ID_POIGNET)
+            if (ew['butee_min'], ew['butee_max']) != BUTEES_POIGNET or not Path(__file__).with_name('poignet_etalonne.json').exists(): sys.exit('Poignet pas étalonné : lancer tester_poignet.bat')
+            bus.limiter_force(ID_POIGNET, 50); bus.retenir(ID_POIGNET)
+            print(f'Poignet (rotation) : n° 5 · bras compté plus long de {ALLONGE_POIGNET} mm. Commande : p45 = pince tournée de 45° (de −90 à +90).')
         print(f"Coude : n° {ID_COUDE} · socle tournant : {'n° 1' if socle else 'pas monté'} · axe de l'épaule à {a.hauteur:.0f} mm de la table")
         for i, nom in ((ID_EPAULE, 'épaule'), (ID_COUDE, 'coude'), (ID_PINCE, 'pince')):
             if i not in trouves: sys.exit(f'Servo n° {i} ({nom}) introuvable : vérifier les câbles.')
@@ -142,7 +156,7 @@ def main():
         print('            poser = descendre jusqu\'à la table, lâcher, remonter · o = ouvrir · s / S = serrer doucement / fort · repos = bras à la verticale · i = infos · q = quitter. Plusieurs à la suite : « n0 o s n40 ».')
         while True:
             mots = input('> ').replace(',', ' ').split()
-            faux = [m for m in mots if not re.fullmatch(r'[ecnt]-?\d+|plat|repos|poser|[osSiq]', m)]
+            faux = [m for m in mots if not re.fullmatch(r'[ecntp]-?\d+|plat|repos|poser|[osSiq]', m)]
             if faux: print('   commande inconnue :', ' '.join(faux), '(rien n\'a bougé)'); continue
             if 'q' in mots: break
             for m in mots:
@@ -179,6 +193,11 @@ def main():
                         if m == 'plat': cible = [(ID_COUDE, pos_c(-ae))]; verifier(ae, -ae); nom = 'avant-bras à l\'horizontale'
                         elif m == 'repos': cible = [(ID_EPAULE, pos_e(90)), (ID_COUDE, pos_c(0))]; nom = 'bras à la verticale'
                         elif m[0] == 'e': v = int(m[1:]); verifier(v, ac); cible = [(ID_EPAULE, pos_e(v))]; nom = f'épaule à {v:+d}°'
+                        elif m[0] == 'p':
+                            v = int(m[1:])
+                            if not poignet: raise ErreurServo('pas de poignet branché (servo n° 5)')
+                            if abs(v) > POIGNET_MAX: raise ErreurServo('poignet hors de ±90°')
+                            cible = [(ID_POIGNET, MILIEU + pas(v))]; nom = f'pince tournée de {v:+d}°'
                         elif m[0] == 't':
                             v = int(m[1:])
                             if not socle: raise ErreurServo('pas de socle tournant branché (servo n° 1, avec le coude au n° 3)')
@@ -202,7 +221,7 @@ def main():
             if tenus:
                 print('\nLa force va être coupée : le bras va TOMBER s\'il n\'est pas tenu.')
                 input('TIENS le bras (haut du bras ET avant-bras), ou pose-le, puis Entrée... ')
-                for i in tenus + [ID_PINCE] + ([1] if ID_COUDE == 3 and bus.present(1) else []): bus.relacher(i)
+                for i in tenus + [ID_PINCE] + ([1] if ID_COUDE == 3 and bus.present(1) else []) + ([ID_POIGNET] if bus.present(ID_POIGNET) else []): bus.relacher(i)
                 print('Force coupée. Pose le bras doucement. Au revoir.')
         except (Exception, KeyboardInterrupt):
             print('\n⚠️  Les servos RETIENNENT peut-être encore le bras. TIENS LE BRAS, puis coupe le 12 V.')
