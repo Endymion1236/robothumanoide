@@ -8,12 +8,13 @@ from servos import Bus, ErreurServo, degres, numero_coude, numero_socle
 import test_epaule as E, test_pince as P, piloter_bras as B
 
 MILIEU = 2048
+QUART = (1024, 3072)        # un quart de tour de chaque côté (écrit ici : ce programme marche même avec un ancien piloter_bras.py)
 def attendues(trouves):
     """Numéro → (rôle, butées attendues ou None si on ne peut pas le savoir, programme d'étalonnage)."""
     coude, socle = numero_coude(trouves), numero_socle(trouves)
     haut = json.loads(E.SENS.read_text(encoding='utf-8'))['haut'] if E.SENS.exists() else None
     r = {2: ('épaule', E.butees(haut) if haut else None, 'tester_epaule.bat'), 4: ('pince', P.BUTEES_PINCE, 'tester_pince.bat'),
-         B.ID_POIGNET: ('poignet, rotation', B.BUTEES_POIGNET, 'tester_poignet.bat'), B.ID_FLEXION: ('poignet, flexion', B.BUTEES_FLEXION, 'tester_flexion.bat')}
+         5: ('poignet, rotation', QUART, 'tester_poignet.bat'), 6: ('poignet, flexion', QUART, 'tester_flexion.bat')}
     r[coude] = ('coude', B.BUTEES_COUDE, 'tester_coude.bat')
     if socle: r[socle] = ('socle', B.BUTEES_SOCLE, 'tester_socle.bat')
     return r
