@@ -36,6 +36,7 @@ poignet complet). Rien n'est mesuré : à réception, demander boîtier (L × l 
 hauteur, cercle et taille des trous), second disque, vis fournies (longueur sous tête), AVANT de dire qu'ils entrent dans
 les berceaux actuels. Vérifier aussi sur l'étiquette que c'est bien du 12 V avant de les brancher sur le bus.
 
-**21/11/2026 : les trous du manchon du support de rotation ne tombaient pas en face de ceux de l'avant-bras.** La position
-réelle des 2 vis M3 × 30 du bout de l'avant-bras (distance au bout, écart entre elles) n'a jamais été mesurée : la demander
-avant toute nouvelle pièce qui s'enfile sur l'avant-bras. En attendant, les manchons ont des trous oblongs (± 2,5 mm).
+**21/11/2026 : les trous du manchon du support de rotation étaient décalés de 1,1 mm de côté** (Nicolas : trou à 5,9 mm du
+bord sur l'avant-bras, à 4,8 mm sur le support). Cause : ce manchon n'avait que 3 faces et glissait de côté. Leçon : un manchon
+sur l'avant-bras se fait FERMÉ sur 4 faces, comme celui de la pince, qui tombait juste. La distance des vis au bout de
+l'avant-bras n'a toujours pas été mesurée (7,5 mm au dessin).

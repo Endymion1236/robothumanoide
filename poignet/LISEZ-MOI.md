@@ -35,7 +35,8 @@ descendrait plus entre les rails. Ses câbles se branchent avant de le glisser :
 ## Premier montage réel (21/11/2026)
 
 Support, barre et base imprimés et montés (première version du support : fenêtres de câble fermées, barre sans languette).
-- Les 2 trous du manchon ne tombaient pas en face des vis de l'avant-bras → trous oblongs (position réelle à mesurer).
+- Les 2 trous du manchon étaient décalés de 1,1 mm de côté (mesuré) : le manchon n'avait que 3 faces et glissait de côté.
+  Corrigé au dessin : manchon fermé sur 4 faces, comme celui de la pince. Le dessus du manchon s'imprime en pont de 46 mm.
 - **Le servo n° 5 a du jeu : son bas bascule vers l'avant.** Rien ne le tenait devant, en bas. Corrigé au dessin : deux
   lèvres basses de chaque côté du palonnier. Sur la pièce déjà imprimée : cale provisoire (point de colle chaude).
 

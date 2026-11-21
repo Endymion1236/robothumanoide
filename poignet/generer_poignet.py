@@ -39,7 +39,6 @@ def servo_poignet():
 
 # ---------------- Support du poignet ----------------
 MUR = 3.0
-OBLONG = 2.5                                            # demi-longueur des trous oblongs du manchon
 YI, ZI = FOURCHE_EP / 2 + JEU, FOURCHE_L / 2 + JEU     # intérieur du manchon (le même que celui de la pince V3)
 YP = SW / 2 + JEU                                       # intérieur du logement du servo
 Z_FOND = -(ZI + MUR)                                    # dessous de la pièce = face posée sur le plateau d'impression
@@ -68,11 +67,10 @@ def support():
         coupe = coupe.translate((0, s * (YP + MUR), Z_MURS - 20)) if s > 0 else coupe.mirror((0, 1, 0)).translate((0, -(YP + MUR), Z_MURS - 20))
         m += b - coupe
         m -= cyl_z(sum(X_BARRE) / 2, s * (YP + MUR + BOSS / 2), Z_MURS - INSERT_PROF, Z_MURS + 0.1, M3_INSERT)
-    # 2 vis M3 × 30 par le côté +Y. Trous OBLONGS (± 2,5 mm le long du bras) : au premier montage (21/11/2026) les trous ronds
-    # ne tombaient pas en face de ceux de l'avant-bras ; la position réelle de ces trous n'a jamais été mesurée.
-    for dz in (-VIS_ENT_Y, VIS_ENT_Y):
-        for dx in (-OBLONG, OBLONG): m -= cyl_y(YI - 1, YI + MUR + 1, -ENT_B / 2 + dx, dz, M3)
-        m -= box(-ENT_B / 2 - OBLONG, YI - 1, dz - M3 / 2, -ENT_B / 2 + OBLONG, YI + MUR + 1, dz + M3 / 2)
+    # Manchon FERMÉ sur ses 4 faces, comme celui de la pince (qui tombait juste). Le premier support n'avait pas de dessus :
+    # il pouvait glisser de côté sur l'avant-bras et ses trous se décalaient de 1,1 mm (mesure de Nicolas, 21/11/2026).
+    m += box(-ENT_B, -(YI + MUR), ZI, 0, YI + MUR, ZI + MUR)
+    for dz in (-VIS_ENT_Y, VIS_ENT_Y): m -= cyl_y(YI - 1, YI + MUR + 1, -ENT_B / 2, dz, M3)             # 2 vis M3 × 30 par le côté +Y
     return m
 def barre():
     """Ferme le haut du support. Une LANGUETTE descend derrière le haut du servo : les fentes des câbles ont supprimé

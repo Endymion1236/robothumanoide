@@ -5,13 +5,13 @@
  "prise_des_vis_dans_le_palonnier_mm": 2.5,
  "allongement_du_bras_mm": 48.7,
  "masses_g": {
-  "support": 39,
+  "support": 42,
   "barre": 6.3,
   "base de la pince (poignet)": 71,
   "base de la pince (ancienne)": 81,
   "servo": 55
  },
- "ajout_au_bout_du_bras_g": 90,
+ "ajout_au_bout_du_bras_g": 93,
  "visserie": [
   "2 vis M3 × 30 (celles de la pince, sur l'avant-bras)",
   "2 vis M3 × 10 + 2 inserts M3 (barre)",
