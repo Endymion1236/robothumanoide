@@ -42,7 +42,9 @@ def support():
     m += box(-ENT_L, Y_SOCLE, -25.0, X_AXE - AR_BERCEAU + 0.1, -YI, 25.0)                     # le socle se prolonge sous le manchon
     for s in (1, -1):                                                                         # deux équerres entre le manchon et le socle
         z0, z1 = sorted((s * (ZI + MUR), s * 25.0)); m += box(-ENT_L, Y_SOCLE, z0, 0, -YI + 8, z1)
-    for dz in (-F.vis_M3_Y, F.vis_M3_Y): m -= cyl_y(-ENT_L / 2, dz, YI - 1, YI + MUR + 1, 3.4, 24)   # 2 vis M3 × 30, par le côté +Y
+    for dz in (-F.vis_M3_Y, F.vis_M3_Y):                                                      # 2 vis M3 × 30 par le côté +Y, trous oblongs (voir generer_poignet)
+        for dx in (-P.OBLONG, P.OBLONG): m -= cyl_y(-ENT_L / 2 + dx, dz, YI - 1, YI + MUR + 1, 3.4, 24)
+        m -= box(-ENT_L / 2 - P.OBLONG, YI - 1, dz - 1.7, -ENT_L / 2 + P.OBLONG, YI + MUR + 1, dz + 1.7)
     return m - box(-ENT_L - 1, -YI, -ZI, 0.01, YI, ZI)
 
 def moitie(haute):
