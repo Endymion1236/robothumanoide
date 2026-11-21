@@ -8,6 +8,7 @@ from servos import Bus, ErreurServo, degres, numero_coude, numero_socle
 import test_epaule as E, test_pince as P, piloter_bras as B
 
 MILIEU = 2048
+MARGE = 35              # pas (3°) : un servo arrêté contre sa butée lit souvent 2 ou 3 pas au-delà (épaule à 3074 pour 3072, le 21/11/2026)
 QUART = (1024, 3072)        # un quart de tour de chaque côté (écrit ici : ce programme marche même avec un ancien piloter_bras.py)
 def attendues(trouves):
     """Numéro → (rôle, butées attendues ou None si on ne peut pas le savoir, programme d'étalonnage)."""
@@ -29,7 +30,7 @@ def main(bus=None, demander=input):
         print(f"\n{'n°':>3}  {'rôle':<20} {'butées lues':<13} {'attendues':<13} {'position':<16} verdict")
         for i in trouves:
             e = bus.etat(i); lues = (e['butee_min'], e['butee_max']); role, att, prog = roles.get(i, ('inconnu', None, None))
-            dedans = lues[0] <= e['position'] <= lues[1]
+            dedans = lues[0] - MARGE <= e['position'] <= lues[1] + MARGE
             if role == 'inconnu': verdict = 'numéro non prévu : servo neuf pas encore numéroté ?'
             elif att is None: verdict = f'pas encore étalonné : lance {prog}'
             elif lues == tuple(att): verdict = 'BON' if dedans else 'butées bonnes, mais le servo est EN DEHORS : le remettre à la main, 12 V coupé'
@@ -42,7 +43,7 @@ def main(bus=None, demander=input):
         for i, role, att, prog in a_regler:
             if role == 'épaule': print(f'\nÉpaule (n° {i}) : ses butées se règlent avec {prog} (étalonnage), pas ici.'); continue
             e = bus.etat(i)
-            if not att[0] <= e['position'] <= att[1]:
+            if not att[0] - MARGE <= e['position'] <= att[1] + MARGE:
                 print(f"\n{role} (n° {i}) : il est à {e['position']}, en dehors de {att[0]}–{att[1]}. Remets-le vers son milieu à la main (12 V coupé), puis relance."); continue
             if demander(f'\nRégler les butées du servo n° {i} ({role}) à {att[0]}–{att[1]} ? (o/n) ').strip().lower().startswith('o'):
                 bus.regler_butees(i, *att); e = bus.etat(i); print(f"   fait : {e['butee_min']}–{e['butee_max']}. Pense à lancer {prog} pour l'étalonnage si ce n'est pas fait.")
