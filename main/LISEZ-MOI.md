@@ -39,4 +39,5 @@ Doigt de 73 mm, 14 × 14 mm de section, 23 g. Les phalanges s'impriment couchée
 ## Ensuite
 
 Poulie et support du petit servo (après mesure du servo : boîtier, axe, palonnier, vis), puis la paume et les 5 doigts.
-Les petits servos Feetech SCS0009 sont en **6 V** : jamais sur le bus 12 V des autres servos.
+**5 Feetech SCS0009 commandés le 21/11/2026** (un par doigt). Ils sont en **6 V** : jamais sur le bus 12 V des autres servos ;
+il leur faut leur propre carte (la deuxième Waveshare) et une alimentation 6 V. Leur programme sera différent de `bras/servos.py`.

@@ -43,3 +43,8 @@ l'avant-bras n'a toujours pas été mesurée (7,5 mm au dessin).
 
 **Alimentation : bloc 12 V de 5 A** (dit par Nicolas le 21/11/2026). Creux de tension à 11,4 V déjà relevés avec 5 servos STS3215 :
 juste pour le bras complet, insuffisant à prévoir avec les deux servos 3095 (courant à lire sur leur fiche à réception).
+
+**21/11/2026 : 5 petits servos Feetech SCS0009 commandés pour la main** (un par doigt). Ils sont en **6 V** : jamais sur le bus
+12 V ; prévoir la deuxième carte Waveshare et une alimentation 6 V à part. Rien n'est mesuré : à réception, demander boîtier,
+axe, palonnier, vis, câble et connecteur AVANT de dessiner poulie et support. Leur langage de commande (série SCS) n'est pas
+celui des STS3215 : `bras/servos.py` ne les pilotera pas tel quel, à vérifier sur leur fiche.
