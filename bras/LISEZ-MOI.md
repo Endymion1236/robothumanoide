@@ -236,3 +236,17 @@ Le poignet est pris en compte **dès que le servo n° 5 répond** (essayé en si
 - le poignet est tenu, force limitée à 50 % ; commande `p45` dans `piloter_bras`, curseur « Poignet » dans la fenêtre,
   étape « Poignet » dans le protocole ;
 - il faut avoir lancé `tester_poignet.bat` une fois (étalonnage), sinon ces programmes le demandent.
+
+### Protocole avec le poignet (rotation) et la pince V4 (21/11/2026, 15 h 51)
+
+Tout est BON, 31 à 33 °C à la fin.
+- **Épaule, bras tendu à l'horizontale : 20 % pour tenir** (14 % sans le poignet), stable 30 s sans échauffement ;
+  29 à 32 % en montant (22 à 25 % avant) ; arrive 2,1° sous la cible (1,4° avant).
+  Rapport 20 / 14 = 1,43 : **le calcul (`epaule/calcul_poignet.py`) annonçait 1,41**. Les efforts relatifs du calcul sont donc fiables ;
+  ses valeurs en kg·cm restent environ deux fois trop fortes par rapport au pourcentage lu.
+- Coude : 10 à 20 %, écart ≤ 0,3°. Socle : inchangé (toujours −1,6° et 15 % à +90°), plateau revenu en face du repère.
+- **Poignet : écart ≤ 0,3°, effort 10 à 12 % en mouvement**, retours identiques.
+- **Tension : creux à 11,9 V (épaule qui monte), 11,7 V et 11,4 V (lectures pendant l'étape du poignet)** : elle ne descendait pas
+  sous 12,1 V avant. À surveiller avec les servos 3095 : connaître le courant du bloc 12 V.
+- Projection pour le poignet complet (rotation + flexion), d'après le même calcul : ≈ 30 % pour tenir bras tendu à vide,
+  ≈ 45 à 50 % en montant : tenable à vide et avec un objet léger avec le servo actuel.
