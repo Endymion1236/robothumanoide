@@ -40,3 +40,6 @@ les berceaux actuels. Vérifier aussi sur l'étiquette que c'est bien du 12 V av
 bord sur l'avant-bras, à 4,8 mm sur le support). Cause : ce manchon n'avait que 3 faces et glissait de côté. Leçon : un manchon
 sur l'avant-bras se fait FERMÉ sur 4 faces, comme celui de la pince, qui tombait juste. La distance des vis au bout de
 l'avant-bras n'a toujours pas été mesurée (7,5 mm au dessin).
+
+**Alimentation : bloc 12 V de 5 A** (dit par Nicolas le 21/11/2026). Creux de tension à 11,4 V déjà relevés avec 5 servos STS3215 :
+juste pour le bras complet, insuffisant à prévoir avec les deux servos 3095 (courant à lire sur leur fiche à réception).
