@@ -144,6 +144,11 @@ cou au centre du dessus, pied large en croix.
 - écrous 5 St M5 en plus pour visser les pièces imprimées (supports d'épaule, cou, boîtiers) ;
 - le kit raccord 5 20x20x20 (0.0.437.96) demande de tarauder les profilés : pas retenu.
 
+**Confirmé par Nicolas le 21/11/2026 : on reste sur item**, profilés **commandés coupés à longueur** (il ne coupe pas
+l'aluminium lui-même : la liste de coupe exacte sera fournie avec le dessin du buste). Budget de l'ossature, estimé de
+mémoire, prix non vérifiés (item vend sur devis) : **≈ 200 à 300 €**, dont 100 à 150 € pour les 30 kits équerre ;
+piste d'économie : tenir une partie des angles par des pièces imprimées (≈ 15 équerres au lieu de 30).
+
 **Dedans** : 2 épaules symétriques, cou (2 servos) et tête (caméra, micro, haut-parleur), carte(s) servos,
 alimentation 12 V et interrupteur d'arrêt d'urgence accessible, plus tard l'ordinateur embarqué (Raspberry Pi 5 / Jetson).
 Pied lesté ou vissé : bras tendus, il ne doit jamais basculer.
