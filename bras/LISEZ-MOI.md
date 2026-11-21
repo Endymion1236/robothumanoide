@@ -250,3 +250,13 @@ Tout est BON, 31 à 33 °C à la fin.
   sous 12,1 V avant. À surveiller avec les servos 3095 : connaître le courant du bloc 12 V.
 - Projection pour le poignet complet (rotation + flexion), d'après le même calcul : ≈ 30 % pour tenir bras tendu à vide,
   ≈ 45 à 50 % en montant : tenable à vide et avec un objet léger avec le servo actuel.
+
+### Flexion du poignet prise en compte par les programmes (21/11/2026, essayé sur 6 servos simulés seulement)
+
+Dès que le servo n° 6 répond (et que `tester_flexion.bat` a été lancé une fois) :
+- la flexion est **tenue** par `piloter_bras`, `controle_bras` et `protocole_bras`, jamais lâchée ;
+- la longueur du bras et la sécurité « la pince irait dans la table » tiennent compte de l'angle du poignet
+  (bras compté à 482 mm de l'épaule aux mâchoires avec les deux mouvements du poignet) ;
+- `piloter_bras` : commande `f30` (pince relevée de 30°) ; fenêtre : curseur « Poignet (plier) » et case
+  **« Garder la PINCE à l'horizontale avec le poignet »** : quand l'épaule ou le coude bougent, la flexion compense ;
+- protocole : étape « Poignet : flexion ».

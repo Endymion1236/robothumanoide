@@ -16,7 +16,7 @@ from servos import Bus, ErreurServo, degres, pas
 import test_epaule as E, test_pince as P, piloter_bras as B
 from controle_bras import Controleur, MILIEU
 
-SEUILS = {'ecart': {'coude': 3.0, 'socle': 3.0, 'épaule': 6.0, 'poignet': 3.0},      # ° d'écart à l'arrivée (l'épaule fléchit sous le poids)
+SEUILS = {'ecart': {'coude': 3.0, 'socle': 3.0, 'épaule': 6.0, 'poignet': 3.0, 'flexion': 4.0},      # ° d'écart à l'arrivée (l'épaule fléchit sous le poids)
           'retour': 1.5,                                             # ° entre deux retours au même endroit
           'effort_mouvement': 60, 'effort_tenue': 40,                # % de la force du servo
           'temperature': 55, 'echauffement': 8,                      # °C ; °C gagnés pendant la tenue
@@ -38,6 +38,7 @@ class Essai:
         self.noms = {c.epaule: 'épaule', c.coude: 'coude', c.pince: 'pince'}
         if c.socle: self.noms[c.socle] = 'socle'
         if c.poignet: self.noms[c.poignet] = 'poignet'
+        if c.flexion: self.noms[c.flexion] = 'flexion'
 
     # ---- écriture ----
     def dire(self, t=''): self.dire_(t); self.lignes.append(t)
@@ -48,10 +49,10 @@ class Essai:
     # ---- conversions ----
     def cible(self, i, a):
         c = self.c
-        return E.position(a, c.haut) if i == c.epaule else MILIEU + (c.sc if i == c.coude else 1) * pas(a)
+        return E.position(a, c.haut) if i == c.epaule else MILIEU + (c.sc if i == c.coude else c.sf if i == c.flexion else 1) * pas(a)
     def angle(self, i, p):
         c = self.c
-        return E.angle(p, c.haut) if i == c.epaule else degres(p - MILIEU) * (c.sc if i == c.coude else 1)
+        return E.angle(p, c.haut) if i == c.epaule else degres(p - MILIEU) * (c.sc if i == c.coude else c.sf if i == c.flexion else 1)
 
     def temperature(self, i):
         """Température sûre : médiane de 3 lectures (le servo renvoie parfois une valeur fausse isolée : 47, 58, 75 °C)."""
@@ -61,9 +62,9 @@ class Essai:
     def aller(self, i, a, pause=1.0):
         """Envoie l'articulation i à l'angle a. Renvoie l'écart à l'arrivée (°), ou None si le mouvement a été arrêté."""
         nom = self.noms[i]; c = self.c; self.stat[i] = {'effort': 0.0, 'tension': 99.0}
-        if i in (c.epaule, c.coude):                               # même refus que la fenêtre de contrôle : pas de geste vers la table
+        if i in (c.epaule, c.coude, c.flexion):                    # même refus que la fenêtre de contrôle : pas de geste vers la table
             ae, ac = c._angles()
-            try: c._verifier(a if i == c.epaule else ae, a if i == c.coude else ac)
+            try: c._verifier(a if i == c.epaule else ae, a if i == c.coude else ac, a if i == c.flexion else None)
             except ErreurServo as err: self.dire(f'  {nom} → {a:+.0f}° : non essayé ({err})'); return 0.0
         self.bus.limiter_force(i, 100)
         texte = B.aller_ensemble(self.bus, [(i, self.cible(i, a))])
@@ -137,6 +138,10 @@ class Essai:
                 self.dire('  Socle bras tendu (épaule à 30°) :')
                 if self.serie(c.epaule, [30]): self.serie(c.socle, [60, -60, 0]); self.serie(c.epaule, [90])
         elif socle: self.dire('3. Socle : pas branché, étape sautée')
+        if c.flexion:
+            self.dire('6. Poignet : flexion (bras à la verticale ; la pince est portée par ce servo)')
+            if self.serie(c.flexion, [0, 30, 0, -30, 0, 60, -60, 0]): self.repetabilite(c.flexion, 0, 45, n)
+            self.serie(c.flexion, [0])
         if c.poignet:
             self.dire('5. Poignet : rotation de la pince (bras à la verticale)')
             if self.serie(c.poignet, [0, 45, 0, -45, 0, 90, -90, 0]): self.repetabilite(c.poignet, 0, 60, n)

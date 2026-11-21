@@ -52,13 +52,19 @@ class Controleur:
             if (es['butee_min'], es['butee_max']) != B.BUTEES_SOCLE: raise ErreurServo('Socle pas étalonné : lance tester_socle.bat')
         self.hauteur = 179.0 if self.socle else 101.0
         self.poignet = B.ID_POIGNET if B.regler_longueurs(trouves) else None      # avec le poignet, le bras est compté plus long
+        self.flexion, self.sf = (B.ID_FLEXION if B.FLEXION else None), 1
+        if self.flexion:
+            import test_flexion as TF
+            ef = bus.etat(self.flexion)
+            if (ef['butee_min'], ef['butee_max']) != B.BUTEES_FLEXION or not TF.SENS.exists(): raise ErreurServo('Flexion du poignet pas étalonnée : lance tester_flexion.bat')
+            self.sf = json.loads(TF.SENS.read_text(encoding='utf-8'))['haut']; bus.limiter_force(self.flexion, 100); bus.retenir(self.flexion)
         if self.poignet:
             ew = bus.etat(self.poignet)
             if (ew['butee_min'], ew['butee_max']) != B.BUTEES_POIGNET or not Path(__file__).with_name('poignet_etalonne.json').exists(): raise ErreurServo('Poignet pas étalonné : lance tester_poignet.bat')
             bus.limiter_force(self.poignet, 50); bus.retenir(self.poignet)
         for i in [self.epaule, self.coude] + ([self.socle] if self.socle else []):
             bus.limiter_force(i, 100); bus.retenir(i)
-        self.dire(f"Servos : {trouves}. Coude n° {self.coude}, socle {'n° 1' if self.socle else 'pas monté'}, poignet {'n° 5 (bras compté plus long de 48,7 mm)' if self.poignet else 'pas monté'}. Le bras est tenu là où il est.")
+        self.dire(f"Servos : {trouves}. Coude n° {self.coude}, socle {'n° 1' if self.socle else 'pas monté'}, rotation du poignet {'n° 5' if self.poignet else 'pas montée'}, flexion {'n° 6' if self.flexion else 'pas montée'} (longueur du bras comptée : {B.L_BRAS + B.L_AVANT:.0f} mm). Le bras est tenu là où il est.")
 
     # ---- lecture ----
     def _angles(self):
@@ -69,14 +75,19 @@ class Controleur:
         try: return self.bus.etat(ident)
         except ErreurServo as err: raise ErreurServo(f'le servo n° {ident} ({nom}) ne répond plus — {err}')
 
+    def _flex(self):
+        return degres(self.bus.etat(self.flexion)['position'] - MILIEU) * self.sf if self.flexion else 0.0
+
     def _lire(self):
         e1, e2, e3 = self._etat(self.epaule, 'épaule'), self._etat(self.coude, 'coude'), self._etat(self.pince, 'pince')
         ae, ac = E.angle(e1['position'], self.haut), degres(e2['position'] - MILIEU) * self.sc
         d = {'epaule': (ae, e1['charge'], e1['temperature']), 'coude': (ac, e2['charge'], e2['temperature']),
              'pince': (P.ecart_mm(e3['position'], self.ouvert), e3['charge'], e3['temperature']),
-             'avant_bras': ae + ac, 'bas_pince': B.bas_de_pince(self.hauteur, ae, ac), 'tension': e1['tension']}
+             'avant_bras': ae + ac, 'bas_pince': B.bas_de_pince(self.hauteur, ae, ac, self._flex()), 'tension': e1['tension']}
         if self.socle:
             e0 = self._etat(self.socle, 'socle'); d['socle'] = (degres(e0['position'] - MILIEU), e0['charge'], e0['temperature'])
+        if self.flexion:
+            e6 = self._etat(self.flexion, 'flexion du poignet'); d['flexion'] = (degres(e6['position'] - MILIEU) * self.sf, e6['charge'], e6['temperature'])
         if self.poignet:
             e5 = self._etat(self.poignet, 'poignet'); d['poignet'] = (degres(e5['position'] - MILIEU), e5['charge'], e5['temperature'])
         self.etat = d
@@ -95,7 +106,7 @@ class Controleur:
                     self._muet = str(err)
                 continue
             if cmd[0] == 'fin':
-                for i in [self.epaule, self.coude, self.pince] + ([self.socle] if self.socle else []) + ([self.poignet] if self.poignet else []):
+                for i in [self.epaule, self.coude, self.pince] + ([self.socle] if self.socle else []) + ([self.poignet] if self.poignet else []) + ([self.flexion] if self.flexion else []):
                     try: self.bus.relacher(i)
                     except Exception: pass
                 self.bus.fermer(); self.etat = {'fini': True}; return
@@ -107,10 +118,10 @@ class Controleur:
             try: self._lire()
             except ErreurServo: pass
 
-    def _verifier(self, ae, ac):
+    def _verifier(self, ae, ac, f=None):
         if not E.BAS - 3 <= ae <= E.HAUT + 3: raise ErreurServo(f'épaule à {ae:+.0f}° : hors de −30° à +90°')
         if abs(ac) > B.COUDE_MAX + 3: raise ErreurServo(f'coude à {ac:+.0f}° : hors de ±{B.COUDE_MAX}°')
-        z = B.bas_de_pince(self.hauteur, ae, ac)
+        z = B.bas_de_pince(self.hauteur, ae, ac, self._flex() if f is None else f)
         if z < 3: raise ErreurServo(f'la pince irait dans la table (bas des mâchoires à {z:.0f} mm)')
 
     def _bouger(self, cibles, nom, synchro=False):
@@ -119,21 +130,31 @@ class Controleur:
         texte = B.aller_ensemble(self.bus, cibles, synchro=synchro, vitesse=r['vitesse'], accel=r['acceleration'], arret=self.arret.is_set)
         self.dire(f'{nom} : {texte}'); return not texte.startswith('ARRÊT')
 
-    def _aller(self, epaule=None, coude=None, socle=None, plat=False):
-        ae, ac = self._angles()
+    def _aller(self, epaule=None, coude=None, socle=None, plat=False, niveau=False):
+        ae, ac = self._angles(); niveau = niveau and self.flexion     # niveau : la flexion du poignet garde la pince à l'horizontale
+        borne = lambda x: max(-B.FLEXION_MAX, min(B.FLEXION_MAX, x))
         if plat:                                           # avant-bras gardé à l'horizontale : le coude suit l'épaule
-            v = ae if epaule is None else epaule; self._verifier(v, -v)
+            v = ae if epaule is None else epaule; self._verifier(v, -v, 0.0 if niveau else None)
+            if niveau and abs(self._flex()) > 3 and not self._bouger([(self.flexion, MILIEU)], 'Poignet remis droit'): return
             if abs(ae + ac) > 3 and not self._bouger([(self.coude, MILIEU + self.sc * pas(-ae))], 'Avant-bras à l\'horizontale'): return
             self._bouger([(self.epaule, E.position(v, self.haut)), (self.coude, MILIEU + self.sc * pas(-v))], f'Épaule à {v:+.0f}°, avant-bras à plat', synchro=True)
         elif epaule is not None or coude is not None:
-            ve, vc = (ae if epaule is None else epaule), (ac if coude is None else coude); self._verifier(ve, vc); cibles, noms = [], []
+            ve, vc = (ae if epaule is None else epaule), (ac if coude is None else coude); fc = borne(-(ve + vc)) if niveau else None
+            self._verifier(ve, vc, fc); cibles, noms = [], []
             if epaule is not None: cibles.append((self.epaule, E.position(ve, self.haut))); noms.append(f'épaule à {ve:+.0f}°')
             if coude is not None: cibles.append((self.coude, MILIEU + self.sc * pas(vc))); noms.append(f'coude à {vc:+.0f}°')
+            if niveau: cibles.append((self.flexion, MILIEU + self.sf * pas(fc))); noms.append(f'pince gardée à plat (poignet à {fc:+.0f}°)')
             self._bouger(cibles, ', '.join(noms).capitalize())
         if socle is not None:
             if not self.socle: raise ErreurServo('pas de socle tournant branché')
             if abs(socle) > B.SOCLE_MAX: raise ErreurServo('socle hors de ±90°')
             self._bouger([(self.socle, MILIEU + pas(socle))], f'Socle à {socle:+.0f}°')
+
+    def _flechir(self, angle):
+        if not self.flexion: raise ErreurServo('pas de flexion du poignet branchée (servo n° 6)')
+        if abs(angle) > B.FLEXION_MAX: raise ErreurServo('flexion hors de ±90°')
+        ae, ac = self._angles(); self._verifier(ae, ac, angle)
+        self._bouger([(self.flexion, MILIEU + self.sf * pas(angle))], f'Poignet plié à {angle:+.0f}°')
 
     def _poignet(self, angle):
         if not self.poignet: raise ErreurServo('pas de poignet branché (servo n° 5)')
@@ -161,7 +182,7 @@ class Controleur:
         while True:
             v -= 1
             if self.arret.is_set(): self.dire('Poser : arrêté.'); return
-            if v < E.BAS or B.bas_de_pince(self.hauteur, v, -v) < 5: self.dire('Poser : arrivé en bas sans sentir la table, je n\'ouvre pas.'); return
+            if v < E.BAS or B.bas_de_pince(self.hauteur, v, -v, self._flex()) < 5: self.dire('Poser : arrivé en bas sans sentir la table, je n\'ouvre pas.'); return
             texte = B.aller_ensemble(self.bus, [(self.epaule, E.position(v, self.haut)), (self.coude, MILIEU + self.sc * pas(-v))], synchro=True, arret=self.arret.is_set)
             if texte.startswith('ARRÊT'): self.dire('Poser : ' + texte); return
             time.sleep(0.25)
@@ -187,22 +208,25 @@ def fenetre(ctrl):
     gros = ('Segoe UI', 11); titre = ('Segoe UI', 12, 'bold')
     cadre = ttk.LabelFrame(f, text=' Articulations (lâche le curseur pour envoyer) '); cadre.pack(fill='x', padx=10, pady=6)
     curseurs, etats = {}, {}
-    plat = tk.BooleanVar(value=False)
+    plat = tk.BooleanVar(value=False); niveau = tk.BooleanVar(value=False)
     def envoyer(nom):
         v = curseurs[nom].get()
-        if nom == 'epaule': ctrl.demander('aller', v, None, None, plat.get())
-        elif nom == 'coude': ctrl.demander('aller', None, v, None, False)
+        if nom == 'epaule': ctrl.demander('aller', v, None, None, plat.get(), niveau.get())
+        elif nom == 'coude': ctrl.demander('aller', None, v, None, False, niveau.get())
+        elif nom == 'flexion': ctrl.demander('flechir', v)
         elif nom == 'poignet': ctrl.demander('poignet', v)
         else: ctrl.demander('aller', None, None, v, False)
-    lignes = [('socle', 'Socle (− gauche · + droite, vu de derrière)', -90, 90), ('epaule', 'Épaule (lever)', -30, 90), ('coude', 'Coude (plier)', -90, 90), ('poignet', 'Poignet (− droite · + gauche, vu de derrière)', -90, 90)]
+    lignes = [('socle', 'Socle (− gauche · + droite, vu de derrière)', -90, 90), ('epaule', 'Épaule (lever)', -30, 90), ('coude', 'Coude (plier)', -90, 90), ('flexion', 'Poignet (plier : + vers le haut)', -90, 90), ('poignet', 'Poignet (− droite · + gauche, vu de derrière)', -90, 90)]
     for k, (nom, texte, mini, maxi) in enumerate(lignes):
         ttk.Label(cadre, text=texte, font=titre, width=15).grid(row=k, column=0, padx=6, pady=8, sticky='w')
         c = tk.Scale(cadre, from_=mini, to=maxi, orient='horizontal', length=330, resolution=1, font=gros); c.grid(row=k, column=1)
         c.bind('<ButtonRelease-1>', lambda ev, n=nom: envoyer(n)); c.bind('<KeyRelease>', lambda ev, n=nom: envoyer(n)); curseurs[nom] = c
         etats[nom] = ttk.Label(cadre, text='', font=gros, width=30); etats[nom].grid(row=k, column=2, padx=8, sticky='w')
-        if (nom == 'socle' and not ctrl.socle) or (nom == 'poignet' and not ctrl.poignet): c.configure(state='disabled'); etats[nom].configure(text='pas monté')
-    ttk.Checkbutton(cadre, text='Garder l\'avant-bras à l\'horizontale quand l\'épaule bouge (pour porter un verre)', variable=plat).grid(row=4, column=0, columnspan=3, sticky='w', padx=6, pady=4)
-    resume = ttk.Label(cadre, text='', font=gros); resume.grid(row=5, column=0, columnspan=3, sticky='w', padx=6, pady=4)
+        if (nom == 'socle' and not ctrl.socle) or (nom == 'poignet' and not ctrl.poignet) or (nom == 'flexion' and not ctrl.flexion): c.configure(state='disabled'); etats[nom].configure(text='pas monté')
+    ttk.Checkbutton(cadre, text='Garder l\'avant-bras à l\'horizontale quand l\'épaule bouge (pour porter un verre)', variable=plat).grid(row=5, column=0, columnspan=3, sticky='w', padx=6, pady=4)
+    c2 = ttk.Checkbutton(cadre, text='Garder la PINCE à l\'horizontale avec le poignet, quand l\'épaule ou le coude bougent', variable=niveau); c2.grid(row=6, column=0, columnspan=3, sticky='w', padx=6, pady=2)
+    if not ctrl.flexion: c2.configure(state='disabled')
+    resume = ttk.Label(cadre, text='', font=gros); resume.grid(row=7, column=0, columnspan=3, sticky='w', padx=6, pady=4)
 
     cp = ttk.LabelFrame(f, text=' Pince '); cp.pack(fill='x', padx=10, pady=6)
     for k, (texte, a) in enumerate([('Ouvrir', 'o'), ('Serrer doux', 's'), ('Serrer fort', 'S')]):
@@ -226,7 +250,7 @@ def fenetre(ctrl):
     def rafraichir():
         e = ctrl.etat
         if e.get('fini'): f.destroy(); return
-        for nom in ('socle', 'epaule', 'coude', 'poignet'):
+        for nom in ('socle', 'epaule', 'coude', 'poignet', 'flexion'):
             if nom in e:
                 a, ch, t = e[nom]; etats[nom].configure(text=f'{a:+.0f}° · charge {ch:+.0f} % · {t} °C', foreground='#b00' if t >= 50 or abs(ch) >= 50 else '#000')
                 if premier[0]: curseurs[nom].set(round(a))

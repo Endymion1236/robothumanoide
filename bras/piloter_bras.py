@@ -29,19 +29,29 @@ L_BRAS, L_AVANT, SOUS_PINCE = 120.0, 230.0, 40.0       # épaule→coude, coude�
 # Poignet : angle POSITIF = le haut de la pince part À GAUCHE, vu de derrière le bras (constaté par Nicolas le 21/11/2026).
 ID_POIGNET, BUTEES_POIGNET, POIGNET_MAX = 5, (1024, 3072), 90
 ALLONGE_POIGNET, SOUS_PINCE_POIGNET = 48.7, 60.0      # la rotation du poignet allonge le bras de 48,7 mm ; pince tournée, son point le plus bas est à 60 mm sous l'axe
+# Flexion du poignet (servo n° 6) : son axe est à 161 mm du coude (avant-bras de 120 + 41) ; de cet axe au milieu des mâchoires :
+# 42 (fourche) + 110 (pince), plus 48,7 si la rotation est montée. Angle positif = la pince remonte.
+ID_FLEXION, BUTEES_FLEXION, FLEXION_MAX = 6, (1024, 3072), 90
+L_COUDE_FLEXION, L_FLEXION_PINCE, BOUT_MACHOIRES = 161.0, 152.0, 30.0
+FLEXION, L_APRES_FLEXION = False, 152.0
 def regler_longueurs(trouves):
-    """Avec le poignet (servo n° 5), le bras est plus long : la sécurité « la pince irait dans la table » doit le savoir."""
-    global L_AVANT, SOUS_PINCE
-    poignet = ID_POIGNET in trouves
-    L_AVANT, SOUS_PINCE = (230.0 + ALLONGE_POIGNET, SOUS_PINCE_POIGNET) if poignet else (230.0, 40.0)
+    """Avec le poignet (servos n° 5 et 6), le bras est plus long : la sécurité « la pince irait dans la table » doit le savoir.
+    Renvoie True si la rotation (n° 5) est montée ; la variable FLEXION dit si la flexion (n° 6) l'est."""
+    global L_AVANT, SOUS_PINCE, FLEXION, L_APRES_FLEXION
+    poignet = ID_POIGNET in trouves; FLEXION = ID_FLEXION in trouves
+    SOUS_PINCE = SOUS_PINCE_POIGNET if poignet else 40.0
+    L_APRES_FLEXION = L_FLEXION_PINCE + (ALLONGE_POIGNET if poignet else 0.0)
+    L_AVANT = L_COUDE_FLEXION + L_APRES_FLEXION if FLEXION else 230.0 + (ALLONGE_POIGNET if poignet else 0.0)
     return poignet
 SENS_COUDE = Path(__file__).with_name('sens_coude.json')
 TOL = E.TOLERANCE
 SEUIL_CONTACT = 10          # points de charge : variation qui signale que le verre touche la table (à ajuster à l'essai)
 
-def bas_de_pince(h, a, g):
-    """Hauteur du bas des mâchoires au-dessus de la table (mm), pour épaule a et coude g (degrés)."""
-    return h + L_BRAS * math.sin(math.radians(a)) + L_AVANT * math.sin(math.radians(a + g)) - SOUS_PINCE
+def bas_de_pince(h, a, g, f=0.0):
+    """Hauteur du point le plus bas de la pince au-dessus de la table (mm), pour épaule a, coude g et flexion du poignet f (degrés)."""
+    if not FLEXION: return h + L_BRAS * math.sin(math.radians(a)) + L_AVANT * math.sin(math.radians(a + g)) - SOUS_PINCE
+    t = math.radians(a + g + f)                        # inclinaison de la pince ; penchée, le bout des mâchoires descend plus bas que leur milieu
+    return h + L_BRAS * math.sin(math.radians(a)) + L_COUDE_FLEXION * math.sin(math.radians(a + g)) + L_APRES_FLEXION * math.sin(t) - SOUS_PINCE - BOUT_MACHOIRES * abs(math.sin(t))
 
 def apprendre_sens_coude(bus):
     print('\n--- Sens du coude (le moteur ne bouge pas) ---')
@@ -113,6 +123,14 @@ def main():
         ID_COUDE, socle = numero_coude(trouves), numero_socle(trouves)
         if a.hauteur is None: a.hauteur = 179.0 if socle else 101.0
         poignet = regler_longueurs(trouves)
+        sf, ang_f = 1, (lambda: 0.0)
+        if FLEXION:
+            import test_flexion as TF
+            ef = bus.etat(ID_FLEXION)
+            if (ef['butee_min'], ef['butee_max']) != BUTEES_FLEXION or not TF.SENS.exists(): sys.exit('Flexion du poignet pas étalonnée : lancer tester_flexion.bat')
+            sf = json.loads(TF.SENS.read_text(encoding='utf-8'))['haut']; ang_f = lambda: degres(bus.etat(ID_FLEXION)['position'] - MILIEU) * sf
+            bus.limiter_force(ID_FLEXION, 100); bus.retenir(ID_FLEXION); tenus.append(ID_FLEXION)
+            print('Flexion du poignet : n° 6, tenue. Commande : f30 = pince relevée de 30° (de −90 à +90).')
         if poignet:
             ew = bus.etat(ID_POIGNET)
             if (ew['butee_min'], ew['butee_max']) != BUTEES_POIGNET or not Path(__file__).with_name('poignet_etalonne.json').exists(): sys.exit('Poignet pas étalonné : lancer tester_poignet.bat')
@@ -141,15 +159,15 @@ def main():
         pos_e = lambda x: E.position(x, haut); pos_c = lambda x: MILIEU + sc * pas(x)
         def etat():
             ae, ac = ang_e(), ang_c(); e1, e2, e3 = bus.etat(ID_EPAULE), bus.etat(ID_COUDE), bus.etat(ID_PINCE)
-            print(f"   épaule {ae:+.0f}° · coude {ac:+.0f}° · avant-bras {ae + ac:+.0f}° par rapport à l'horizontale · bas de la pince à {bas_de_pince(a.hauteur, ae, ac):.0f} mm de la table"
+            print(f"   épaule {ae:+.0f}° · coude {ac:+.0f}° · avant-bras {ae + ac:+.0f}° par rapport à l'horizontale · bas de la pince à {bas_de_pince(a.hauteur, ae, ac, ang_f()):.0f} mm de la table"
                   f" · mâchoires ≈ {P.ecart_mm(e3['position'], ouvert):.0f} mm")
             if socle: print(f"   socle {degres(bus.etat(socle)['position'] - MILIEU):+.0f}° · charge {bus.etat(socle)['charge']:+.0f} % · {bus.etat(socle)['temperature']} °C")
             print(f"   charges : épaule {e1['charge']:+.0f} %, coude {e2['charge']:+.0f} %, pince {e3['charge']:+.0f} % · températures : {e1['temperature']}, {e2['temperature']}, {e3['temperature']} °C")
-        def verifier(ae, ac):
+        def verifier(ae, ac, f=None):
             # 3° de marge : un servo arrêté en butée lit parfois 90,3° (essai du 18/11/2026 : tout geste refusé bras à la verticale)
             if not E.BAS - 3 <= ae <= E.HAUT + 3: raise ErreurServo(f'épaule à {ae:+.0f}° : hors de −30° à +90°')
             if abs(ac) > COUDE_MAX + 3: raise ErreurServo(f'coude à {ac:+.0f}° : hors de ±{COUDE_MAX}°')
-            z = bas_de_pince(a.hauteur, ae, ac)
+            z = bas_de_pince(a.hauteur, ae, ac, ang_f() if f is None else f)
             if z < 3: raise ErreurServo(f'la pince irait dans la table (bas des mâchoires à {z:.0f} mm)')
         etat()
         if socle: print('\nSocle : t45 = tourner à +45° (de −90 à +90), t0 = revenir en face.', end='')
@@ -157,7 +175,7 @@ def main():
         print('            poser = descendre jusqu\'à la table, lâcher, remonter · o = ouvrir · s / S = serrer doucement / fort · repos = bras à la verticale · i = infos · q = quitter. Plusieurs à la suite : « n0 o s n40 ».')
         while True:
             mots = input('> ').replace(',', ' ').split()
-            faux = [m for m in mots if not re.fullmatch(r'[ecntp]-?\d+|plat|repos|poser|[osSiq]', m)]
+            faux = [m for m in mots if not re.fullmatch(r'[ecntpf]-?\d+|plat|repos|poser|[osSiq]', m)]
             if faux: print('   commande inconnue :', ' '.join(faux), '(rien n\'a bougé)'); continue
             if 'q' in mots: break
             for m in mots:
@@ -172,7 +190,7 @@ def main():
                         v, lus, pose = round(ang_e()), [], False
                         while True:
                             v -= 1
-                            if v < E.BAS or bas_de_pince(a.hauteur, v, -v) < 5:
+                            if v < E.BAS or bas_de_pince(a.hauteur, v, -v, ang_f()) < 5:
                                 print('   arrivé en bas sans sentir la table : je n\'ouvre pas. (o pour ouvrir quand même)'); break
                             texte = aller_ensemble(bus, [(ID_EPAULE, pos_e(v)), (ID_COUDE, pos_c(-v))], synchro=True)
                             if texte.startswith('ARRÊT'): print('  ', texte); break
@@ -194,6 +212,11 @@ def main():
                         if m == 'plat': cible = [(ID_COUDE, pos_c(-ae))]; verifier(ae, -ae); nom = 'avant-bras à l\'horizontale'
                         elif m == 'repos': cible = [(ID_EPAULE, pos_e(90)), (ID_COUDE, pos_c(0))]; nom = 'bras à la verticale'
                         elif m[0] == 'e': v = int(m[1:]); verifier(v, ac); cible = [(ID_EPAULE, pos_e(v))]; nom = f'épaule à {v:+d}°'
+                        elif m[0] == 'f':
+                            v = int(m[1:])
+                            if not FLEXION: raise ErreurServo('pas de flexion du poignet branchée (servo n° 6)')
+                            if abs(v) > FLEXION_MAX: raise ErreurServo('flexion hors de ±90°')
+                            verifier(ae, ac, v); cible = [(ID_FLEXION, MILIEU + sf * pas(v))]; nom = f'pince relevée de {v:+d}°'
                         elif m[0] == 'p':
                             v = int(m[1:])
                             if not poignet: raise ErreurServo('pas de poignet branché (servo n° 5)')
