@@ -12,7 +12,8 @@ from servos import Bus, ErreurServo, degres, pas
 
 ID, MILIEU, BUTEES, FORCE = 5, 2048, (1024, 3072), 50
 FAIT = Path(__file__).with_name('poignet_etalonne.json')
-MENU = {'c': ('pince droite', 0), 'g': ('45° d\'un côté', 45), 'd': ('45° de l\'autre côté', -45), 'G': ('90° d\'un côté', 90), 'D': ('90° de l\'autre côté', -90)}
+# + = le haut de la pince part À GAUCHE, vu de derrière le bras (constaté par Nicolas le 21/11/2026)
+MENU = {'c': ('pince droite', 0), 'g': ('45° à gauche (vu de derrière)', 45), 'd': ('45° à droite (vu de derrière)', -45), 'G': ('90° à gauche', 90), 'D': ('90° à droite', -90)}
 
 def etalonner(bus, i=ID):
     """La pince « droite » se règle à la main : le palonnier se visse par quarts de tour, il ne tombe pas forcément droit

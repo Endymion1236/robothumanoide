@@ -226,7 +226,8 @@ En quittant, il demande de soutenir la pince avant de couper la force. Ctrl+C : 
 
 ### Poignet (rotation) : premier essai réel et intégration (21/11/2026)
 
-Essai réel de `tester_poignet` : ± 45° et ± 90° atteints, charge 0 à 3 %, 27–28 °C, 12,2 V. Sens du + à noter.
+Essai réel de `tester_poignet` : ± 45° et ± 90° atteints, charge 0 à 3 %, 27–28 °C, 12,2 V.
+**Sens : angle positif = le haut de la pince part à GAUCHE, vu de derrière le bras** (l'inverse du socle, où + = à droite).
 Montage du jour : 3 vis sur 4 au palonnier (tournevis trop court pour la 4e), servo un peu libre dans son support.
 
 Le poignet est pris en compte **dès que le servo n° 5 répond** (essayé en simulation seulement) :

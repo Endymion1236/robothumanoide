@@ -194,7 +194,7 @@ def fenetre(ctrl):
         elif nom == 'coude': ctrl.demander('aller', None, v, None, False)
         elif nom == 'poignet': ctrl.demander('poignet', v)
         else: ctrl.demander('aller', None, None, v, False)
-    lignes = [('socle', 'Socle (− gauche · + droite, vu de derrière)', -90, 90), ('epaule', 'Épaule (lever)', -30, 90), ('coude', 'Coude (plier)', -90, 90), ('poignet', 'Poignet (tourner la pince)', -90, 90)]
+    lignes = [('socle', 'Socle (− gauche · + droite, vu de derrière)', -90, 90), ('epaule', 'Épaule (lever)', -30, 90), ('coude', 'Coude (plier)', -90, 90), ('poignet', 'Poignet (− droite · + gauche, vu de derrière)', -90, 90)]
     for k, (nom, texte, mini, maxi) in enumerate(lignes):
         ttk.Label(cadre, text=texte, font=titre, width=15).grid(row=k, column=0, padx=6, pady=8, sticky='w')
         c = tk.Scale(cadre, from_=mini, to=maxi, orient='horizontal', length=330, resolution=1, font=gros); c.grid(row=k, column=1)

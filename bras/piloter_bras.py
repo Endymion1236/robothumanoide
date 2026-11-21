@@ -26,6 +26,7 @@ BUTEES_COUDE = (908, 3188); COUDE_MAX = 90
 # Socle : angle POSITIF = le bras part À DROITE quand on est DERRIÈRE lui : c'est la droite du robot (constaté par Nicolas le 20/11/2026). Vu de face, c'est donc à gauche.
 BUTEES_SOCLE = (1024, 3072); SOCLE_MAX = 90           # un quart de tour de chaque côté            # ± 90° utilisés (vérifiés sans contact dans epaule/verifier_epaule.py)
 L_BRAS, L_AVANT, SOUS_PINCE = 120.0, 230.0, 40.0       # épaule→coude, coude→milieu des mâchoires, bas des mâchoires sous l'axe (mm)
+# Poignet : angle POSITIF = le haut de la pince part À GAUCHE, vu de derrière le bras (constaté par Nicolas le 21/11/2026).
 ID_POIGNET, BUTEES_POIGNET, POIGNET_MAX = 5, (1024, 3072), 90
 ALLONGE_POIGNET, SOUS_PINCE_POIGNET = 48.7, 60.0      # la rotation du poignet allonge le bras de 48,7 mm ; pince tournée, son point le plus bas est à 60 mm sous l'axe
 def regler_longueurs(trouves):
