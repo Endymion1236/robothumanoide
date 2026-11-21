@@ -57,6 +57,9 @@ def support():
         m += box(0, y0, Z_FOND, X_LEVRE1, y1, Z_MURS)                                                     # mur
         y0, y1 = sorted((s * (YP - 2.2), s * YP)); m += box(EP_FOND, y0, Z_PRES - JEU, X_DOS, y1, Z_MURS)  # rail derrière le servo
         y0, y1 = sorted((s * (YP - LEVRE - JEU), s * YP)); m += box(X_LEVRE0, y0, Z_LEVRE, X_LEVRE1, y1, Z_MURS)   # lèvre devant
+        # lèvre BASSE, devant la partie basse du servo, de chaque côté du palonnier : sans elle le bas du servo n'était tenu
+        # que par-derrière et basculait vers l'avant (montage du 21/11/2026)
+        y0, y1 = sorted((s * (YP - LEVRE), s * YP)); m += box(X_BAS + 0.2, y0, Z_PRES - JEU, X_BAS + 3.0, y1, Z_HAUTE - 1.5)
         m -= box(EP_FOND, s * YP - 4 if s > 0 else -YP - MUR - 1, CABLE_Z[0], 22, YP + MUR + 1 if s > 0 else -YP + 4, Z_MURS + 1)   # fente du câble, OUVERTE VERS LE HAUT : le servo descend avec ses câbles branchés
         # bossage de l'insert de la barre (dessous en biais : s'imprime sans support)
         y0, y1 = sorted((s * (YP + MUR), s * (YP + MUR + BOSS)))

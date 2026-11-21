@@ -32,6 +32,13 @@ descendrait plus entre les rails. Ses câbles se branchent avant de le glisser :
 - la pince tourne de −90° à +90° sans toucher le support, pince ouverte, au milieu ou fermée ;
 - le tournevis atteint les 4 vis du palonnier par l'avant de la pince (servo de la pince retiré, plaque mobile non montée).
 
+## Premier montage réel (21/11/2026)
+
+Support, barre et base imprimés et montés (première version du support : fenêtres de câble fermées, barre sans languette).
+- Les 2 trous du manchon ne tombaient pas en face des vis de l'avant-bras → trous oblongs (position réelle à mesurer).
+- **Le servo n° 5 a du jeu : son bas bascule vers l'avant.** Rien ne le tenait devant, en bas. Corrigé au dessin : deux
+  lèvres basses de chaque côté du palonnier. Sur la pièce déjà imprimée : cale provisoire (point de colle chaude).
+
 ## Ce qui reste à vérifier en vrai
 
 - **Tournevis** : 2 des 4 vis du palonnier sont au fond d'un passage de 5,4 mm de large et d'environ 55 mm de long
