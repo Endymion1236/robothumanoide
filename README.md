@@ -167,6 +167,8 @@ pince de 205 g, voir `epaule/calcul_poignet.py`).
   fil ; différence de longueur des deux fils compensée par le diamètre de la poulie (ou un petit ressort sur le fil du dos).
   Écartés : élastiques (vieillissent, se détendent). En réserve : biellettes rigides (plus robustes, moins adaptables).
 - À faire d'abord : **un doigt d'essai** avec un seul servo, avant de dessiner la main entière.
+  **Doigt d'essai dessiné le 21/11/2026 dans `main/`** (3 phalanges, axes en filament de 1,75 mm, deux canaux de fil ;
+  s'essaie d'abord à la main, sans servo ; rien d'imprimé). Nicolas a commandé les petits servos (modèle et nombre à noter).
 - 5 petits servos (un par doigt), dans la paume ou dans l'avant-bras ; 250 à 350 g au bout du bras.
 - Reprend le premier projet de main de Nicolas (ESP32, MG90S, gestes).
 - Servos des doigts envisagés : **Feetech SCS0009** (bus série comme les STS, 2,3 kg·cm, 23 × 12 × 25 mm, retour de

@@ -1,0 +1,35 @@
+{
+ "etat": "PROTOTYPE, rien n'est imprimé",
+ "courses_des_charnieres_deg": [
+  {
+   "butée doigt tendu": -2,
+   "butée doigt plié": 90
+  },
+  {
+   "butée doigt tendu": -2,
+   "butée doigt plié": 90
+  },
+  {
+   "butée doigt tendu": -2,
+   "butée doigt plié": 90
+  }
+ ],
+ "doigt_plie": "plié de [85.0, 85.0, 85.0] : aucune pièce ne touche une pièce non voisine",
+ "fil_a_tirer_mm": {
+  "pour plier à fond": 16.0,
+  "bras de levier du fil": 3.6
+ },
+ "longueur_du_doigt_mm": 72.8,
+ "masse_g": 23.2,
+ "il_faut": [
+  "3 morceaux de filament de 1,75 mm, de 14 mm de long (les axes)",
+  "du fil de pêche tressé (un seul brin, environ 40 cm)",
+  "2 vis à bois ou M3 pour fixer la base sur une planchette"
+ ],
+ "stl": [
+  "doigt_base.stl",
+  "doigt_phalange_1.stl",
+  "doigt_phalange_2.stl",
+  "doigt_phalange_3.stl"
+ ]
+}
