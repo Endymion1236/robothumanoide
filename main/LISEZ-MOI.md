@@ -18,7 +18,8 @@ Doigt de 73 mm, 14 × 14 mm de section, 23 g. Les phalanges s'impriment couchée
 
 ## Ce qu'il faut en plus
 
-- 3 morceaux de **filament de 1,75 mm**, de 14 mm de long : ce sont les axes (serrés dans la fourche, libres dans la languette) ;
+- 3 morceaux de **filament de 1,75 mm**, de 17 mm de long : ce sont les axes. Ils entrent sans forcer ; on les retient en
+  écrasant leurs deux bouts avec la panne chaude du fer à souder (une petite tête de chaque côté) ;
 - environ 40 cm de **fil de pêche tressé** (un seul brin : il descend par le canal du dessous, se noue au bout du doigt
   dans le puits vertical, et revient par le canal du dessus) ;
 - 2 vis pour fixer la base sur une planchette.
@@ -31,7 +32,7 @@ Doigt de 73 mm, 14 × 14 mm de section, 23 g. Les phalanges s'impriment couchée
 
 ## Ce que l'essai à la main doit dire
 
-- les charnières tournent-elles librement, sans jeu excessif ? (trous de 1,9 mm serrés et 2,3 mm libres, à ajuster) ;
+- les charnières tournent-elles librement, sans jeu excessif ? (trous de 2,15 et 2,5 mm depuis le 22/11/2026 : à 1,9 et 2,3 le filament n'entrait presque pas) ;
 - le fil coulisse-t-il sans accrocher aux sorties des canaux ?
 - le doigt se ferme-t-il en entier, et dans quel ordre plient les phalanges ?
 - faut-il beaucoup de force sur le fil ?

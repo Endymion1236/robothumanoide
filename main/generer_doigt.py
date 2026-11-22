@@ -18,7 +18,8 @@ LARGEUR, HAUTEUR = 14.0, 14.0; R = HAUTEUR / 2
 LONGUEURS = [30.0, 22.0, 18.0]            # 3 phalanges, d'axe en axe (la dernière : de son axe au bout)
 L_BASE = 32.0                             # base : du bord arrière à l'axe de la première charnière
 EP_LANGUETTE, JEU = 5.0, 0.25             # languette de 5 mm dans une fente de 5,5
-D_AXE_SERRE, D_AXE_LIBRE = 1.9, 2.3       # filament de 1,75 : serré dans la fourche, libre dans la languette
+D_AXE_SERRE, D_AXE_LIBRE = 2.15, 2.5      # filament de 1,75. Les trous imprimés sortent plus petits que dessinés : à 1,9 et 2,3 le
+                                          # filament n'entrait presque pas (essai de Nicolas, 22/11/2026). L'axe est retenu en écrasant ses deux bouts à chaud.
 BAISSE = 2.0                              # la languette est plus basse de 2 mm côté dos : un pont de la fourche vient buter dessus (doigt tendu)
 Z_FIL, D_FIL = 3.6, 1.6                   # canaux des fils : à 3,6 mm au-dessus et au-dessous des axes
 PLI_MAX = 85.0                            # angle de pliage visé à chaque charnière
