@@ -33,7 +33,10 @@ class Essai:
         lire = self.bus.etat
         def etat(i):                                               # toutes les lectures passent ici : on garde le pire
             e = lire(i); s = self.stat.setdefault(i, {'effort': 0.0, 'tension': 99.0})
-            s['effort'] = max(s['effort'], abs(e['charge'])); s['tension'] = min(s['tension'], e['tension']); return e
+            s['effort'] = max(s['effort'], abs(e['charge']))
+            # tension : on retient la 2e plus basse lecture. Une lecture isolée très basse (10,9 V au milieu de 12,2 V, le 23/11/2026)
+            # est le plus souvent une lecture fausse, comme pour la température ; une vraie chute dure plusieurs lectures.
+            bas = sorted(s.get('basses', []) + [e['tension']])[:2]; s['basses'] = bas; s['tension'] = bas[-1]; return e
         self.bus.etat = etat
         self.noms = {c.epaule: 'épaule', c.coude: 'coude', c.pince: 'pince'}
         if c.socle: self.noms[c.socle] = 'socle'

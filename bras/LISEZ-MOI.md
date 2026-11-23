@@ -298,3 +298,12 @@ Le ressort divise presque par deux l'effort de l'épaule dans la zone de travail
 n'atteint plus 90° et force à 30 % en permanence (d'où les 43 °C). Entre ses deux accroches il ne reste que 40 mm à 90°, pour
 un ressort de 70 mm : il doit se plier de côté, et quelque chose l'en empêche (crochets bloqués par les écrous ? ressort qui
 appuie sur le mât ou le bras ?). À inspecter. Le ressort reçu n'a pas été mesuré.
+
+### Protocole avec le ressort (trou du haut) et le repos à 80° (23/11/2026, 21 h 14)
+
+- **Au repos (80°) l'épaule ne force plus : 6 à 8 % en tenue**, écart 0,6° (au lieu de 30 % et 3,3° à 90°). Sa température reste à 39 °C.
+- Zone de travail inchangée : 25 à 34 % en montant, 14 % pour tenir à +15°, 10 % à +30°, 6 % à +60°.
+- Coude, socle, flexion et rotation du poignet : comme avant.
+- Un « À VOIR » : **une lecture de tension à 10,9 V**, isolée, pendant un mouvement du poignet à 12 % d'effort, entourée de lectures à
+  12,2 V. Déjà vu à 11,5 / 11,4 / 11,3 V les fois précédentes, toujours une seule ligne. Probablement une lecture fausse, sans
+  certitude : le protocole retient désormais la deuxième plus basse lecture. À revoir avec l'alimentation de 10 A.
