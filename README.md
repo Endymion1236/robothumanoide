@@ -80,6 +80,22 @@ Puis bouger (2 servos).
 - Limites : objets de 14 à 110 mm de large (pince V2), pas d'objets plats ni collés les uns aux autres au début.
 - Variante plus tard : apprentissage par démonstration (**LeRobot**, bras « maître » piloté à la main).
 
+## Objectif : jouer à des jeux de société (23/11/2026)
+
+Idée de Nicolas. Un jeu oblige le robot à voir, décider, saisir et poser : c'est un bon test de tout ce qui précède.
+
+- **Premier jeu : le morpion**, dès que le bras va à un point de la table de façon fiable (`bras/aller_point.py` essayé en vrai)
+  et que la caméra de table est réglée.
+- **Le jeu est fabriqué pour le robot** : pions imprimés (cylindres de 3 à 4 cm de diamètre, 4 cm de haut, deux couleurs que la
+  caméra distingue), plateau imprimé sur papier avec des cases de 5 à 6 cm. Plateau de 24 × 24 cm au plus : c'est la profondeur
+  de table que le bras atteint d'après le calcul (à mesurer en vrai).
+- **Le coup est choisi par un petit programme qui connaît les règles**, pas par l'IA de conversation ; Câlin commente la partie.
+- **À mesurer avant de dessiner les pions** : ouverture réelle de la pince V4, mâchoires montées.
+- **Ensuite, par difficulté** : jeux où il ne touche à rien (devinettes, dé lu à la caméra), dames ou petits chevaux sur plateau
+  réduit, puissance 4 (entonnoir au-dessus de chaque colonne), échecs à pièces refaites.
+- **Cartes** : à plat sur la table, presque impossibles à pincer. Piste retenue : **cartes debout dans un support à fentes**,
+  rigides ou collées sur un carton épais, une fente par carte, la pince les prend par le haut. Rien n'est dessiné.
+
 ## Se repérer dans l'espace (12/11/2026)
 
 | Besoin | Outil | Quand |
