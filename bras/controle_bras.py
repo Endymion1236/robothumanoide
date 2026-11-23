@@ -78,12 +78,15 @@ class Controleur:
     def _flex(self):
         return degres(self.bus.etat(self.flexion)['position'] - MILIEU) * self.sf if self.flexion else 0.0
 
+    def _roulis(self):
+        return degres(self.bus.etat(self.poignet)['position'] - MILIEU) if self.poignet else 0.0
+
     def _lire(self):
         e1, e2, e3 = self._etat(self.epaule, 'épaule'), self._etat(self.coude, 'coude'), self._etat(self.pince, 'pince')
         ae, ac = E.angle(e1['position'], self.haut), degres(e2['position'] - MILIEU) * self.sc
         d = {'epaule': (ae, e1['charge'], e1['temperature']), 'coude': (ac, e2['charge'], e2['temperature']),
              'pince': (P.ecart_mm(e3['position'], self.ouvert), e3['charge'], e3['temperature']),
-             'avant_bras': ae + ac, 'bas_pince': B.bas_de_pince(self.hauteur, ae, ac, self._flex()), 'tension': e1['tension']}
+             'avant_bras': ae + ac, 'bas_pince': B.bas_de_pince(self.hauteur, ae, ac, self._flex(), self._roulis()), 'tension': e1['tension']}
         if self.socle:
             e0 = self._etat(self.socle, 'socle'); d['socle'] = (degres(e0['position'] - MILIEU), e0['charge'], e0['temperature'])
         if self.flexion:
@@ -121,7 +124,7 @@ class Controleur:
     def _verifier(self, ae, ac, f=None):
         if not E.BAS - 3 <= ae <= E.HAUT + 3: raise ErreurServo(f'épaule à {ae:+.0f}° : hors de −30° à +90°')
         if abs(ac) > B.COUDE_MAX + 3: raise ErreurServo(f'coude à {ac:+.0f}° : hors de ±{B.COUDE_MAX}°')
-        z = B.bas_de_pince(self.hauteur, ae, ac, self._flex() if f is None else f)
+        z = B.bas_de_pince(self.hauteur, ae, ac, self._flex() if f is None else f, self._roulis())
         if z < 3: raise ErreurServo(f'la pince irait dans la table (bas des mâchoires à {z:.0f} mm)')
 
     def _bouger(self, cibles, nom, synchro=False):

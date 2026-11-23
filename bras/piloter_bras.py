@@ -47,11 +47,14 @@ SENS_COUDE = Path(__file__).with_name('sens_coude.json')
 TOL = E.TOLERANCE
 SEUIL_CONTACT = 10          # points de charge : variation qui signale que le verre touche la table (à ajuster à l'essai)
 
-def bas_de_pince(h, a, g, f=0.0):
-    """Hauteur du point le plus bas de la pince au-dessus de la table (mm), pour épaule a, coude g et flexion du poignet f (degrés)."""
-    if not FLEXION: return h + L_BRAS * math.sin(math.radians(a)) + L_AVANT * math.sin(math.radians(a + g)) - SOUS_PINCE
+SOUS_PINCE_DROITE = 40.0        # pince droite (pas tournée) : le bas des mâchoires est à 35 mm sous son axe, 5 mm de marge
+def bas_de_pince(h, a, g, f=0.0, roulis=None):
+    """Hauteur du point le plus bas de la pince au-dessus de la table (mm), pour épaule a, coude g et flexion du poignet f (degrés).
+    roulis : rotation de la pince, si on la connaît. Pince droite (moins de 15°), elle descend moins bas que tournée."""
+    sous = SOUS_PINCE_DROITE if roulis is not None and abs(roulis) < 15 else SOUS_PINCE
+    if not FLEXION: return h + L_BRAS * math.sin(math.radians(a)) + L_AVANT * math.sin(math.radians(a + g)) - sous
     t = math.radians(a + g + f)                        # inclinaison de la pince ; penchée, le bout des mâchoires descend plus bas que leur milieu
-    return h + L_BRAS * math.sin(math.radians(a)) + L_COUDE_FLEXION * math.sin(math.radians(a + g)) + L_APRES_FLEXION * math.sin(t) - SOUS_PINCE - BOUT_MACHOIRES * abs(math.sin(t))
+    return h + L_BRAS * math.sin(math.radians(a)) + L_COUDE_FLEXION * math.sin(math.radians(a + g)) + L_APRES_FLEXION * math.sin(t) - sous - BOUT_MACHOIRES * abs(math.sin(t))
 
 def apprendre_sens_coude(bus):
     print('\n--- Sens du coude (le moteur ne bouge pas) ---')

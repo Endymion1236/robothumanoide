@@ -307,3 +307,19 @@ appuie sur le mât ou le bras ?). À inspecter. Le ressort reçu n'a pas été m
 - Un « À VOIR » : **une lecture de tension à 10,9 V**, isolée, pendant un mouvement du poignet à 12 % d'effort, entourée de lectures à
   12,2 V. Déjà vu à 11,5 / 11,4 / 11,3 V les fois précédentes, toujours une seule ligne. Probablement une lecture fausse, sans
   certitude : le protocole retient désormais la deuxième plus basse lecture. À revoir avec l'alimentation de 10 A.
+
+## Aller à un point de la table — `aller_point.bat` (23/11/2026)
+
+**Essayé sur 6 servos simulés seulement.** Il faut le socle et le poignet complet.
+
+Repère : origine sur l'axe du socle, X vers la droite du robot (vu de derrière), Y vers l'avant, en mm (le même que `camera/`).
+Le plan du bras est **décalé de 53,5 mm à gauche** de l'axe du socle, vu de derrière (photo du 23/11/2026) : `geometrie.py` en tient compte.
+
+- `v X Y` : calcule les angles (socle, épaule, coude, poignet) pour une pince À PLAT au-dessus du point, les affiche, demande
+  confirmation, relève le bras s'il faut tourner, tourne le socle, puis place la pince au-dessus (épaule relevée de 25°) ;
+- `d` descend sur le point (axe de la pince à 45 mm de la table : bas des mâchoires à 10 mm), `m` remonte ;
+- `o` / `s` pince, `r` repos, `i` où est la pince, `q` quitter.
+
+**Zone où la pince peut se poser à plat : de 356 à 450 mm de l'axe du socle** (par le calcul), sur un quart de tour de chaque côté.
+Plus près, le coude dépasserait −90° ; plus loin, le bras est trop court.
+La sécurité de la table compte maintenant la pince droite à 40 mm sous son axe (60 mm si elle est tournée de plus de 15°).

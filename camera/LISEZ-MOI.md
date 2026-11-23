@@ -35,7 +35,8 @@ Ces programmes utilisent l'installation de la tête (`tete\installer.bat`, déj�
 ## Limites connues
 
 - Un point se mesure **au niveau de la table**. Le haut d'un objet haut, vu en biais, paraît décalé : cliquer sur le pied de l'objet.
-- Le bras est décalé de 53,5 mm par rapport à l'axe du socle (côté à confirmer) : l'angle du socle affiché n'en tient pas encore compte.
+- L'angle du socle affiché par `voir_table` ne tient pas compte du décalage du bras (53,5 mm à gauche de l'axe) : le vrai calcul
+  est dans `bras/aller_point.bat`, à qui on donne le X et le Y lus ici.
 - Pas encore de reconnaissance automatique des objets, ni de mouvement du bras : étapes suivantes.
 
 ## Fichiers
