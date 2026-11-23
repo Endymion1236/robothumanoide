@@ -24,3 +24,7 @@ Ce qu'elle fait apparaître, à trancher quand on dessinera vraiment le buste :
   table, mêmes programmes et mêmes calculs ; conseillé pour commencer.
   **B. axe horizontal, socle fixé sur le flanc du buste** : plus proche d'une épaule humaine (lever devant + écarter), mais le servo du
   socle porterait alors tout le bras, les roulements travailleraient en porte-à-faux et le calcul des positions serait à refaire.
+- **24/11/2026 : option A retenue** (socle tête en bas sous une tablette). Nicolas voyait plutôt une épaule humaine (option B) mais y
+  renonce si c'est trop lourd. Raison : en B, trois articulations devraient porter le bras (lever devant, écarter, coude) alors que
+  seuls 2 servos plus forts sont commandés, et tout le calcul serait à refaire. En A, le bras a déjà deux des trois mouvements d'une
+  épaule humaine (lever devant, pivoter) ; il lui manque « écarter le bras du corps ». À rouvrir quand le buste et les deux bras marcheront.
