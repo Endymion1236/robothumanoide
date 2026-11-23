@@ -2,13 +2,13 @@
  "etat": "PROTOTYPE, aucune validation physique",
  "flexion": "aucun contact de −90° à +90°, pince droite ou tournée de ±90°",
  "masses_g": {
-  "support de flexion": 46,
+  "support de flexion": 52,
   "moitié basse": 14,
   "moitié haute": 14,
   "bride": 2,
   "servo": 55
  },
- "ajout_au_bout_du_bras_g": 131,
+ "ajout_au_bout_du_bras_g": 137,
  "allongement_du_bras_mm": 83.0,
  "axe_de_flexion_apres_le_bout_de_l_avant_bras_mm": 41.0,
  "visserie": [

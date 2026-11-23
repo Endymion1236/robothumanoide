@@ -155,3 +155,13 @@ Au remontage : bossage du servo bien DERRIÈRE la nervure, servo au fond, bride 
 
 Ce que les calculs ne disent pas : la tenue du mât et du mur quand le ressort tire, le frottement, et le vrai
 ressort. La fourche autour du servo est celle du coude, validée à ± 90° ; la plaque haute fait 7 mm au lieu de 4.
+
+## Berceau à parois hautes (23/11/2026)
+
+Avec le poignet complet, le bras penchait de côté à partir du coude : le servo du coude avait du jeu gauche-droite dans son
+berceau (constat de Nicolas). Cause : les parois du berceau ne faisaient que 19 mm et ne tenaient que les 10 premiers millimètres
+du boîtier du servo, avec 0,2 mm de jeu de chaque côté → bascule de ± 2°, soit plus d'un centimètre au bout du bras.
+**`berceau_a_inserts.stl` a maintenant des parois de 41 mm** (elles tiennent 32 mm de boîtier, jusqu'à 2 mm sous la bride).
+Même correction dans le support de flexion du poignet (`poignet/sortie/flexion_support.stl`), qui reprend ce berceau.
+Vérifié par le calcul : aucun contact sur toute la course à l'épaule, au coude et à la flexion du poignet. Rien d'imprimé.
+En attendant la réimpression : deux tours de ruban adhésif autour du boîtier du servo, là où il entre dans le berceau.

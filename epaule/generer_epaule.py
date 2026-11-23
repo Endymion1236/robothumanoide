@@ -51,7 +51,10 @@ exec(_src[:_src.index('p,b,brace,servo,cable=build()')], _ns)
 # nervure qui retient le bossage du servo : 3,4 mm au lieu de 1,2. Sur le support de table rien ne tirait dessus ; sur le
 # bras, le poids de l'avant-bras tire le servo du coude hors du berceau et la nervure de 1,2 a cassé (19/11/2026).
 # 3,4 = le maximum sans entrer dans la zone balayée par la plaque basse de la fourche.
-B, BERCEAU_C, BRIDE_C, SERVO_C, CABLE_C = _ns['build']({'mount_D': '4.0 mm', 'nervure_T': '3.4 mm'})
+# parois HAUTES autour du servo : 41 mm au lieu de 19. À 19 mm elles ne tenaient que les 10 premiers millimètres du boîtier, avec
+# 0,2 mm de jeu de chaque côté : le servo basculait de ± 2° et tout le bras penchait de côté à partir du coude (23/11/2026).
+# À 41 mm elles montent jusqu'à 2 mm sous la bride et tiennent 32 mm de boîtier : bascule divisée par 3.
+B, BERCEAU_C, BRIDE_C, SERVO_C, CABLE_C = _ns['build']({'mount_D': '4.0 mm', 'nervure_T': '3.4 mm', 'wall_H': '41 mm'})
 B = type('P', (), B)
 
 # ---------------- Cotes de l'épaule ----------------
