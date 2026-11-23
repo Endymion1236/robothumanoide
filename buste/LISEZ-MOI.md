@@ -28,3 +28,11 @@ Ce qu'elle fait apparaître, à trancher quand on dessinera vraiment le buste :
   renonce si c'est trop lourd. Raison : en B, trois articulations devraient porter le bras (lever devant, écarter, coude) alors que
   seuls 2 servos plus forts sont commandés, et tout le calcul serait à refaire. En A, le bras a déjà deux des trois mouvements d'une
   épaule humaine (lever devant, pivoter) ; il lui manque « écarter le bras du corps ». À rouvrir quand le buste et les deux bras marcheront.
+
+## Habillage (choix de Nicolas, 23/11/2026)
+
+**Peluche palomino, comme la tête.** L'ossature devient un T (barre d'épaules plus longue en haut) et l'habillage se pose
+par-dessus sans rien porter : `sortie/apercu_buste_peluche.png` (squelette nu, puis habillé). Illustration de principe : les
+formes seront celles de la couturière. À prévoir au dessin : dessous des épaules ouvert pour que le bras tourne, habillage
+démontable (accès aux cartes et à l'arrêt d'urgence), aérations, et pas de tissu près des engrenages ou de la pince.
+Les bras restent nus pour l'instant (une manche ne doit ni gêner le coude ni chauffer les servos).

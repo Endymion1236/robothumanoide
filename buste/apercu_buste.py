@@ -35,6 +35,26 @@ def ossature():
     pied = boite(-175, -10, 0, 175, 10, 20) + boite(-10, -175, 0, 10, 175, 20)                       # pied en croix
     return m, pied
 
+def ossature_T():
+    """La même ossature, avec en haut une barre d'épaules plus longue (forme de T) qui porte les tablettes d'épaule."""
+    m, pied = ossature()
+    for x in (-P / 2, P / 2 - 20): m += boite(x, -(L / 2 + 110), H - 20, x + 20, L / 2 + 110, H)
+    return m, pied
+
+def ovale(c, r, n=40): return mf.Manifold.sphere(1.0, n).scale(r).translate(c)
+def habillage():
+    """L'habillage en peluche, posé sur l'ossature : il ne porte rien. Poitrail, taille, dessus d'épaules, col et poitrail clair.
+    Formes de principe : la couturière décidera. Le dessous des épaules reste ouvert pour que le bras tourne librement."""
+    corps = mf.Manifold.batch_hull([ovale((8, 0, 330), (112, 128, 95)), ovale((0, 0, 200), (100, 122, 110)), ovale((0, 0, 75), (108, 126, 60))])
+    corps ^= boite(-300, -300, 22, 300, 300, 800)
+    epaules = mf.Manifold()
+    for s in (1, -1):
+        e = mf.Manifold.batch_hull([ovale((0, s * 172, Z_EP + 40), (98, 68, 48)), ovale((5, s * 80, Z_EP + 50), (105, 70, 58))])
+        epaules += e ^ boite(-300, -300, Z_EP + 27, 300, 300, 800)
+    col = mf.Manifold.batch_hull([ovale((15, 0, H + 15), (80, 85, 35)), ovale((30, 0, H + 70), (58, 60, 30))])
+    plastron = ovale((95, 0, 250), (30, 70, 95)) ^ boite(60, -300, 22, 300, 300, 800)
+    return [(corps, C['tete']), (epaules, C['tete']), (col, C['tete']), (plastron, C['crin'])]
+
 def bras(cote, epaule, coude, flexion, couleurs=True):
     """Un bras : cote = +1 (droit du robot, y négatif) ou −1. Angles en degrés : épaule (0 = bras à l'horizontale vers l'avant,
     −90 = pend), coude et flexion comme dans les programmes."""
@@ -59,12 +79,29 @@ def tete():
     return [(place(T['coque'](*[T['boule'](*b) for b in T['CRANE'] + T['CHANFREIN'] + T['BOUT_NEZ'] + T['GANACHE']])), C['tete']), (place(T['COU']), C['tete']),
             (place(T['CRINIERE']), C['crin'])] + [(place(o), C['tete']) for o in T['OREILLES']]
 
-def scene(angles_d, angles_g=None):
-    os_, pied = ossature()
-    pcs = [(boite(-200, -330, -10, 520, 330, 0), C['table']), (os_, C['alu']), (pied, C['pied'])] + tete() + bras(1, *angles_d)
+def scene(angles_d, angles_g=None, forme='boite'):
+    """forme : 'boite' (l'ossature simple), 'T' (épaules larges, nue) ou 'peluche' (ossature en T sous son habillage)."""
+    os_, pied = ossature() if forme == 'boite' else ossature_T()
+    pcs = [(boite(-200, -330, -10, 520, 330, 0), C['table']), (pied, C['pied'])] + tete() + bras(1, *angles_d)
+    pcs += habillage() if forme == 'peluche' else [(os_, C['alu'])]             # sous la peluche, l'ossature ne se voit plus
     return pcs + (bras(-1, *angles_g, couleurs=False) if angles_g else [])
 
+def planche(nom, vues, legende):
+    fig = plt.figure(figsize=(18, 11)); fig.patch.set_facecolor('white')
+    for k, (titre, pcs, vue) in enumerate(vues):
+        ax = fig.add_subplot(2, 2, k + 1, projection='3d'); PM.dessiner(ax, pcs, vue=vue, cadre=(-200, 520, -360, 360, -10, 720), marge=0.6); ax.set_title(titre, fontsize=15, weight='bold')
+    fig.text(0.5, 0.012, legende, ha='center', fontsize=12)
+    fig.subplots_adjust(left=0, right=1, top=0.95, bottom=0.03, hspace=0.06, wspace=0)
+    fig.savefig(OUT / nom, dpi=80); plt.close(fig); print('ok', nom)
+
 if __name__ == '__main__':
+    R = (-90, 90, 0)
+    planche('apercu_buste_peluche.png',
+            [('Le squelette : ossature en T, épaules larges', scene(R, R, 'T'), (14, -52)),
+             ('Le même, habillé de peluche', scene(R, R, 'peluche'), (14, -52)),
+             ('Habillé, vu de face', scene(R, R, 'peluche'), (6, 0)),
+             ('Habillé, il prend un objet sur la table', scene((-60, -20, 80), R, 'peluche'), (14, -52))],
+            'Illustration de principe, pas un plan. Habillage en peluche palomino comme la tête, poitrail clair ; il se pose sur l\'ossature et ne porte rien. Bras laissés nus pour l\'instant.')
     fig = plt.figure(figsize=(18, 11)); fig.patch.set_facecolor('white')
     vues = [('Au repos : le haut du bras pend, l\'avant-bras à l\'horizontale', scene((-90, 90, 0), (-90, 90, 0)), (14, -52)),
             ('Il prend un objet sur la table, pince à plat', scene((-60, -20, 80), (-90, 90, 0)), (14, -52)),
