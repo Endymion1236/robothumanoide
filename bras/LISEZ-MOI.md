@@ -280,3 +280,21 @@ Tout est BON, 32 à 39 °C à la fin (le socle est le plus chaud : 39 °C).
 - Tension : un creux à 11,5 V, sinon 12,0 V au plus bas.
 - Marge restante à l'épaule avant le seuil « À VOIR » (60 %) : faible. À vide c'est bon ; avec une charge, il faut le ressort
   puis le servo 3095.
+
+### Protocole avec le poignet complet ET le ressort (23/11/2026, 20 h 50) — trou du mât : rangée du haut, colonne du milieu
+
+| Épaule | sans ressort (20 h 21) | avec ressort |
+|---|---|---|
+| Effort en montant vers 30° | 52 % | 31 à 34 % |
+| Effort en montant de 30° à 60° | 45 à 49 % | 26 % |
+| Tenue à 30° après une montée | 30 % | 10 % |
+| Tenue à 60° après une montée | 18 à 19 % | 5 à 6 % |
+| Écart à 30° | −3,2° | −1,0° |
+| Tenue 30 s à +15° | (non mesurée) | 12 %, sans échauffement |
+| **À la verticale (+90°)** | écart +0,2°, **0 % en tenue** | **écart −3,3°, 30 à 32 % en tenue** |
+| Température de l'épaule en fin d'essai | 35 °C | **43 °C** |
+
+Le ressort divise presque par deux l'effort de l'épaule dans la zone de travail. **Mais bras à la verticale, il gêne** : le servo
+n'atteint plus 90° et force à 30 % en permanence (d'où les 43 °C). Entre ses deux accroches il ne reste que 40 mm à 90°, pour
+un ressort de 70 mm : il doit se plier de côté, et quelque chose l'en empêche (crochets bloqués par les écrous ? ressort qui
+appuie sur le mât ou le bras ?). À inspecter. Le ressort reçu n'a pas été mesuré.
