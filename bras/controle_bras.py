@@ -5,7 +5,7 @@ tester_pince et piloter_bras (étalonnages et sens) : sinon la fenêtre dit lequ
 Les sécurités sont celles de piloter_bras : butées, chaleur, blocage (les servos RETIENNENT le bras), refus d'un geste
 qui enverrait la pince dans la table. Le bouton ARRÊT fige le bras là où il est, sans le lâcher.
 Les réglages sont gardés dans reglages_bras.json."""
-import json, queue, threading, time
+import json, math, queue, threading, time
 from pathlib import Path
 from servos import Bus, ErreurServo, degres, pas, numero_coude, numero_socle
 import test_epaule as E, test_pince as P, piloter_bras as B
@@ -193,7 +193,21 @@ class Controleur:
                 raise ErreurServo('sur ce trajet la pince passerait trop près de la table : clique d\'abord sur « Repos »')
             if not self._bouger([(self.epaule, E.position(haut[0], self.haut)), (self.coude, MILIEU + self.sc * pas(haut[1])), (self.flexion, MILIEU + self.sf * pas(haut[2]))], 'Pince relevée avant de changer d\'inclinaison'): return
         quoi = f"Pince {nom} : {s + avance:.0f} mm devant l'épaule, à {z + monte:.0f} mm de la table{glisse}"
-        self._bouger([(self.epaule, E.position(arrivee[0], self.haut)), (self.coude, MILIEU + self.sc * pas(arrivee[1])), (self.flexion, MILIEU + self.sf * pas(arrivee[2]))], quoi)
+        poser = lambda ang, texte: self._bouger([(self.epaule, E.position(ang[0], self.haut)), (self.coude, MILIEU + self.sc * pas(ang[1])), (self.flexion, MILIEU + self.sf * pas(ang[2]))], texte)
+        if depart or monte >= 0: poser(arrivee, quoi); return
+        # DESCENTE : par petites marches de 5 mm, en surveillant l'effort. Si la pince touche la table ou l'objet, l'effort de l'épaule,
+        # du coude ou du poignet change d'un coup : on s'arrête et on remonte d'une marche, au lieu de forcer (incident du 23/11/2026).
+        effort = lambda: [sum(self.bus.etat(i)['charge'] for _ in range(3)) / 3 for i in (self.epaule, self.coude, self.flexion)]
+        n = max(1, math.ceil(abs(monte) / 5.0)); avant, precedent = effort(), [ae, ac, f]
+        for k in range(1, n + 1):
+            try: c = G.angles_plan(s + avance * k / n, z + monte * k / n, inclinaison, self.hauteur); marche = [c['epaule'], c['coude'], c['flexion']]
+            except G.HorsDePortee: marche = arrivee
+            if k == n: marche = arrivee
+            if not poser(marche, f'Descente {k}/{n}' if k < n else quoi): return
+            time.sleep(0.2); apres = effort()
+            if max(abs(x - y) for x, y in zip(apres, avant)) >= B.SEUIL_CONTACT:
+                poser(precedent, 'Remontée d\'une marche'); raise ErreurServo(f'CONTACT senti pendant la descente (la pince touche la table ou l\'objet) : arrêt à {z + monte * (k - 1) / n:.0f} mm, je ne force pas')
+            avant, precedent = apres, marche
 
     def _poignet(self, angle):
         if not self.poignet: raise ErreurServo('pas de poignet branché (servo n° 5)')

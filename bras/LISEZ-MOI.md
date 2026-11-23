@@ -370,3 +370,8 @@ Cause côté programme : la garde au-dessus de la table n'était que de 3 mm **p
 3° sous sa cible, soit environ 2 cm au bout du bras, plus le jeu du poignet). **La garde passe à 20 mm** (`MARGE_TABLE`), et la
 hauteur de prise de `aller_point` est relevée d'autant. La zone de prise à plat devient 368 à 458 mm du socle.
 À faire avant de reporter du poids : remonter le palonnier (vis centrale), 4 vis M2,5 plus longues, refaire l'étalonnage du poignet.
+
+**Descente qui sent le contact (23/11/2026, essayé en simulation).** Dans « Déplacer la pince », le bouton Descendre avance par marches
+de 5 mm et relit l'effort de l'épaule, du coude et du poignet après chacune. Un saut de 10 points ou plus (`SEUIL_CONTACT`) = la
+pince touche la table ou l'objet : elle remonte d'une marche et le dit en rouge, au lieu de forcer. Seuil à ajuster à l'essai.
+Précision sur l'incident : c'est le **palonnier qui a quitté l'axe du servo n° 5** (dit par Nicolas), pas les vis de la pince.
