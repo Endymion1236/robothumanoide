@@ -165,3 +165,15 @@ du boîtier du servo, avec 0,2 mm de jeu de chaque côté → bascule de ± 2°,
 Même correction dans le support de flexion du poignet (`poignet/sortie/flexion_support.stl`), qui reprend ce berceau.
 Vérifié par le calcul : aucun contact sur toute la course à l'épaule, au coude et à la flexion du poignet. Rien d'imprimé.
 En attendant la réimpression : deux tours de ruban adhésif autour du boîtier du servo, là où il entre dans le berceau.
+
+## Ressort posé (23/11/2026) : ce qu'on a appris
+
+Ressort reçu : **70 × 10 × 1,2 mm, celui du dessin** (confirmé par Nicolas). Accroche retenue : rangée du haut du mât, colonne la
+plus éloignée de l'épaule (x = −46, z = 50).
+- Dans la zone de travail, il divise presque par deux l'effort de l'épaule (mesures dans `bras/LISEZ-MOI.md`).
+- **Erreur du dessin : bras à la verticale, il ne reste que 46 mm entre les deux accroches pour un ressort de 70 mm.** Un ressort de
+  traction ne se comprime pas : il sert de cale, l'épaule butait vers 87°. Le texte plus haut (« il pend entre ses deux vis ») est faux.
+  Contournement retenu : **repos du bras à 80°** dans tous les programmes (`REPOS` dans `bras/test_epaule.py`).
+- Accroché en bas du mât, le ressort se décroche quand il se détend : ne pas utiliser les rangées du bas sans butée sur la tige.
+- Pour retrouver la verticale avec ce ressort, il faudrait une accroche vers x = −60, z = 24 (trou à percer au bord arrière du mât) :
+  l'aide tombe alors de 8,5 à 4,3 kg·cm bras à l'horizontale, là où elle sert le plus. Non retenu : le repos à 80° est préférable.
