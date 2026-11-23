@@ -18,6 +18,9 @@ from servos import Bus, ErreurServo, degres, pas
 
 MILIEU = 2048
 BAS, HAUT = -30, 90            # course de l'épaule, en degrés par rapport à l'horizontale (epaule/generer_epaule.py)
+REPOS = 80                     # position de repos : 80° et non 90°. Avec le ressort posé (23/11/2026), il ne reste que 40 à 46 mm entre
+                               # ses deux accroches bras à la verticale, pour un ressort de 70 mm : il sert de cale, l'épaule s'arrêtait
+                               # à 86,7° en forçant à 30 % (43 °C). À 80° le ressort est détendu et le bras presque en équilibre.
 SENS = Path(__file__).with_name('sens_epaule.json')
 POSES = {'b': ('un peu sous l\'horizontale (−20°)', -20), 'h': ('à l\'horizontale (0°)', 0), '3': ('à 30°', 30), '6': ('à 60°', 60), 'v': ('à la verticale (90°)', 90)}
 

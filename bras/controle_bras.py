@@ -163,7 +163,7 @@ class Controleur:
         r = self.reglages; texte = B.aller_ensemble(self.bus, [(self.poignet, MILIEU + pas(angle))], vitesse=r['vitesse'], accel=r['acceleration'], arret=self.arret.is_set)
         self.dire(f'Pince tournée de {angle:+.0f}° : {texte}')
 
-    def _repos(self): self._bouger([(self.epaule, E.position(90, self.haut)), (self.coude, MILIEU)], 'Repos (bras à la verticale)')
+    def _repos(self): self._bouger([(self.epaule, E.position(E.REPOS, self.haut)), (self.coude, MILIEU)], f'Repos (bras à {E.REPOS}°, presque à la verticale)')
 
     def _pince(self, action):
         b, r = self.bus, self.reglages; b.tenir(self.pince)

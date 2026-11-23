@@ -115,12 +115,12 @@ class Essai:
         self.dire('0. État au départ')
         for i, nom in self.noms.items():
             e = self.bus.etat(i); self.dire(f'  {nom} (n° {i}) : {self.angle(i, e["position"]):+.0f}° · {e["temperature"]} °C · {e["tension"]:.1f} V')
-        self.demander('Dégage la table autour du bras, pince vide. Entrée pour mettre le poignet droit puis le bras au repos (à la verticale)... ')
+        self.demander('Dégage la table autour du bras, pince vide. Entrée pour mettre le poignet droit puis le bras au repos (presque à la verticale)... ')
         # le poignet d'abord : il restait là où il était au lancement (plié à 45° pendant tout le protocole, le 23/11/2026)
         for i in (c.flexion, c.poignet):
             if i and not self.serie(i, [0]): return self.fin()
-        if not (self.serie(c.coude, [0]) and self.serie(c.epaule, [90])): return self.fin()
-        self.dire('1. Coude (épaule à la verticale)')
+        if not (self.serie(c.coude, [0]) and self.serie(c.epaule, [E.REPOS])): return self.fin()
+        self.dire('1. Coude (épaule au repos, à 80°)')
         if self.serie(c.coude, [45, 0, -45, 0, 90, -90, 0]): self.repetabilite(c.coude, 0, 45, n)
         self.dire('2. Épaule (bras tendu, coude à 0°)')
         # On mesure la tenue après une MONTÉE : après une descente, les frottements du réducteur portent une partie du poids
@@ -133,7 +133,7 @@ class Essai:
         if self.serie(c.epaule, [60, 30, 0] + ([dessous] if dessous else []) + [palier]):
             self.dire(f'  Bras tendu à {palier:+d}°, atteint en montant : la position la plus dure pour l\'épaule.'); self.tenue(c.epaule, tenue)
             self.serie(c.epaule, [30, 60]); self.repetabilite(c.epaule, 60, 30, n)
-        self.serie(c.epaule, [90])
+        self.serie(c.epaule, [E.REPOS])
         if c.socle and socle:
             self.dire('3. Socle (bras à la verticale)')
             # Le socle va d'abord à 0° : le repère se colle bras « en face » (le 20/11/2026 il était demandé socle encore à +65°,
@@ -144,7 +144,7 @@ class Essai:
                 self.repetabilite(c.socle, 0, 60, n)
                 if not self.question('Le bras est-il revenu exactement en face du repère ?'): self.avis.append('socle : le plateau a glissé sur le palonnier (bras plus en face du repère)')
                 self.dire('  Socle bras tendu (épaule à 30°) :')
-                if self.serie(c.epaule, [30]): self.serie(c.socle, [60, -60, 0]); self.serie(c.epaule, [90])
+                if self.serie(c.epaule, [30]): self.serie(c.socle, [60, -60, 0]); self.serie(c.epaule, [E.REPOS])
         elif socle: self.dire('3. Socle : pas branché, étape sautée')
         if c.flexion:
             self.dire('6. Poignet : flexion (bras à la verticale ; la pince est portée par ce servo)')

@@ -210,7 +210,7 @@ def main():
                     else:
                         ae, ac = ang_e(), ang_c()
                         if m == 'plat': cible = [(ID_COUDE, pos_c(-ae))]; verifier(ae, -ae); nom = 'avant-bras à l\'horizontale'
-                        elif m == 'repos': cible = [(ID_EPAULE, pos_e(90)), (ID_COUDE, pos_c(0))]; nom = 'bras à la verticale'
+                        elif m == 'repos': cible = [(ID_EPAULE, pos_e(E.REPOS)), (ID_COUDE, pos_c(0))]; nom = f'bras au repos ({E.REPOS}°)'
                         elif m[0] == 'e': v = int(m[1:]); verifier(v, ac); cible = [(ID_EPAULE, pos_e(v))]; nom = f'épaule à {v:+d}°'
                         elif m[0] == 'f':
                             v = int(m[1:])
