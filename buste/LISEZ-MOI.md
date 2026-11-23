@@ -36,3 +36,9 @@ par-dessus sans rien porter : `sortie/apercu_buste_peluche.png` (squelette nu, p
 formes seront celles de la couturière. À prévoir au dessin : dessous des épaules ouvert pour que le bras tourne, habillage
 démontable (accès aux cartes et à l'arrêt d'urgence), aérations, et pas de tissu près des engrenages ou de la pince.
 Les bras restent nus pour l'instant (une manche ne doit ni gêner le coude ni chauffer les servos).
+
+**Proportions validées par Nicolas le 23/11/2026** (celles de l'illustration, à reprendre pour le dessin de l'ossature) :
+colonne de 200 mm de large × 150 mm de profondeur × 400 mm de haut, barre d'épaules de 420 mm, 350 mm entre les deux axes
+d'épaule, axe de l'épaule à 345 mm de la table, pied de 350 mm. Ce sont des proportions, pas encore des longueurs de coupe :
+celles-ci se calculeront au dessin, après avoir fixé le modèle de profilé, les équerres et mesuré ce qui se loge dedans
+(alimentation, cartes, arrêt d'urgence).
