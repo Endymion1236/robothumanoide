@@ -333,3 +333,19 @@ Nicolas avait du mal à combiner épaule, coude et poignet pour aller chercher u
 - quatre boutons : Reculer, Avancer, Descendre, Monter, par pas de 2 cm, en gardant l'inclinaison choisie ;
 - une ligne dit où est la pince ; un geste impossible est refusé en rouge avec sa raison.
 Le socle et la rotation du poignet gardent leurs curseurs. La sécurité de la table tient compte de l'inclinaison de la pince.
+
+### Zone atteignable du bras complet, et ce qui l'agrandirait (calcul du 23/11/2026)
+
+Premier essai réel de « Déplacer la pince » : « Monter » refusé à 389 mm de l'épaule, coude en butée à −90°.
+La zone où la pince tient à plat est une colonne étroite : **380 à 460 mm devant l'épaule**, de 50 à 330 mm de haut.
+Pince vers le bas : seulement 190 à 255 mm devant l'épaule, entre 50 et 90 mm de haut.
+
+| Piste | Gain calculé |
+|---|---|
+| Essayer l'autre configuration du coude (coude en bas) | + 7 % de positions à plat, rien de plus près de la table |
+| Coude de ± 100° au lieu de ± 90° (les butées du servo sont déjà à ± 100°) | + 17 % ; la bande de prise passe de 352–446 à 326–446 mm |
+| Flexion du poignet de ± 110° au lieu de ± 90° | zone « pince vers le bas » multipliée par 2,3 |
+
+Fait dans la fenêtre : un déplacement hors de portée **glisse** vers le point atteignable le plus proche (monter en avançant un
+peu, par exemple) et le dit ; pas réglable (1, 2, 5 ou 10 cm). `geometrie.angles_plan` sait calculer les deux configurations du
+coude, mais la fenêtre n'utilise que « coude en haut ». Essayé en simulation.

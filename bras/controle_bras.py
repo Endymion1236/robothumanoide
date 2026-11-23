@@ -172,8 +172,16 @@ class Controleur:
         ae, ac = self._angles(); f = self._flex(); s, z, t = G.position_plan(ae, ac, f, self.hauteur)
         if depart: s, z, avance, monte = *self.DEPART[inclinaison], 0, 0
         elif abs(t - inclinaison) > 8: raise ErreurServo(f'la pince n\'est pas encore {nom} : clique d\'abord sur le rond « Pince {nom} »')
+        glisse = ''
         try: cible = G.angles_plan(s + avance, z + monte, inclinaison, self.hauteur)
-        except G.HorsDePortee as err: raise ErreurServo(f'la pince ne peut pas aller là : {err}')
+        except G.HorsDePortee as err:
+            # Le point demandé est hors de portée : on prend le plus proche en glissant sur l'autre axe (monter en avançant un peu, par
+            # exemple), et on le dit. Le 23/11/2026, « Monter » était refusé net à 389 mm de l'épaule : le coude était en butée.
+            if depart: raise ErreurServo(f'la pince ne peut pas aller là : {err}')
+            try: cible, d = G.au_plus_pres(s + avance, z + monte, inclinaison, self.hauteur, 'avance' if monte else 'hauteur')
+            except G.HorsDePortee: raise ErreurServo(f'la pince ne peut pas aller là : {err}')
+            if monte: avance += d; glisse = f" (pour y arriver, la pince a aussi {'avancé' if d > 0 else 'reculé'} de {abs(d)} mm)"
+            else: monte += d; glisse = f" (pour y arriver, la pince est aussi {'montée' if d > 0 else 'descendue'} de {abs(d)} mm)"
         arrivee = [cible['epaule'], cible['coude'], cible['flexion']]; self._verifier(*arrivee)
         if not G.trajet_sur([ae, ac, f], arrivee, self.hauteur):
             # trajet direct trop près de la table (changement d'inclinaison, pince basse) : on passe par une position haute, pince à plat
@@ -181,7 +189,7 @@ class Controleur:
             if not (depart and G.trajet_sur([ae, ac, f], haut, self.hauteur) and G.trajet_sur(haut, arrivee, self.hauteur)):
                 raise ErreurServo('sur ce trajet la pince passerait trop près de la table : clique d\'abord sur « Repos »')
             if not self._bouger([(self.epaule, E.position(haut[0], self.haut)), (self.coude, MILIEU + self.sc * pas(haut[1])), (self.flexion, MILIEU + self.sf * pas(haut[2]))], 'Pince relevée avant de changer d\'inclinaison'): return
-        quoi = f"Pince {nom} : {s + avance:.0f} mm devant l'épaule, à {z + monte:.0f} mm de la table"
+        quoi = f"Pince {nom} : {s + avance:.0f} mm devant l'épaule, à {z + monte:.0f} mm de la table{glisse}"
         self._bouger([(self.epaule, E.position(arrivee[0], self.haut)), (self.coude, MILIEU + self.sc * pas(arrivee[1])), (self.flexion, MILIEU + self.sf * pas(arrivee[2]))], quoi)
 
     def _poignet(self, angle):
@@ -258,10 +266,13 @@ def fenetre(ctrl):
     alerte = ttk.Label(cadre, text='', font=titre, foreground='#b00', wraplength=900); alerte.grid(row=8, column=0, columnspan=3, sticky='w', padx=6, pady=2)
 
     cd = ttk.LabelFrame(f, text=' Déplacer la pince (le programme règle tout seul l\'épaule, le coude et le poignet) '); cd.pack(fill='x', padx=10, pady=6)
-    incl = tk.IntVar(value=1); pas_mm = 20          # aucun rond coché au départ : on choisit d'abord « à plat » ou « vers le bas »
-    for k, (texte, av, mo) in enumerate([('Reculer', -pas_mm, 0), ('Avancer', pas_mm, 0), ('Descendre', 0, -pas_mm), ('Monter', 0, pas_mm)]):
-        b = tk.Button(cd, text=f'{texte} de 2 cm', font=titre, width=15, command=lambda av=av, mo=mo: ctrl.demander('deplacer', av, mo, incl.get())); b.grid(row=0, column=k, padx=4, pady=6)
+    incl = tk.IntVar(value=1); pas_mm = tk.IntVar(value=20)          # aucun rond coché au départ : on choisit d'abord « à plat » ou « vers le bas »
+    for k, (texte, av, mo) in enumerate([('Reculer', -1, 0), ('Avancer', 1, 0), ('Descendre', 0, -1), ('Monter', 0, 1)]):
+        b = tk.Button(cd, text=texte, font=titre, width=13, command=lambda av=av, mo=mo: ctrl.demander('deplacer', av * pas_mm.get(), mo * pas_mm.get(), incl.get())); b.grid(row=0, column=k, padx=4, pady=6)
         if not ctrl.flexion: b.configure(state='disabled')
+    cpas = ttk.Frame(cd); cpas.grid(row=0, column=4, padx=10)
+    ttk.Label(cpas, text='de', font=gros).pack(side='left')
+    for v in (10, 20, 50, 100): ttk.Radiobutton(cpas, text=f'{v // 10} cm', variable=pas_mm, value=v).pack(side='left', padx=2)
     for k, (texte, v) in enumerate([('Pince à plat (prendre par le côté)', 0), ('Pince vers le bas (prendre par le dessus)', -90)]):
         r = ttk.Radiobutton(cd, text=texte, variable=incl, value=v, command=lambda: ctrl.demander('deplacer', 0, 0, incl.get(), True)); r.grid(row=1, column=2 * k, columnspan=2, sticky='w', padx=6)
         if not ctrl.flexion: r.configure(state='disabled')

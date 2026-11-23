@@ -15,7 +15,7 @@ EPAULE_MAX = E.REPOS           # au-delà, l'épaule bute contre le ressort
 
 class HorsDePortee(Exception): pass
 
-def angles_plan(s, z, inclinaison=0.0, hauteur_epaule=179.0):
+def angles_plan(s, z, inclinaison=0.0, hauteur_epaule=179.0, coude_en_haut=True):
     """Dans le plan du bras : les angles (épaule, coude, flexion) pour amener le milieu des mâchoires à la distance s devant l'axe de
     l'épaule et à la hauteur z au-dessus de la table, la pince inclinée de `inclinaison` degrés (0 = à plat, −90 = pointée vers le bas)."""
     L1, L2, L3 = B.L_BRAS, B.L_COUDE_FLEXION, B.L_APRES_FLEXION; t = math.radians(inclinaison)
@@ -24,13 +24,22 @@ def angles_plan(s, z, inclinaison=0.0, hauteur_epaule=179.0):
     c = (d2 - L1 * L1 - L2 * L2) / (2 * L1 * L2)
     if c > 1: raise HorsDePortee('trop loin pour le bras')
     if c < -1 or xw < 20: raise HorsDePortee('trop près du socle')
-    g = -math.acos(c)                                                # coude « en haut » : le haut du bras monte, l'avant-bras redescend
+    g = -math.acos(c) if coude_en_haut else math.acos(c)             # coude « en haut » : le haut du bras monte, l'avant-bras redescend ; « en bas » : l'inverse
     a = math.atan2(zw, xw) - math.atan2(L2 * math.sin(g), L1 + L2 * math.cos(g))
     r = {'epaule': math.degrees(a), 'coude': math.degrees(g), 'flexion': inclinaison - math.degrees(a + g)}
     if not E.BAS <= r['epaule'] <= EPAULE_MAX: raise HorsDePortee(f"épaule à {r['epaule']:+.0f}° : hors de {E.BAS}° à {EPAULE_MAX}° ({'trop loin ou trop bas' if r['epaule'] < E.BAS else 'trop près ou trop haut'})")
     if abs(r['coude']) > B.COUDE_MAX: raise HorsDePortee(f"coude à {r['coude']:+.0f}° : hors de ±{B.COUDE_MAX}° (trop près)")
     if abs(r['flexion']) > B.FLEXION_MAX: raise HorsDePortee(f"poignet à {r['flexion']:+.0f}° : hors de ±{B.FLEXION_MAX}°")
     return r
+
+def au_plus_pres(s, z, inclinaison, hauteur_epaule, glisser, coude_en_haut=True, maxi=150):
+    """Si le point (s, z) n'est pas atteignable, cherche le point atteignable le plus proche en glissant le long d'un seul axe
+    (`glisser` = 'avance' : on avance ou recule ; 'hauteur' : on monte ou descend). Renvoie (angles, décalage en mm) ou lève HorsDePortee."""
+    erreur = None
+    for d in [0] + [k * sg for k in range(5, maxi + 1, 5) for sg in (1, -1)]:
+        try: return angles_plan(s + (d if glisser == 'avance' else 0), z + (d if glisser == 'hauteur' else 0), inclinaison, hauteur_epaule, coude_en_haut), d
+        except HorsDePortee as e: erreur = erreur or e
+    raise erreur
 
 def position_plan(epaule, coude, flexion, hauteur_epaule=179.0):
     """L'inverse : (distance devant l'épaule, hauteur au-dessus de la table, inclinaison de la pince) d'après les angles."""
