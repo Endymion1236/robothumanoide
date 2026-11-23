@@ -10,6 +10,12 @@ import test_epaule as E, test_pince as P, piloter_bras as B
 MILIEU = 2048
 MARGE = 35              # pas (3°) : un servo arrêté contre sa butée lit souvent 2 ou 3 pas au-delà (épaule à 3074 pour 3072, le 21/11/2026)
 QUART = (1024, 3072)        # un quart de tour de chaque côté (écrit ici : ce programme marche même avec un ancien piloter_bras.py)
+A_LA_MAIN = ('socle', 'poignet, rotation', 'poignet, flexion')      # servos dont le milieu se règle à la main, dans leur programme d'essai
+def hors(role, prog):
+    """Un servo dont les butées sont bonnes mais qui se lit en dehors : ce que ça veut dire dépend de l'articulation."""
+    if role in A_LA_MAIN: return f'milieu À REFAIRE : lance {prog} (étalonnage à la main)'      # la pièce a été remontée dans une autre position sur le palonnier
+    if role == 'épaule': return 'bras posé plus bas que sa butée : normal sur la table, relève-le avant de piloter'
+    return 'butées bonnes, mais le servo est EN DEHORS : le remettre à la main, 12 V coupé'
 def attendues(trouves):
     """Numéro → (rôle, butées attendues ou None si on ne peut pas le savoir, programme d'étalonnage)."""
     coude, socle = numero_coude(trouves), numero_socle(trouves)
@@ -33,7 +39,7 @@ def main(bus=None, demander=input):
             dedans = lues[0] - MARGE <= e['position'] <= lues[1] + MARGE
             if role == 'inconnu': verdict = 'numéro non prévu : servo neuf pas encore numéroté ?'
             elif att is None: verdict = f'pas encore étalonné : lance {prog}'
-            elif lues == tuple(att): verdict = 'BON' if dedans else 'butées bonnes, mais le servo est EN DEHORS : le remettre à la main, 12 V coupé'
+            elif lues == tuple(att): verdict = 'BON' if dedans else hors(role, prog)
             elif lues in ((0, 4095), (0, 0)): verdict = 'PAS RÉGLÉES (valeurs d\'usine)'; a_regler.append((i, role, att, prog))
             else: verdict = 'DIFFÉRENTES de celles attendues'; a_regler.append((i, role, att, prog))
             print(f"{i:>3}  {role:<20} {f'{lues[0]}–{lues[1]}':<13} {(f'{att[0]}–{att[1]}' if att else '?'):<13} {e['position']} ({degres(e['position'] - MILIEU):+.0f}°)".ljust(72) + verdict)
@@ -43,6 +49,8 @@ def main(bus=None, demander=input):
         for i, role, att, prog in a_regler:
             if role == 'épaule': print(f'\nÉpaule (n° {i}) : ses butées se règlent avec {prog} (étalonnage), pas ici.'); continue
             e = bus.etat(i)
+            if not att[0] - MARGE <= e['position'] <= att[1] + MARGE and role in A_LA_MAIN:
+                print(f"\n{role} (n° {i}) : lance {prog}. Il règlera lui-même les butées, puis le milieu à la main."); continue
             if not att[0] - MARGE <= e['position'] <= att[1] + MARGE:
                 print(f"\n{role} (n° {i}) : il est à {e['position']}, en dehors de {att[0]}–{att[1]}. Remets-le vers son milieu à la main (12 V coupé), puis relance."); continue
             if demander(f'\nRégler les butées du servo n° {i} ({role}) à {att[0]}–{att[1]} ? (o/n) ').strip().lower().startswith('o'):
