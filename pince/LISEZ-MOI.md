@@ -197,3 +197,7 @@ Pour vérifier le montage : `sortie/vue_dessus_montee.png` (vue de dessus, quel 
 - Le sens « ouvrir » (vers la butée min ou max) se vérifie au premier essai.
 
 **Plan de montage de la V4** : `sortie/plan_montage_pince_v4.pdf` (6 étapes, une page chacune), produit par `plan_montage_v4.py`.
+
+**Première prise réelle avec la pince V4 (23/11/2026)** : sur le bras complet (poignet à deux mouvements), Nicolas a saisi un rouleau
+d'essuie-tout couché sur la table, piloté depuis la fenêtre de contrôle. Le calcul le donnait trop gros (11 à 12 cm pour une
+pince prévue jusqu'à 9 cm) : le rouleau est souple et s'écrase. Détails de la prise (sens de la pince, force) à noter.
