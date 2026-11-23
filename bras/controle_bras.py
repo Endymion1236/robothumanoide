@@ -27,7 +27,7 @@ class Controleur:
     """Tout ce qui parle aux servos, dans un seul fil d'exécution. La fenêtre ne fait que poster des demandes."""
     def __init__(self, port=None, bus=None):
         self.bus = bus or Bus(port); self.q = queue.Queue(); self.journal = queue.Queue(); self.arret = threading.Event()
-        self.etat, self.occupe, self.reglages = {}, False, charger()
+        self.etat, self.occupe, self.reglages = {}, False, charger(); self.refus = None
         self._preparer(); self._lire()
         threading.Thread(target=self._boucle, daemon=True).start()
 
@@ -115,7 +115,7 @@ class Controleur:
                 self.bus.fermer(); self.etat = {'fini': True}; return
             self.occupe = True
             try: getattr(self, '_' + cmd[0])(*cmd[1:])
-            except ErreurServo as err: self.dire(f'Refusé : {err}')
+            except ErreurServo as err: self.dire(f'Refusé : {err}'); self.refus = str(err)      # la fenêtre l'affiche en rouge et remet les curseurs à leur vraie place
             except Exception as err: self.dire(f'Erreur : {err!r}')
             self.occupe = False
             try: self._lire()
@@ -230,6 +230,7 @@ def fenetre(ctrl):
     c2 = ttk.Checkbutton(cadre, text='Garder la PINCE à l\'horizontale avec le poignet, quand l\'épaule ou le coude bougent', variable=niveau); c2.grid(row=6, column=0, columnspan=3, sticky='w', padx=6, pady=2)
     if not ctrl.flexion: c2.configure(state='disabled')
     resume = ttk.Label(cadre, text='', font=gros); resume.grid(row=7, column=0, columnspan=3, sticky='w', padx=6, pady=4)
+    alerte = ttk.Label(cadre, text='', font=titre, foreground='#b00', wraplength=900); alerte.grid(row=8, column=0, columnspan=3, sticky='w', padx=6, pady=2)
 
     cp = ttk.LabelFrame(f, text=' Pince '); cp.pack(fill='x', padx=10, pady=6)
     for k, (texte, a) in enumerate([('Ouvrir', 'o'), ('Serrer doux', 's'), ('Serrer fort', 'S')]):
@@ -249,16 +250,20 @@ def fenetre(ctrl):
     ttk.Label(cr, text='Vitesse : 300 = lent et sûr (réglage des essais). Monte par petites marches.', font=('Segoe UI', 9)).grid(row=9, column=0, columnspan=2, sticky='w', padx=6)
 
     journal = tk.Text(f, height=9, font=('Consolas', 10), state='disabled'); journal.pack(fill='both', expand=True, padx=10, pady=6)
-    premier = [True]
+    premier = [True]; recaler = [False]
     def rafraichir():
         e = ctrl.etat
         if e.get('fini'): f.destroy(); return
+        remettre = premier[0] or recaler[0]; recaler[0] = False
+        if ctrl.occupe: alerte.configure(text='')
         for nom in ('socle', 'epaule', 'coude', 'poignet', 'flexion'):
             if nom in e:
                 a, ch, t = e[nom]; etats[nom].configure(text=f'{a:+.0f}° · charge {ch:+.0f} % · {t} °C', foreground='#b00' if t >= 50 or abs(ch) >= 50 else '#000')
-                if premier[0]: curseurs[nom].set(round(a))
+                if remettre: curseurs[nom].set(round(a))
         if 'pince' in e:
             a, ch, t = e['pince']; etats['pince'].configure(text=f'≈ {a:.0f} mm · charge {ch:+.0f} % · {t} °C', foreground='#b00' if t >= 50 else '#000')
+            if ctrl.refus:                                   # geste refusé : on le dit en gros, et les curseurs reviennent à la position réelle
+                alerte.configure(text='GESTE REFUSÉ : ' + ctrl.refus); ctrl.refus = None; recaler[0] = True
             resume.configure(text=f"Avant-bras : {e['avant_bras']:+.0f}° par rapport à l'horizontale · bas de la pince à {e['bas_pince']:.0f} mm de la table · {e['tension']:.1f} V"
                              + ('   ·   EN MOUVEMENT' if ctrl.occupe else ''))
             premier[0] = False
