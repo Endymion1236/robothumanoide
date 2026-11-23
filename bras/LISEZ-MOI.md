@@ -266,3 +266,17 @@ Dès que le servo n° 6 répond (et que `tester_flexion.bat` a été lancé une 
 **Essayé en simulation seulement.** Ne fait rien bouger. Affiche pour chaque servo qui répond : numéro, rôle, butées lues,
 butées attendues, position, verdict. Propose de régler celles qui manquent (réponse « o » exigée), sauf l'épaule
 (étalonnage par `tester_epaule.bat`) et un servo qui se trouve en dehors des butées à poser.
+
+### Protocole avec le poignet complet (flexion + rotation), pince V4 avec mâchoires, sans ressort (23/11/2026, 20 h 21)
+
+Tout est BON, 32 à 39 °C à la fin (le socle est le plus chaud : 39 °C).
+- **Flexion du poignet, premier essai réel : écart ≤ 0,4°, effort 10 à 19 %**, retours identiques.
+- **Épaule : 45 à 52 % en montant** (29 à 32 % avec la rotation seule, 22 à 25 % sans poignet), soit 2 fois l'effort d'origine,
+  comme le calcul l'annonçait (2,1). Pour tenir après une montée : 30 % à +30°, 18 à 19 % à +60°. Arrive 3,2° sous la cible à +30°.
+  La tenue « à l'horizontale » (11 %) a été mesurée après une descente : chiffre trop flatteur, protocole corrigé
+  (bras long : palier à +15° atteint en montant).
+- Coude : 25 à 33 % pour remonter l'avant-bras à la verticale, écart ≤ 0,5°. Rotation du poignet : 11 à 14 %.
+- Socle : inchangé (−1,4° et 14 % à +90°), plateau revenu en face du repère.
+- Tension : un creux à 11,5 V, sinon 12,0 V au plus bas.
+- Marge restante à l'épaule avant le seuil « À VOIR » (60 %) : faible. À vide c'est bon ; avec une charge, il faut le ressort
+  puis le servo 3095.

@@ -123,10 +123,15 @@ class Essai:
         self.dire('1. Coude (épaule à la verticale)')
         if self.serie(c.coude, [45, 0, -45, 0, 90, -90, 0]): self.repetabilite(c.coude, 0, 45, n)
         self.dire('2. Épaule (bras tendu, coude à 0°)')
-        # On arrive à l'horizontale EN MONTANT (depuis −15°) : après une descente, les frottements du réducteur portent une partie
-        # du poids et l'effort lu est trop flatteur (20/11/2026 : 3 % en tenue après la descente, 13 % après une montée).
-        if self.serie(c.epaule, [60, 30, 0, -15, 0]):
-            self.dire('  Bras tendu à l\'horizontale, atteint en montant : la position la plus dure pour l\'épaule.'); self.tenue(c.epaule, tenue)
+        # On mesure la tenue après une MONTÉE : après une descente, les frottements du réducteur portent une partie du poids
+        # et l'effort lu est trop flatteur (20/11/2026 : 3 % après la descente, 13 % après une montée).
+        # Bras court : on descend à −15° et on remonte à 0°. Bras long (poignet) : −15° enverrait la pince dans la table,
+        # on descend alors à 0° et on remonte à +15° (presque l'horizontale) — sinon la tenue était mesurée après une descente (23/11/2026).
+        ae, ac = c._angles()
+        try: c._verifier(-15, 0.0); dessous, palier = -15, 0
+        except ErreurServo: dessous, palier = 0, 15
+        if self.serie(c.epaule, [60, 30, 0] + ([dessous] if dessous else []) + [palier]):
+            self.dire(f'  Bras tendu à {palier:+d}°, atteint en montant : la position la plus dure pour l\'épaule.'); self.tenue(c.epaule, tenue)
             self.serie(c.epaule, [30, 60]); self.repetabilite(c.epaule, 60, 30, n)
         self.serie(c.epaule, [90])
         if c.socle and socle:
