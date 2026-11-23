@@ -3,3 +3,4 @@ __pycache__/
 .venv/
 bras/sens_pince.json
 bras/rapports/
+camera/table.json
