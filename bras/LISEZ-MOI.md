@@ -323,3 +323,13 @@ Le plan du bras est **décalé de 53,5 mm à gauche** de l'axe du socle, vu de d
 **Zone où la pince peut se poser à plat : de 356 à 450 mm de l'axe du socle** (par le calcul), sur un quart de tour de chaque côté.
 Plus près, le coude dépasserait −90° ; plus loin, le bras est trop court.
 La sécurité de la table compte maintenant la pince droite à 40 mm sous son axe (60 mm si elle est tournée de plus de 15°).
+
+### Fenêtre de contrôle : « Déplacer la pince » (23/11/2026, essayé en simulation seulement)
+
+Nicolas avait du mal à combiner épaule, coude et poignet pour aller chercher un objet. Nouveau cadre dans la fenêtre : on déplace
+**la pince**, et le programme calcule les trois articulations (`geometrie.angles_plan`).
+- deux ronds : **« Pince à plat »** (prendre par le côté ; départ à 400 mm devant l'épaule, 130 mm de haut) et **« Pince vers le
+  bas »** (prendre par le dessus ; départ à 220 mm, milieu des mâchoires à 70 mm) ;
+- quatre boutons : Reculer, Avancer, Descendre, Monter, par pas de 2 cm, en gardant l'inclinaison choisie ;
+- une ligne dit où est la pince ; un geste impossible est refusé en rouge avec sa raison.
+Le socle et la rotation du poignet gardent leurs curseurs. La sécurité de la table tient compte de l'inclinaison de la pince.

@@ -91,6 +91,7 @@ class Controleur:
             e0 = self._etat(self.socle, 'socle'); d['socle'] = (degres(e0['position'] - MILIEU), e0['charge'], e0['temperature'])
         if self.flexion:
             e6 = self._etat(self.flexion, 'flexion du poignet'); d['flexion'] = (degres(e6['position'] - MILIEU) * self.sf, e6['charge'], e6['temperature'])
+            import geometrie as G; d['pince_plan'] = G.position_plan(ae, ac, d['flexion'][0], self.hauteur)
         if self.poignet:
             e5 = self._etat(self.poignet, 'poignet'); d['poignet'] = (degres(e5['position'] - MILIEU), e5['charge'], e5['temperature'])
         self.etat = d
@@ -158,6 +159,30 @@ class Controleur:
         if abs(angle) > B.FLEXION_MAX: raise ErreurServo('flexion hors de ±90°')
         ae, ac = self._angles(); self._verifier(ae, ac, angle)
         self._bouger([(self.flexion, MILIEU + self.sf * pas(angle))], f'Poignet plié à {angle:+.0f}°')
+
+    DEPART = {0: (400.0, 130.0), -90: (220.0, 70.0)}         # positions de départ : (mm devant l'épaule, hauteur du milieu des mâchoires, mm)
+
+    def _deplacer(self, avance, monte, inclinaison, depart=False):
+        """Déplace la PINCE de quelques millimètres (vers l'avant, vers le haut) en gardant son inclinaison : c'est le programme qui
+        calcule l'épaule, le coude et le poignet. inclinaison : 0 = pince à plat, −90 = pince pointée vers le bas.
+        depart=True : amène d'abord la pince à une position de départ commode, dans cette inclinaison."""
+        if not self.flexion: raise ErreurServo('il faut la flexion du poignet (servo n° 6) pour déplacer la pince ainsi')
+        import geometrie as G
+        nom = 'à plat' if inclinaison == 0 else 'vers le bas'
+        ae, ac = self._angles(); f = self._flex(); s, z, t = G.position_plan(ae, ac, f, self.hauteur)
+        if depart: s, z, avance, monte = *self.DEPART[inclinaison], 0, 0
+        elif abs(t - inclinaison) > 8: raise ErreurServo(f'la pince n\'est pas encore {nom} : clique d\'abord sur le rond « Pince {nom} »')
+        try: cible = G.angles_plan(s + avance, z + monte, inclinaison, self.hauteur)
+        except G.HorsDePortee as err: raise ErreurServo(f'la pince ne peut pas aller là : {err}')
+        arrivee = [cible['epaule'], cible['coude'], cible['flexion']]; self._verifier(*arrivee)
+        if not G.trajet_sur([ae, ac, f], arrivee, self.hauteur):
+            # trajet direct trop près de la table (changement d'inclinaison, pince basse) : on passe par une position haute, pince à plat
+            haut = [70.0, -70.0, 0.0]
+            if not (depart and G.trajet_sur([ae, ac, f], haut, self.hauteur) and G.trajet_sur(haut, arrivee, self.hauteur)):
+                raise ErreurServo('sur ce trajet la pince passerait trop près de la table : clique d\'abord sur « Repos »')
+            if not self._bouger([(self.epaule, E.position(haut[0], self.haut)), (self.coude, MILIEU + self.sc * pas(haut[1])), (self.flexion, MILIEU + self.sf * pas(haut[2]))], 'Pince relevée avant de changer d\'inclinaison'): return
+        quoi = f"Pince {nom} : {s + avance:.0f} mm devant l'épaule, à {z + monte:.0f} mm de la table"
+        self._bouger([(self.epaule, E.position(arrivee[0], self.haut)), (self.coude, MILIEU + self.sc * pas(arrivee[1])), (self.flexion, MILIEU + self.sf * pas(arrivee[2]))], quoi)
 
     def _poignet(self, angle):
         if not self.poignet: raise ErreurServo('pas de poignet branché (servo n° 5)')
@@ -232,6 +257,16 @@ def fenetre(ctrl):
     resume = ttk.Label(cadre, text='', font=gros); resume.grid(row=7, column=0, columnspan=3, sticky='w', padx=6, pady=4)
     alerte = ttk.Label(cadre, text='', font=titre, foreground='#b00', wraplength=900); alerte.grid(row=8, column=0, columnspan=3, sticky='w', padx=6, pady=2)
 
+    cd = ttk.LabelFrame(f, text=' Déplacer la pince (le programme règle tout seul l\'épaule, le coude et le poignet) '); cd.pack(fill='x', padx=10, pady=6)
+    incl = tk.IntVar(value=1); pas_mm = 20          # aucun rond coché au départ : on choisit d'abord « à plat » ou « vers le bas »
+    for k, (texte, av, mo) in enumerate([('Reculer', -pas_mm, 0), ('Avancer', pas_mm, 0), ('Descendre', 0, -pas_mm), ('Monter', 0, pas_mm)]):
+        b = tk.Button(cd, text=f'{texte} de 2 cm', font=titre, width=15, command=lambda av=av, mo=mo: ctrl.demander('deplacer', av, mo, incl.get())); b.grid(row=0, column=k, padx=4, pady=6)
+        if not ctrl.flexion: b.configure(state='disabled')
+    for k, (texte, v) in enumerate([('Pince à plat (prendre par le côté)', 0), ('Pince vers le bas (prendre par le dessus)', -90)]):
+        r = ttk.Radiobutton(cd, text=texte, variable=incl, value=v, command=lambda: ctrl.demander('deplacer', 0, 0, incl.get(), True)); r.grid(row=1, column=2 * k, columnspan=2, sticky='w', padx=6)
+        if not ctrl.flexion: r.configure(state='disabled')
+    ou = ttk.Label(cd, text='', font=gros); ou.grid(row=2, column=0, columnspan=4, sticky='w', padx=6, pady=2)
+
     cp = ttk.LabelFrame(f, text=' Pince '); cp.pack(fill='x', padx=10, pady=6)
     for k, (texte, a) in enumerate([('Ouvrir', 'o'), ('Serrer doux', 's'), ('Serrer fort', 'S')]):
         tk.Button(cp, text=texte, font=titre, width=13, command=lambda a=a: ctrl.demander('pince', a)).grid(row=0, column=k, padx=6, pady=8)
@@ -249,7 +284,7 @@ def fenetre(ctrl):
         s.set(ctrl.reglages[cle]); s.grid(row=k, column=1)
     ttk.Label(cr, text='Vitesse : 300 = lent et sûr (réglage des essais). Monte par petites marches.', font=('Segoe UI', 9)).grid(row=9, column=0, columnspan=2, sticky='w', padx=6)
 
-    journal = tk.Text(f, height=9, font=('Consolas', 10), state='disabled'); journal.pack(fill='both', expand=True, padx=10, pady=6)
+    journal = tk.Text(f, height=5, font=('Consolas', 10), state='disabled'); journal.pack(fill='both', expand=True, padx=10, pady=6)
     premier = [True]; recaler = [False]
     def rafraichir():
         e = ctrl.etat
@@ -262,6 +297,7 @@ def fenetre(ctrl):
                 if remettre: curseurs[nom].set(round(a))
         if 'pince' in e:
             a, ch, t = e['pince']; etats['pince'].configure(text=f'≈ {a:.0f} mm · charge {ch:+.0f} % · {t} °C', foreground='#b00' if t >= 50 else '#000')
+            if 'pince_plan' in e: ou.configure(text=f"La pince est à {e['pince_plan'][0]:.0f} mm devant l'épaule, à {e['pince_plan'][1]:.0f} mm au-dessus de la table, inclinée de {e['pince_plan'][2]:+.0f}°")
             if ctrl.refus:                                   # geste refusé : on le dit en gros, et les curseurs reviennent à la position réelle
                 alerte.configure(text='GESTE REFUSÉ : ' + ctrl.refus); ctrl.refus = None; recaler[0] = True
             resume.configure(text=f"Avant-bras : {e['avant_bras']:+.0f}° par rapport à l'horizontale · bas de la pince à {e['bas_pince']:.0f} mm de la table · {e['tension']:.1f} V"

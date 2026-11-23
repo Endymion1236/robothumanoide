@@ -32,7 +32,7 @@ ALLONGE_POIGNET, SOUS_PINCE_POIGNET = 48.7, 60.0      # la rotation du poignet a
 # Flexion du poignet (servo n° 6) : son axe est à 161 mm du coude (avant-bras de 120 + 41) ; de cet axe au milieu des mâchoires :
 # 42 (fourche) + 110 (pince), plus 48,7 si la rotation est montée. Angle positif = la pince remonte.
 ID_FLEXION, BUTEES_FLEXION, FLEXION_MAX = 6, (1024, 3072), 90
-L_COUDE_FLEXION, L_FLEXION_PINCE, BOUT_MACHOIRES = 161.0, 152.0, 30.0
+L_COUDE_FLEXION, L_FLEXION_PINCE, BOUT_MACHOIRES = 161.0, 152.0, 35.0
 FLEXION, L_APRES_FLEXION = False, 152.0
 def regler_longueurs(trouves):
     """Avec le poignet (servos n° 5 et 6), le bras est plus long : la sécurité « la pince irait dans la table » doit le savoir.
@@ -54,7 +54,10 @@ def bas_de_pince(h, a, g, f=0.0, roulis=None):
     sous = SOUS_PINCE_DROITE if roulis is not None and abs(roulis) < 15 else SOUS_PINCE
     if not FLEXION: return h + L_BRAS * math.sin(math.radians(a)) + L_AVANT * math.sin(math.radians(a + g)) - sous
     t = math.radians(a + g + f)                        # inclinaison de la pince ; penchée, le bout des mâchoires descend plus bas que leur milieu
-    return h + L_BRAS * math.sin(math.radians(a)) + L_COUDE_FLEXION * math.sin(math.radians(a + g)) + L_APRES_FLEXION * math.sin(t) - sous - BOUT_MACHOIRES * abs(math.sin(t))
+    # sous l'axe de la pince : `sous` quand elle est à plat ; quand elle pointe vers le bas, c'est le bout des mâchoires (35 mm devant
+    # leur milieu) qui est le plus bas. Entre les deux, on additionne les deux parts : toujours du côté de la prudence.
+    return (h + L_BRAS * math.sin(math.radians(a)) + L_COUDE_FLEXION * math.sin(math.radians(a + g)) + L_APRES_FLEXION * math.sin(t)
+            - sous * abs(math.cos(t)) - BOUT_MACHOIRES * abs(math.sin(t)))
 
 def apprendre_sens_coude(bus):
     print('\n--- Sens du coude (le moteur ne bouge pas) ---')

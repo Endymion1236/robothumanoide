@@ -15,6 +15,29 @@ EPAULE_MAX = E.REPOS           # au-delà, l'épaule bute contre le ressort
 
 class HorsDePortee(Exception): pass
 
+def angles_plan(s, z, inclinaison=0.0, hauteur_epaule=179.0):
+    """Dans le plan du bras : les angles (épaule, coude, flexion) pour amener le milieu des mâchoires à la distance s devant l'axe de
+    l'épaule et à la hauteur z au-dessus de la table, la pince inclinée de `inclinaison` degrés (0 = à plat, −90 = pointée vers le bas)."""
+    L1, L2, L3 = B.L_BRAS, B.L_COUDE_FLEXION, B.L_APRES_FLEXION; t = math.radians(inclinaison)
+    xw, zw = s - L3 * math.cos(t), z - L3 * math.sin(t) - hauteur_epaule          # l'axe de flexion du poignet, vu depuis l'épaule
+    d2 = xw * xw + zw * zw
+    c = (d2 - L1 * L1 - L2 * L2) / (2 * L1 * L2)
+    if c > 1: raise HorsDePortee('trop loin pour le bras')
+    if c < -1 or xw < 20: raise HorsDePortee('trop près du socle')
+    g = -math.acos(c)                                                # coude « en haut » : le haut du bras monte, l'avant-bras redescend
+    a = math.atan2(zw, xw) - math.atan2(L2 * math.sin(g), L1 + L2 * math.cos(g))
+    r = {'epaule': math.degrees(a), 'coude': math.degrees(g), 'flexion': inclinaison - math.degrees(a + g)}
+    if not E.BAS <= r['epaule'] <= EPAULE_MAX: raise HorsDePortee(f"épaule à {r['epaule']:+.0f}° : hors de {E.BAS}° à {EPAULE_MAX}° ({'trop loin ou trop bas' if r['epaule'] < E.BAS else 'trop près ou trop haut'})")
+    if abs(r['coude']) > B.COUDE_MAX: raise HorsDePortee(f"coude à {r['coude']:+.0f}° : hors de ±{B.COUDE_MAX}° (trop près)")
+    if abs(r['flexion']) > B.FLEXION_MAX: raise HorsDePortee(f"poignet à {r['flexion']:+.0f}° : hors de ±{B.FLEXION_MAX}°")
+    return r
+
+def position_plan(epaule, coude, flexion, hauteur_epaule=179.0):
+    """L'inverse : (distance devant l'épaule, hauteur au-dessus de la table, inclinaison de la pince) d'après les angles."""
+    a, ag, t = math.radians(epaule), math.radians(epaule + coude), math.radians(epaule + coude + flexion)
+    return (B.L_BRAS * math.cos(a) + B.L_COUDE_FLEXION * math.cos(ag) + B.L_APRES_FLEXION * math.cos(t),
+            hauteur_epaule + B.L_BRAS * math.sin(a) + B.L_COUDE_FLEXION * math.sin(ag) + B.L_APRES_FLEXION * math.sin(t), math.degrees(t))
+
 def angles_pour(X, Y, hauteur_axe=H_PRISE, hauteur_epaule=179.0):
     """Renvoie {'socle', 'epaule', 'coude', 'flexion'} en degrés, pince à l'horizontale, ou lève HorsDePortee avec la raison."""
     R = math.hypot(X, Y)
@@ -22,19 +45,8 @@ def angles_pour(X, Y, hauteur_axe=H_PRISE, hauteur_epaule=179.0):
     s = math.sqrt(R * R - DECALAGE_BRAS ** 2)                       # distance à parcourir dans le plan du bras, depuis l'axe de l'épaule
     socle = math.degrees(math.atan2(X, Y) - math.atan2(DECALAGE_BRAS, s))
     if abs(socle) > B.SOCLE_MAX: raise HorsDePortee(f'il faudrait tourner le socle de {socle:+.0f}° (limite ±{B.SOCLE_MAX}°)')
-    L1, L2, L3 = B.L_BRAS, B.L_COUDE_FLEXION, B.L_APRES_FLEXION
-    xw, zw = s - L3, hauteur_axe - hauteur_epaule                    # l'axe de flexion du poignet, vu depuis l'épaule
-    d2 = xw * xw + zw * zw
-    c = (d2 - L1 * L1 - L2 * L2) / (2 * L1 * L2)
-    if c > 1: raise HorsDePortee(f'trop loin : {R:.0f} mm du socle')
-    if c < -1 or xw < 20: raise HorsDePortee(f'trop près : {R:.0f} mm du socle')
-    g = -math.acos(c)                                                # coude « en haut » : le haut du bras monte, l'avant-bras redescend
-    a = math.atan2(zw, xw) - math.atan2(L2 * math.sin(g), L1 + L2 * math.cos(g))
-    r = {'socle': socle, 'epaule': math.degrees(a), 'coude': math.degrees(g), 'flexion': -math.degrees(a + g)}
-    if not E.BAS <= r['epaule'] <= EPAULE_MAX: raise HorsDePortee(f"épaule à {r['epaule']:+.0f}° : hors de {E.BAS}° à {EPAULE_MAX}° ({'trop loin' if r['epaule'] < E.BAS else 'trop près'})")
-    if abs(r['coude']) > B.COUDE_MAX: raise HorsDePortee(f"coude à {r['coude']:+.0f}° : hors de ±{B.COUDE_MAX}° (trop près)")
-    if abs(r['flexion']) > B.FLEXION_MAX: raise HorsDePortee(f"poignet à {r['flexion']:+.0f}° : hors de ±{B.FLEXION_MAX}°")
-    return r
+    try: return dict(angles_plan(s, hauteur_axe, 0.0, hauteur_epaule), socle=socle)
+    except HorsDePortee as e: raise HorsDePortee(f'{e} ({R:.0f} mm du socle)')
 
 def au_dessus(angles, leve=25.0):
     """La position d'approche : la même, épaule relevée de `leve` degrés, le poignet compensant pour garder la pince à plat.
