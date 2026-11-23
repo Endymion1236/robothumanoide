@@ -9,7 +9,8 @@ import math
 import piloter_bras as B, test_epaule as E
 
 DECALAGE_BRAS = -53.5          # mm : position du plan du bras par rapport à l'axe du socle, + = à droite vu de derrière
-H_PRISE = 45.0                 # hauteur de l'axe de la pince au-dessus de la table pour saisir : le bas des mâchoires est alors à 10 mm
+H_PRISE = 62.0                 # hauteur de l'axe de la pince au-dessus de la table pour saisir : le bas des mâchoires est alors, par le
+                               # calcul, à 22 mm ; en vrai plus bas, car le bras fléchit (garde de 20 mm, voir MARGE_TABLE)
 H_SURVOL = 130.0               # hauteur de l'axe de la pince pour arriver au-dessus d'un objet sans le toucher
 EPAULE_MAX = E.REPOS           # au-delà, l'épaule bute contre le ressort
 
@@ -74,7 +75,7 @@ def ou_est_la_pince(socle, epaule, coude, flexion, hauteur_epaule=179.0):
 
 def trajet_sur(depart, arrivee, hauteur_epaule=179.0, pas=12):
     """Vrai si, en passant en ligne droite d'un jeu d'angles (épaule, coude, flexion) à l'autre, la pince ne descend jamais sous la table."""
-    return all(B.bas_de_pince(hauteur_epaule, *[d + (f - d) * k / pas for d, f in zip(depart, arrivee)], roulis=0.0) >= 3 for k in range(pas + 1))
+    return all(B.bas_de_pince(hauteur_epaule, *[d + (f - d) * k / pas for d, f in zip(depart, arrivee)], roulis=0.0) >= B.MARGE_TABLE for k in range(pas + 1))
 
 def zone(hauteur_axe=H_PRISE, hauteur_epaule=179.0):
     """Distances au socle, droit devant, entre lesquelles la pince peut se poser à plat à cette hauteur : (mini, maxi) en mm."""

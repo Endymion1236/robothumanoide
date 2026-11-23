@@ -126,7 +126,7 @@ class Controleur:
         if not E.BAS - 3 <= ae <= E.HAUT + 3: raise ErreurServo(f'épaule à {ae:+.0f}° : hors de −30° à +90°')
         if abs(ac) > B.COUDE_MAX + 3: raise ErreurServo(f'coude à {ac:+.0f}° : hors de ±{B.COUDE_MAX}°')
         z = B.bas_de_pince(self.hauteur, ae, ac, self._flex() if f is None else f, self._roulis())
-        if z < 3: raise ErreurServo(f'la pince irait dans la table (bas des mâchoires à {z:.0f} mm)')
+        if z < B.MARGE_TABLE: raise ErreurServo(f'la pince irait trop près de la table (bas des mâchoires à {z:.0f} mm par le calcul, il en faut {B.MARGE_TABLE:.0f} : le bras fléchit)')
 
     def _bouger(self, cibles, nom, synchro=False):
         for i, _ in cibles: self.bus.limiter_force(i, 100)

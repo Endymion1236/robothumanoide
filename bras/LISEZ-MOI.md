@@ -361,3 +361,12 @@ coude, mais la fenêtre n'utilise que « coude en haut ». Essayé en simulation
 proche du socle. Calcul, bas de la pince à 10 mm de la table : à plat 356–450 mm devant l'épaule ; à −45° 342–420 ; à −60° 294–374 ;
 à −75° 242–324 ; à −90° 190–260. Plus la pince pointe vers le bas, plus elle travaille près. La fenêtre propose maintenant quatre
 inclinaisons (à plat, 45°, 70°, vers le bas), qui se recouvrent de 19 à 45 cm. Essayé en simulation.
+
+### Incident du 23/11/2026 : la pince a forcé sur la table et s'est décrochée du poignet
+
+En approchant un objet posé sur la table, la pince a appuyé sur la table ; l'ensemble pince + palonnier s'est détaché du servo
+de rotation du poignet (n° 5). La pince ne tenait que par 3 vis M2,5 sur 4, avec 2,5 mm de prise.
+Cause côté programme : la garde au-dessus de la table n'était que de 3 mm **par le calcul**, alors que le bras fléchit (épaule 2 à
+3° sous sa cible, soit environ 2 cm au bout du bras, plus le jeu du poignet). **La garde passe à 20 mm** (`MARGE_TABLE`), et la
+hauteur de prise de `aller_point` est relevée d'autant. La zone de prise à plat devient 368 à 458 mm du socle.
+À faire avant de reporter du poids : remonter le palonnier (vis centrale), 4 vis M2,5 plus longues, refaire l'étalonnage du poignet.

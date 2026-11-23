@@ -47,6 +47,10 @@ SENS_COUDE = Path(__file__).with_name('sens_coude.json')
 TOL = E.TOLERANCE
 SEUIL_CONTACT = 10          # points de charge : variation qui signale que le verre touche la table (à ajuster à l'essai)
 
+# Garde au-dessus de la table : le programme refuse tout geste qui amènerait le point le plus bas de la pince à moins de 20 mm.
+# Elle était de 3 mm. Mais le bras FLÉCHIT : l'épaule arrive 2 à 3° sous sa cible, soit 2 cm de moins au bout d'un bras de 48 cm,
+# et le poignet a du jeu. Le 23/11/2026 la pince a forcé sur la table et s'est arrachée du palonnier du poignet.
+MARGE_TABLE = 20.0
 SOUS_PINCE_DROITE = 40.0        # pince droite (pas tournée) : le bas des mâchoires est à 35 mm sous son axe, 5 mm de marge
 def bas_de_pince(h, a, g, f=0.0, roulis=None):
     """Hauteur du point le plus bas de la pince au-dessus de la table (mm), pour épaule a, coude g et flexion du poignet f (degrés).
@@ -174,7 +178,7 @@ def main():
             if not E.BAS - 3 <= ae <= E.HAUT + 3: raise ErreurServo(f'épaule à {ae:+.0f}° : hors de −30° à +90°')
             if abs(ac) > COUDE_MAX + 3: raise ErreurServo(f'coude à {ac:+.0f}° : hors de ±{COUDE_MAX}°')
             z = bas_de_pince(a.hauteur, ae, ac, ang_f() if f is None else f)
-            if z < 3: raise ErreurServo(f'la pince irait dans la table (bas des mâchoires à {z:.0f} mm)')
+            if z < MARGE_TABLE: raise ErreurServo(f'la pince irait trop près de la table (bas des mâchoires à {z:.0f} mm, il en faut {MARGE_TABLE:.0f})')
         etat()
         if socle: print('\nSocle : t45 = tourner à +45° (de −90 à +90), t0 = revenir en face.', end='')
         print('\nCommandes : e30 = épaule à 30° · c-45 = coude à −45° · n20 = épaule à 20°, avant-bras gardé à l\'horizontale · plat = avant-bras à l\'horizontale')

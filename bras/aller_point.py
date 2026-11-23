@@ -6,7 +6,7 @@ Repère : origine sur l'axe du socle, X vers la droite du robot (vu de derrière
 Commandes :
   v X Y   viser le point : le programme affiche les angles, demande confirmation, tourne le socle et place la pince
           AU-DESSUS du point (épaule relevée de 25°), pince à plat. Exemple : v 0 400
-  d       descendre sur le point (hauteur de prise : bas des mâchoires à 10 mm de la table)
+  d       descendre sur le point (hauteur de prise : bas des mâchoires à 2 cm de la table par le calcul, moins en vrai)
   m       remonter au-dessus      o / s   ouvrir / serrer la pince
   r       repos                   i       où est la pince        q   quitter
 Chaque geste est vérifié avant d'être fait (butées, table) ; un geste arrêté RETIENT le bras."""
