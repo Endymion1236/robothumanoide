@@ -115,7 +115,10 @@ class Essai:
         self.dire('0. État au départ')
         for i, nom in self.noms.items():
             e = self.bus.etat(i); self.dire(f'  {nom} (n° {i}) : {self.angle(i, e["position"]):+.0f}° · {e["temperature"]} °C · {e["tension"]:.1f} V')
-        self.demander('Dégage la table autour du bras, pince vide. Entrée pour mettre le bras au repos (à la verticale)... ')
+        self.demander('Dégage la table autour du bras, pince vide. Entrée pour mettre le poignet droit puis le bras au repos (à la verticale)... ')
+        # le poignet d'abord : il restait là où il était au lancement (plié à 45° pendant tout le protocole, le 23/11/2026)
+        for i in (c.flexion, c.poignet):
+            if i and not self.serie(i, [0]): return self.fin()
         if not (self.serie(c.coude, [0]) and self.serie(c.epaule, [90])): return self.fin()
         self.dire('1. Coude (épaule à la verticale)')
         if self.serie(c.coude, [45, 0, -45, 0, 90, -90, 0]): self.repetabilite(c.coude, 0, 45, n)
