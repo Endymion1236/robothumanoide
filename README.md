@@ -96,6 +96,23 @@ Idée de Nicolas. Un jeu oblige le robot à voir, décider, saisir et poser : c'
 - **Cartes** : à plat sur la table, presque impossibles à pincer. Piste retenue : **cartes debout dans un support à fentes**,
   rigides ou collées sur un carton épais, une fente par carte, la pince les prend par le haut. Rien n'est dessiné.
 
+## Objectif : Câlin maître du jeu d'un jeu de rôle (23/11/2026)
+
+Idée de Nicolas, en plus du morpion. Un maître du jeu, c'est surtout une voix, une imagination et une mémoire : presque rien ne
+dépend de la précision du bras. **On peut donc commencer sur l'ordinateur, avec la voix et le micro seulement**, avant le buste.
+
+- **Carnet de campagne** : fiches des personnages, ce qui s'est passé, où en est l'histoire (un fichier par partie, sur le PC de
+  Nicolas, jamais dans le dépôt s'il contient des prénoms d'enfants).
+- **Dés gérés par un programme**, jamais « inventés » par l'IA de conversation : dé virtuel annoncé, ou vrais dés dans une piste
+  lus à la caméra.
+- **Scénario écrit à l'avance** dans les grandes lignes, **règles simples** (système maison à un seul dé).
+- **Cadre pour les enfants** : pas de violence détaillée, pas de peur, histoires adaptées à l'âge.
+- **Difficultés** : plusieurs personnes qui parlent en même temps (bâton de parole ou bouton par joueur), savoir qui parle
+  (prénom dit à voix haute, ou caméra de la tête), temps de réponse (un geste d'attente), coût de l'IA en ligne et connexion.
+- **Le bras, plus tard** : désigner un joueur, montrer un lieu sur une carte, déplacer une figurine (le geste du pion de morpion).
+- **Piste pour le club** : une aventure de poneys, chaque enfant joue un cavalier et sa monture ; atelier de jour de pluie.
+- **À demander à Nicolas avant de commencer** : âge des joueurs, nombre d'enfants autour de la table.
+
 ## Se repérer dans l'espace (12/11/2026)
 
 | Besoin | Outil | Quand |
