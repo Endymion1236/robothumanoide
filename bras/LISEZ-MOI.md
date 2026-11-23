@@ -349,3 +349,10 @@ Pince vers le bas : seulement 190 à 255 mm devant l'épaule, entre 50 et 90 mm 
 Fait dans la fenêtre : un déplacement hors de portée **glisse** vers le point atteignable le plus proche (monter en avançant un
 peu, par exemple) et le dit ; pas réglable (1, 2, 5 ou 10 cm). `geometrie.angles_plan` sait calculer les deux configurations du
 coude, mais la fenêtre n'utilise que « coude en haut ». Essayé en simulation.
+
+**Amplitudes vérifiées par le calcul le 23/11/2026** (pièces seules, sans les câbles) :
+- **flexion du poignet : libre jusqu'à ± 96° seulement**, la fourche touche ensuite son support. Les ± 110° envisagés plus haut
+  sont donc impossibles avec les pièces actuelles ; il faudrait une fourche plus longue.
+- **coude : la fourche de l'avant-bras est libre jusqu'à ± 109°**, avec le berceau actuel comme avec le berceau à parois hautes ;
+  de −90° à −100°, ni le poignet ni la pince ne touchent le berceau du coude. Passer la limite du programme de 90° à 97° est donc
+  possible côté pièces ; reste à vérifier sur le vrai bras, à la main, que les câbles et le haut du bras ne gênent pas.
