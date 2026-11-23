@@ -160,7 +160,10 @@ class Controleur:
         ae, ac = self._angles(); self._verifier(ae, ac, angle)
         self._bouger([(self.flexion, MILIEU + self.sf * pas(angle))], f'Poignet plié à {angle:+.0f}°')
 
-    DEPART = {0: (400.0, 130.0), -90: (220.0, 70.0)}         # positions de départ : (mm devant l'épaule, hauteur du milieu des mâchoires, mm)
+    # positions de départ selon l'inclinaison de la pince : (mm devant l'épaule, hauteur du milieu des mâchoires, mm).
+    # Plus la pince pointe vers le bas, plus elle travaille PRÈS du socle : à plat 36–45 cm, à 45° 34–42 cm, à 70° 26–34 cm, à 90° 19–26 cm.
+    DEPART = {0: (400.0, 130.0), -45: (380.0, 120.0), -70: (300.0, 110.0), -90: (220.0, 70.0)}
+    NOMS_INCL = {0: 'à plat', -45: 'en biais (45°)', -70: 'presque vers le bas (70°)', -90: 'vers le bas'}
 
     def _deplacer(self, avance, monte, inclinaison, depart=False):
         """Déplace la PINCE de quelques millimètres (vers l'avant, vers le haut) en gardant son inclinaison : c'est le programme qui
@@ -168,7 +171,7 @@ class Controleur:
         depart=True : amène d'abord la pince à une position de départ commode, dans cette inclinaison."""
         if not self.flexion: raise ErreurServo('il faut la flexion du poignet (servo n° 6) pour déplacer la pince ainsi')
         import geometrie as G
-        nom = 'à plat' if inclinaison == 0 else 'vers le bas'
+        nom = self.NOMS_INCL.get(inclinaison, f'inclinée de {inclinaison}°')
         ae, ac = self._angles(); f = self._flex(); s, z, t = G.position_plan(ae, ac, f, self.hauteur)
         if depart: s, z, avance, monte = *self.DEPART[inclinaison], 0, 0
         elif abs(t - inclinaison) > 8: raise ErreurServo(f'la pince n\'est pas encore {nom} : clique d\'abord sur le rond « Pince {nom} »')
@@ -273,10 +276,10 @@ def fenetre(ctrl):
     cpas = ttk.Frame(cd); cpas.grid(row=0, column=4, padx=10)
     ttk.Label(cpas, text='de', font=gros).pack(side='left')
     for v in (10, 20, 50, 100): ttk.Radiobutton(cpas, text=f'{v // 10} cm', variable=pas_mm, value=v).pack(side='left', padx=2)
-    for k, (texte, v) in enumerate([('Pince à plat (prendre par le côté)', 0), ('Pince vers le bas (prendre par le dessus)', -90)]):
-        r = ttk.Radiobutton(cd, text=texte, variable=incl, value=v, command=lambda: ctrl.demander('deplacer', 0, 0, incl.get(), True)); r.grid(row=1, column=2 * k, columnspan=2, sticky='w', padx=6)
+    for k, (texte, v) in enumerate([('Pince à plat (par le côté, loin : 36 à 45 cm)', 0), ('En biais à 45° (34 à 42 cm)', -45), ('Presque vers le bas, 70° (26 à 34 cm)', -70), ('Vers le bas (par le dessus, près : 19 à 26 cm)', -90)]):
+        r = ttk.Radiobutton(cd, text=texte, variable=incl, value=v, command=lambda: ctrl.demander('deplacer', 0, 0, incl.get(), True)); r.grid(row=1 + k // 2, column=2 * (k % 2), columnspan=3, sticky='w', padx=6)
         if not ctrl.flexion: r.configure(state='disabled')
-    ou = ttk.Label(cd, text='', font=gros); ou.grid(row=2, column=0, columnspan=4, sticky='w', padx=6, pady=2)
+    ou = ttk.Label(cd, text='', font=gros); ou.grid(row=3, column=0, columnspan=5, sticky='w', padx=6, pady=2)
 
     cp = ttk.LabelFrame(f, text=' Pince '); cp.pack(fill='x', padx=10, pady=6)
     for k, (texte, a) in enumerate([('Ouvrir', 'o'), ('Serrer doux', 's'), ('Serrer fort', 'S')]):

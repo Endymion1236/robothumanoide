@@ -356,3 +356,8 @@ coude, mais la fenêtre n'utilise que « coude en haut ». Essayé en simulation
 - **coude : la fourche de l'avant-bras est libre jusqu'à ± 109°**, avec le berceau actuel comme avec le berceau à parois hautes ;
   de −90° à −100°, ni le poignet ni la pince ne touchent le berceau du coude. Passer la limite du programme de 90° à 97° est donc
   possible côté pièces ; reste à vérifier sur le vrai bras, à la main, que les câbles et le haut du bras ne gênent pas.
+
+**Inclinaisons intermédiaires (23/11/2026).** Constat de Nicolas : pince vers le bas, on ne prend rien au-delà d'une petite zone
+proche du socle. Calcul, bas de la pince à 10 mm de la table : à plat 356–450 mm devant l'épaule ; à −45° 342–420 ; à −60° 294–374 ;
+à −75° 242–324 ; à −90° 190–260. Plus la pince pointe vers le bas, plus elle travaille près. La fenêtre propose maintenant quatre
+inclinaisons (à plat, 45°, 70°, vers le bas), qui se recouvrent de 19 à 45 cm. Essayé en simulation.
