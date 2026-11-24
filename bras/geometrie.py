@@ -48,15 +48,58 @@ def position_plan(epaule, coude, flexion, hauteur_epaule=179.0):
     return (B.L_BRAS * math.cos(a) + B.L_COUDE_FLEXION * math.cos(ag) + B.L_APRES_FLEXION * math.cos(t),
             hauteur_epaule + B.L_BRAS * math.sin(a) + B.L_COUDE_FLEXION * math.sin(ag) + B.L_APRES_FLEXION * math.sin(t), math.degrees(t))
 
-def angles_pour(X, Y, hauteur_axe=H_PRISE, hauteur_epaule=179.0):
-    """Renvoie {'socle', 'epaule', 'coude', 'flexion'} en degrés, pince à l'horizontale, ou lève HorsDePortee avec la raison."""
+INCLINAISONS = (0, -15, -30, -45, -60, -75, -90)     # essayées dans cet ordre : la pince la plus à plat possible d'abord
+def hauteur_prise(inclinaison=0.0):
+    """Hauteur du MILIEU des mâchoires pour saisir, la pince inclinée de `inclinaison` degrés : celle qui laisse le point le plus bas
+    de la pince 2 mm au-dessus de la garde de la table (22 mm par le calcul). À plat : 62 mm (H_PRISE). Pointée vers le bas : 57 mm."""
+    t = math.radians(inclinaison)
+    return B.MARGE_TABLE + 2.0 + B.SOUS_PINCE_DROITE * abs(math.cos(t)) + B.BOUT_MACHOIRES * abs(math.sin(t))
+
+def angles_pour(X, Y, hauteur_axe=None, hauteur_epaule=179.0, inclinaison=0.0):
+    """Renvoie {'socle', 'epaule', 'coude', 'flexion'} en degrés, la pince inclinée de `inclinaison` (0 = à l'horizontale, −90 = pointée
+    vers le bas), ou lève HorsDePortee avec la raison. hauteur_axe : hauteur du milieu des mâchoires (par défaut, celle de la prise)."""
+    if hauteur_axe is None: hauteur_axe = hauteur_prise(inclinaison)
     R = math.hypot(X, Y)
     if R <= abs(DECALAGE_BRAS) + 1: raise HorsDePortee('point trop près du socle')
     s = math.sqrt(R * R - DECALAGE_BRAS ** 2)                       # distance à parcourir dans le plan du bras, depuis l'axe de l'épaule
     socle = math.degrees(math.atan2(X, Y) - math.atan2(DECALAGE_BRAS, s))
     if abs(socle) > B.SOCLE_MAX: raise HorsDePortee(f'il faudrait tourner le socle de {socle:+.0f}° (limite ±{B.SOCLE_MAX}°)')
-    try: return dict(angles_plan(s, hauteur_axe, 0.0, hauteur_epaule), socle=socle)
+    try: return dict(angles_plan(s, hauteur_axe, inclinaison, hauteur_epaule), socle=socle)
     except HorsDePortee as e: raise HorsDePortee(f'{e} ({R:.0f} mm du socle)')
+
+def prise_et_approche(X, Y, hauteur_epaule=179.0, inclinaison=0.0):
+    """Les deux positions d'un geste de prise, pour une inclinaison donnée : (prise, approche). Lève HorsDePortee si l'une des deux est
+    impossible ou si la descente de l'une à l'autre frôlerait la table.
+    Pince à plat : l'approche est la position d'avant (épaule relevée de 25°), essayée en vrai le 24/11/2026.
+    Pince inclinée : on cherche d'abord une approche À LA VERTICALE du point (7, puis 5,5, puis 4 cm plus haut)."""
+    prise = angles_pour(X, Y, None, hauteur_epaule, inclinaison)
+    if B.bas_de_pince(hauteur_epaule, prise['epaule'], prise['coude'], prise['flexion'], roulis=0.0) < B.MARGE_TABLE: raise HorsDePortee('la pince toucherait la table')
+    # tout près du socle, pince pointée vers le bas, le poignet n'a plus assez de course pour monter à la verticale sans changer
+    # d'inclinaison : on accepte alors une approche un peu moins raide (5, 10 puis 15° de moins), toujours au-dessus du point.
+    essais = [] if abs(inclinaison) < 1 else [lambda dz=dz, di=di: angles_pour(X, Y, hauteur_prise(inclinaison) + dz, hauteur_epaule, min(0.0, inclinaison + di))
+                                              for di in (0.0, 5.0, 10.0, 15.0) for dz in (70.0, 55.0, 40.0)]
+    erreur = None
+    for essai in essais + [lambda: au_dessus(prise)]:
+        try: haut = essai()
+        except HorsDePortee as e: erreur = erreur or e; continue
+        cles = ('epaule', 'coude', 'flexion')
+        gain = position_plan(*[haut[k] for k in cles], hauteur_epaule)[1] - position_plan(*[prise[k] for k in cles], hauteur_epaule)[1]
+        if gain < 30: erreur = erreur or HorsDePortee('l\'approche ne serait pas assez haute au-dessus du point'); continue
+        if trajet_sur([haut[k] for k in cles], [prise[k] for k in cles], hauteur_epaule): return prise, haut
+        erreur = erreur or HorsDePortee('la descente passerait trop près de la table')
+    raise HorsDePortee(f'pas de position d\'approche ({erreur})')
+
+def choisir_inclinaison(X, Y, hauteur_epaule=179.0, imposee=None):
+    """Choisit l'inclinaison de la pince pour saisir en (X, Y) : la plus à plat qui marche (0°, puis −15°, −30°… jusqu'à −90°).
+    `imposee` : n'essayer que celle-là. Renvoie (inclinaison, prise, approche) ou lève HorsDePortee (la raison donnée est celle de la
+    pince à plat si le point est loin, celle de la pince pointée vers le bas s'il est près)."""
+    erreurs = {}
+    for incl in (INCLINAISONS if imposee is None else (float(imposee),)):
+        try: return (incl,) + prise_et_approche(X, Y, hauteur_epaule, incl)
+        except HorsDePortee as e: erreurs[incl] = e
+    if imposee is not None: raise erreurs[float(imposee)]
+    pres = 'trop près' in str(erreurs[0]) or 'coude' in str(erreurs[0])
+    raise HorsDePortee(f"{erreurs[-90] if pres else erreurs[0]} ; aucune inclinaison de la pince ne convient")
 
 def au_dessus(angles, leve=25.0):
     """La position d'approche : la même, épaule relevée de `leve` degrés, le poignet compensant pour garder la pince à plat.
@@ -76,6 +119,15 @@ def ou_est_la_pince(socle, epaule, coude, flexion, hauteur_epaule=179.0):
 def trajet_sur(depart, arrivee, hauteur_epaule=179.0, pas=12):
     """Vrai si, en passant en ligne droite d'un jeu d'angles (épaule, coude, flexion) à l'autre, la pince ne descend jamais sous la table."""
     return all(B.bas_de_pince(hauteur_epaule, *[d + (f - d) * k / pas for d, f in zip(depart, arrivee)], roulis=0.0) >= B.MARGE_TABLE for k in range(pas + 1))
+
+def zone_toutes(hauteur_epaule=179.0):
+    """Distances au socle, droit devant, que la pince atteint en choisissant son inclinaison : (mini, maxi) en mm."""
+    ok = []
+    for r in range(100, 700, 2):
+        th = math.atan2(DECALAGE_BRAS, math.sqrt(max(r * r - DECALAGE_BRAS ** 2, 1)))
+        try: choisir_inclinaison(r * math.sin(th), r * math.cos(th), hauteur_epaule); ok.append(r)
+        except HorsDePortee: pass
+    return (min(ok), max(ok)) if ok else None
 
 def zone(hauteur_axe=H_PRISE, hauteur_epaule=179.0):
     """Distances au socle, droit devant, entre lesquelles la pince peut se poser à plat à cette hauteur : (mini, maxi) en mm."""

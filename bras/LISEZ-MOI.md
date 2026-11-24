@@ -375,3 +375,21 @@ hauteur de prise de `aller_point` est relevée d'autant. La zone de prise à pla
 de 5 mm et relit l'effort de l'épaule, du coude et du poignet après chacune. Un saut de 10 points ou plus (`SEUIL_CONTACT`) = la
 pince touche la table ou l'objet : elle remonte d'une marche et le dit en rouge, au lieu de forcer. Seuil à ajuster à l'essai.
 Précision sur l'incident : c'est le **palonnier qui a quitté l'axe du servo n° 5** (dit par Nicolas), pas les vis de la pince.
+
+## Aller à un point : premier essai réel, et inclinaison choisie toute seule (24/11/2026)
+
+**Premier essai réel de `aller_point` (Nicolas)** : `v 13 435`, point lu à la caméra → socle +9°, épaule 0°, coude −46°, poignet +46° ;
+socle arrivé en 0,5 s, pince au-dessus du point en 2,3 s. Pas encore de mesure à la règle de l'endroit où la pince arrive, ni de descente.
+Un point à 339 mm a été refusé (coude à −103°, hors de ±90°) : à plat, le bras ne se pose qu'entre 368 et 458 mm.
+
+**`v X Y` choisit maintenant l'inclinaison de la pince** (`geometrie.choisir_inclinaison`) : à plat si c'est possible, sinon −15°, −30°…
+jusqu'à −90° (pointée vers le bas), la première qui marche. Hauteur de prise : celle qui laisse le point le plus bas de la pince à
+22 mm de la table par le calcul, quelle que soit l'inclinaison (milieu des mâchoires à 62 mm à plat, 57 mm pointée vers le bas).
+Approche : à plat, comme avant (épaule relevée de 25°) ; inclinée, à la verticale du point, 4 à 7 cm plus haut (tout près du socle,
+avec une pince 5 à 15° moins raide, faute de course au poignet). `v X Y 45` impose une inclinaison.
+
+**Zone atteinte droit devant, par le calcul : de 204 à 470 mm du socle**, sans trou (à plat de 368 à 458). Inclinaison choisie :
+−90° de 205 à 235 mm, −75° jusqu'à 280, −60° jusqu'à 340, −45° vers 355, à plat de 370 à 445, −15° à 460.
+Vérifié sur 919 points de la table : butées, table (22 mm au plus bas), approche au moins 3 cm au-dessus, descente sans frôler.
+**Essayé sur 6 servos simulés seulement.** Limite connue : pince inclinée, les mâchoires serrent toujours de côté ; un objet de moins
+de 2,5 cm de haut passe sous leur bout.

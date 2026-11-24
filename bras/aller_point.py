@@ -1,11 +1,12 @@
-"""Envoyer la pince à un point de la table, pince à l'horizontale. Premier essai du « aller à un point », sans caméra :
+"""Envoyer la pince à un point de la table. Premier essai du « aller à un point », sans caméra :
 on tape la position à la main (celle que donne camera\\voir_table.bat, ou mesurée à la règle).
 
 Lancer : aller_point.bat (FD et la fenêtre de contrôle fermés, 12 V allumé). Il faut le poignet complet et tous les étalonnages.
 Repère : origine sur l'axe du socle, X vers la droite du robot (vu de derrière), Y vers l'avant, en millimètres.
 Commandes :
-  v X Y   viser le point : le programme affiche les angles, demande confirmation, tourne le socle et place la pince
-          AU-DESSUS du point (épaule relevée de 25°), pince à plat. Exemple : v 0 400
+  v X Y   viser le point : le programme CHOISIT L'INCLINAISON de la pince (à plat si possible, sinon inclinée vers le bas juste
+          ce qu'il faut, jusqu'à pointée vers le bas), affiche les angles, demande confirmation, tourne le socle et place la
+          pince AU-DESSUS du point. Exemple : v 0 400.   v X Y 45 : impose une inclinaison de 45° vers le bas.
   d       descendre sur le point (hauteur de prise : bas des mâchoires à 2 cm de la table par le calcul, moins en vrai)
   m       remonter au-dessus      o / s   ouvrir / serrer la pince
   r       repos                   i       où est la pince        q   quitter
@@ -36,12 +37,15 @@ class Pointeur:
         ok = c._bouger([(c.epaule, E.position(arrivee[0], c.haut)), (c.coude, MILIEU + c.sc * pas(arrivee[1])), (c.flexion, MILIEU + c.sf * pas(arrivee[2]))], nom)
         self.vider(); return ok
 
-    def viser(self, X, Y):
+    def viser(self, X, Y, imposee=None):
         c = self.c
-        try: prise = G.angles_pour(X, Y, G.H_PRISE, c.hauteur); haut = G.au_dessus(prise)
-        except G.HorsDePortee as e: self.dire(f'   Hors de portée : {e}. Zone possible droit devant : de {G.zone(G.H_PRISE, c.hauteur)[0]} à {G.zone(G.H_PRISE, c.hauteur)[1]} mm du socle.'); return
-        self.dire(f"   Pour saisir en X {X:+.0f}, Y {Y:+.0f} : socle {prise['socle']:+.0f}°, épaule {prise['epaule']:+.0f}°, coude {prise['coude']:+.0f}°, poignet {prise['flexion']:+.0f}°")
-        self.dire(f"   D'abord au-dessus : épaule {haut['epaule']:+.0f}°, poignet {haut['flexion']:+.0f}° (pince à {G.ou_est_la_pince(**haut, hauteur_epaule=c.hauteur)[2]:.0f} mm de la table)")
+        try: incl, prise, haut = G.choisir_inclinaison(X, Y, c.hauteur, imposee)
+        except G.HorsDePortee as e:
+            z = G.zone_toutes(c.hauteur); self.dire(f'   Hors de portée : {e}. Zone possible droit devant : de {z[0]} à {z[1]} mm du socle.'); return
+        comment = 'à plat' if abs(incl) < 1 else 'pointée vers le bas' if incl <= -89 else f'inclinée de {abs(incl):.0f}° vers le bas'
+        self.dire(f"   Pour saisir en X {X:+.0f}, Y {Y:+.0f}, pince {comment}{'' if imposee is None else ' (demandé)'} : socle {prise['socle']:+.0f}°, épaule {prise['epaule']:+.0f}°, coude {prise['coude']:+.0f}°, poignet {prise['flexion']:+.0f}°")
+        if imposee is None and abs(incl) >= 1: self.dire('   (à plat, ce point est trop près : j\'incline la pince juste ce qu\'il faut)')
+        self.dire(f"   D'abord au-dessus : épaule {haut['epaule']:+.0f}°, coude {haut['coude']:+.0f}°, poignet {haut['flexion']:+.0f}° (pince à {G.ou_est_la_pince(**haut, hauteur_epaule=c.hauteur)[2]:.0f} mm de la table)")
         if abs(c._roulis()) > 15: self.dire('   La pince est tournée : remets-la droite d\'abord (fenêtre de contrôle, ou tester_poignet).'); return
         if not self.demander('   J\'y vais ? (o/n) ').strip().lower().startswith('o'): return
         ae, ac, _ = self.angles()
@@ -65,15 +69,18 @@ class Pointeur:
         self.dire(f'   socle {so:+.0f}°, épaule {ae:+.0f}°, coude {ac:+.0f}°, poignet {f:+.0f}° → pince en X {x:+.0f}, Y {y:+.0f}, à {z:.0f} mm de la table, inclinée de {t:+.0f}°')
 
     def boucle(self):
-        c = self.c; z = G.zone(G.H_PRISE, c.hauteur)
-        self.dire(f'Zone où la pince peut se poser à plat, droit devant : de {z[0]} à {z[1]} mm de l\'axe du socle.')
-        self.dire('Commandes : v X Y (viser) · d (descendre) · m (remonter) · o / s (pince) · r (repos) · i (infos) · q (quitter)')
+        c = self.c; z, zt = G.zone(G.H_PRISE, c.hauteur), G.zone_toutes(c.hauteur)
+        self.dire(f'Zone atteinte droit devant : de {zt[0]} à {zt[1]} mm de l\'axe du socle (pince à plat de {z[0]} à {z[1]} mm ; plus près, je l\'incline).')
+        self.dire('Commandes : v X Y (viser) · v X Y 45 (viser, pince inclinée de 45°) · d (descendre) · m (remonter) · o / s (pince) · r (repos) · i (infos) · q (quitter)')
         while True:
             mots = self.demander('> ').replace(',', '.').split()
             if not mots: continue
             try:
                 if mots[0] == 'q': break
-                elif mots[0] == 'v' and len(mots) == 3: self.viser(float(mots[1]), float(mots[2]))
+                elif mots[0] == 'v' and len(mots) in (3, 4):
+                    incl = None if len(mots) == 3 else -abs(float(mots[3]))                 # 4e nombre : inclinaison voulue, vers le bas
+                    if incl is not None and incl < -90: raise ErreurServo('inclinaison entre 0 (à plat) et 90 (pointée vers le bas)')
+                    self.viser(float(mots[1]), float(mots[2]), incl)
                 elif mots[0] == 'd': self.descendre()
                 elif mots[0] == 'm': self.monter()
                 elif mots[0] == 'r': self.repos()
