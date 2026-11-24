@@ -402,3 +402,9 @@ de 2,5 cm de haut passe sous leur bout.
 2. **Pince 7 cm trop loin** que la croix visée, alors que la croix est bien à 422 mm de l'axe du socle (mesuré par Nicolas) : la caméra
    a raison, c'est le bras qui dépasse. Cause non trouvée : longueurs du programme (120 / 161 / 200,7) jamais mesurées sur le bras
    réel, ou étalonnage d'un angle. En attente : ce qu'affiche `i` pince descendue, et les trois longueurs mesurées à la règle.
+
+**Suite du 24/11/2026.** Après correction des mesures de la table (400 × 289, marqueur 0 à 198 et 190 mm), la pince arrive à la
+bonne distance mais **4 à 5 cm trop à gauche** (l'objet se retrouve sous la branche droite). Le bras penche à gauche, mesuré au
+niveau après le nouveau berceau du coude : épaule 1,8° de plus que le socle, coude +0,4°, flexion +0,4°, pince +1,2° ; cela
+explique environ 2 cm. À faire : berceau à parois hautes à l'épaule, puis manchon du support de rotation, puis remesurer ;
+s'il reste un écart, chercher du côté de l'alignement du zéro du socle avec le rectangle de marqueurs.

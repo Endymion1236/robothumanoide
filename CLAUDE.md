@@ -54,3 +54,9 @@ la main à partir du 12 V (le Pololu était trop cher). À réception, AVANT tou
 (6 V attendu sans cavalier, non vérifié sur sa version), mesurer la sortie au multimètre, regarder ce qu'il y a au bout des fils.
 Il tire sur le bloc 12 V : avec le bras, il faudra le bloc de 10 A. Deuxième carte Waveshare et bornier de partage du 12 V :
 Nicolas n'a pas dit s'il les a.
+
+**24/11/2026 : contrôle au niveau, articulation par articulation** (idée de Nicolas ; téléphone posé contre le flanc de chaque
+pièce, bras au repos, vu de derrière). Après le nouveau berceau du coude : socle −1,4°, épaule +0,4°, coude +0,8°, flexion +1,2°,
+pince +2,4°. Les écarts qui comptent : **épaule 1,8°** (encore l'ancien berceau à parois basses, à remplacer), coude 0,4° et
+flexion 0,4° (bons), **rotation du poignet 1,2°** (le servo n° 5 ne bouge pas dans son support, barre serrée : Nicolas soupçonne
+le manchon désaxé sur la fourche). **Décision de Nicolas : pour le deuxième bras, contrôle au niveau à chaque étape du montage.**
