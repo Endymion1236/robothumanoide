@@ -393,3 +393,12 @@ avec une pince 5 à 15° moins raide, faute de course au poignet). `v X Y 45` im
 Vérifié sur 919 points de la table : butées, table (22 mm au plus bas), approche au moins 3 cm au-dessus, descente sans frôler.
 **Essayé sur 6 servos simulés seulement.** Limite connue : pince inclinée, les mâchoires serrent toujours de côté ; un objet de moins
 de 2,5 cm de haut passe sous leur bout.
+
+**Première descente réelle (`v 6 422` puis `d`, 24/11/2026) : deux problèmes.**
+1. **Bras bloqué en bas** : `m` et `r` refusés (« la pince passerait trop près de la table »). Le bras fléchit : ses angles réels sont plus
+   bas que ceux demandés, la pince se retrouvait sous la garde de 20 mm et tout trajet était refusé dès son départ. Corrigé :
+   `aller_point` dégage d'abord la pince (épaule seule relevée de 15°), et `trajet_sur` accepte un trajet qui ne fait que monter.
+   Essayé en simulation (épaule affaissée de 4°).
+2. **Pince 7 cm trop loin** que la croix visée, alors que la croix est bien à 422 mm de l'axe du socle (mesuré par Nicolas) : la caméra
+   a raison, c'est le bras qui dépasse. Cause non trouvée : longueurs du programme (120 / 161 / 200,7) jamais mesurées sur le bras
+   réel, ou étalonnage d'un angle. En attente : ce qu'affiche `i` pince descendue, et les trois longueurs mesurées à la règle.

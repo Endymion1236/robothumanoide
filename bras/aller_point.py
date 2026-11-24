@@ -33,7 +33,15 @@ class Pointeur:
         """Épaule, coude et poignet ensemble vers un jeu d'angles, après vérification du trajet."""
         c = self.c; arrivee = [cible['epaule'], cible['coude'], cible['flexion']]
         c._verifier(*arrivee)
-        if not G.trajet_sur(list(self.angles()), arrivee, c.hauteur): raise ErreurServo('sur ce trajet la pince passerait trop près de la table : fais d\'abord « r » (repos)')
+        ae, ac, f = self.angles(); bas = B.bas_de_pince(c.hauteur, ae, ac, f, roulis=0.0)
+        if bas < B.MARGE_TABLE and arrivee[0] > ae + 1:
+            # Le bras a fléchi sous son poids : la pince est plus bas que prévu, sous la garde de la table. On la dégage d'abord en
+            # relevant l'épaule seule de 15° (tout le bras monte), puis on fait le geste demandé. Sans cela, « m » et « r » étaient
+            # refusés et le bras restait bloqué en bas (Nicolas, 24/11/2026).
+            self.dire(f'   La pince est plus bas que prévu ({bas:.0f} mm de la table par le calcul, le bras fléchit) : je la dégage d\'abord.')
+            if not c._bouger([(c.epaule, E.position(min(ae + 15, E.REPOS), c.haut))], 'Dégagement, épaule relevée'): self.vider(); return False
+            self.vider()
+        if not G.trajet_sur(list(self.angles()), arrivee, c.hauteur): raise ErreurServo('sur ce trajet la pince passerait trop près de la table (rien n\'a bougé). Essaie « r » (repos) ; si « r » est refusé aussi, quitte avec « q » en TENANT le bras.')
         ok = c._bouger([(c.epaule, E.position(arrivee[0], c.haut)), (c.coude, MILIEU + c.sc * pas(arrivee[1])), (c.flexion, MILIEU + c.sf * pas(arrivee[2]))], nom)
         self.vider(); return ok
 

@@ -117,8 +117,13 @@ def ou_est_la_pince(socle, epaule, coude, flexion, hauteur_epaule=179.0):
     return (DECALAGE_BRAS * math.cos(th) + s * math.sin(th), -DECALAGE_BRAS * math.sin(th) + s * math.cos(th), z, math.degrees(t))
 
 def trajet_sur(depart, arrivee, hauteur_epaule=179.0, pas=12):
-    """Vrai si, en passant en ligne droite d'un jeu d'angles (épaule, coude, flexion) à l'autre, la pince ne descend jamais sous la table."""
-    return all(B.bas_de_pince(hauteur_epaule, *[d + (f - d) * k / pas for d, f in zip(depart, arrivee)], roulis=0.0) >= B.MARGE_TABLE for k in range(pas + 1))
+    """Vrai si, en passant en ligne droite d'un jeu d'angles (épaule, coude, flexion) à l'autre, la pince ne passe jamais sous la
+    garde de la table. Si elle est DÉJÀ sous la garde au départ (le bras fléchit sous son poids : ses angles réels sont plus bas que
+    ceux demandés), un trajet qui ne fait que MONTER reste permis : sinon le bras resterait bloqué en bas, « m » et « r » refusés
+    (arrivé à Nicolas le 24/11/2026)."""
+    h = [B.bas_de_pince(hauteur_epaule, *[d + (f - d) * k / pas for d, f in zip(depart, arrivee)], roulis=0.0) for k in range(pas + 1)]
+    if h[0] >= B.MARGE_TABLE: return min(h) >= B.MARGE_TABLE
+    return h[-1] >= B.MARGE_TABLE and all(y >= x - 0.5 for x, y in zip(h, h[1:]))
 
 def zone_toutes(hauteur_epaule=179.0):
     """Distances au socle, droit devant, que la pince atteint en choisissant son inclinaison : (mini, maxi) en mm."""
