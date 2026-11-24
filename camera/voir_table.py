@@ -9,19 +9,29 @@ import argparse, sys
 import cv2
 import table as T
 
+def ecrire(image, texte, pos, couleur, taille=0.7):
+    """Un texte lisible sur n'importe quel fond : lettres claires sur un bandeau noir (Nicolas, 24/11/2026 : « je ne vois rien »,
+    l'orange se perdait sur le bois). La taille suit celle de l'image, qui est réduite à l'écran."""
+    t = taille * image.shape[0] / 720; ep = max(1, round(2 * t))
+    (l, hh), bas = cv2.getTextSize(texte, cv2.FONT_HERSHEY_SIMPLEX, t, ep)
+    x = max(4, min(int(pos[0]), image.shape[1] - l - 8)); y = max(hh + 8, min(int(pos[1]), image.shape[0] - bas - 6))
+    cv2.rectangle(image, (x - 4, y - hh - 6), (x + l + 4, y + bas + 4), (0, 0, 0), -1)
+    cv2.putText(image, texte, (x, y), cv2.FONT_HERSHEY_SIMPLEX, t, couleur, ep, cv2.LINE_AA)
+
 def dessiner(image, centres, contours, h, clics):
     for i, c in contours.items():
         cv2.polylines(image, [c.astype(int)], True, (0, 200, 0), 2)
         cv2.putText(image, str(i), (int(centres[i][0]) - 8, int(centres[i][1]) + 8), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
     if h is None:
         manque = [i for i in T.IDS if i not in centres]
-        cv2.putText(image, f'Marqueurs manquants : {manque}', (10, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2); return
+        ecrire(image, f'Marqueurs manquants : {manque}', (10, 40), (80, 80, 255)); return
     cv2.circle(image, T.vers_image(h, 0, 0), 6, (255, 0, 0), -1)                       # l'axe du socle, s'il est dans l'image
-    for (X, Y) in clics:
-        a, d = T.pour_le_bras(X, Y); p = T.vers_image(h, X, Y)
-        cv2.circle(image, p, 5, (0, 165, 255), -1)
-        cv2.putText(image, f'X {X:+.0f}  Y {Y:+.0f} mm | socle {a:+.0f} deg, {d:.0f} mm', (p[0] + 8, p[1] - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 165, 255), 2)
-    cv2.putText(image, 'Table reperee : clique sur un point', (10, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 150, 0), 2)
+    for k, (X, Y) in enumerate(clics):
+        p = T.vers_image(h, X, Y); dernier = k == len(clics) - 1
+        cv2.circle(image, p, 9, (0, 0, 0), -1); cv2.circle(image, p, 6, (0, 200, 255) if dernier else (150, 150, 150), -1)
+        if dernier: ecrire(image, f'X {X:+.0f}   Y {Y:+.0f} mm', (p[0] + 14, p[1] - 14), (0, 230, 255), 0.8)     # seul le dernier clic est écrit
+    ecrire(image, 'Table reperee : clique sur un point', (10, 40), (120, 255, 120))
+    if clics: ecrire(image, f'Dernier point :  X {clics[-1][0]:+.0f}   Y {clics[-1][1]:+.0f} mm   (pour aller_point : v {clics[-1][0]:.0f} {clics[-1][1]:.0f})', (10, image.shape[0] - 16), (0, 230, 255), 0.8)
 
 def ech_fenetre(haut_image, haut_max):
     """De combien réduire l'image pour qu'elle tienne à l'écran (1.0 = pas de réduction). Les mesures se font sur l'image entière."""
