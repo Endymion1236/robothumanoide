@@ -15,12 +15,16 @@ Repère : origine sur l'axe du socle, **X vers la droite du robot** (vu de derri
 
 ## Étapes
 
-1. **Imprimer** `sortie/marqueurs_table.pdf` sur une feuille A4, **à 100 %** (taille réelle). Le trait de contrôle en bas de page
-   doit mesurer 100 mm. Découper les 4 carrés en gardant leur marge blanche.
+1. **Imprimer** `sortie/marqueurs_table.pdf` sur une feuille A4, **à 100 %** (taille réelle). Découper les 4 carrés en gardant leur marge blanche.
+   Le trait de contrôle en bas de page mesure 100 mm si l'impression est à l'échelle, mais **une impression un peu réduite convient
+   aussi** (Nicolas, 24/11/2026 : trait de 95 mm) : le calcul n'utilise que les centres des marqueurs et les distances mesurées à
+   la règle, jamais la taille des carrés.
 2. **Coller** les 4 marqueurs à plat sur la table, en rectangle, vus de derrière le bras :
    0 près à gauche, 1 près à droite, 2 au fond à droite, 3 au fond à gauche. Ils doivent rester visibles quand le bras est au repos.
 3. **Mesurer** à la règle, de centre à centre : la largeur (0 → 1), la profondeur (0 → 3), et la position du marqueur 0 par
-   rapport à l'axe du socle (combien à gauche, combien en avant). Lancer `regler_table.bat` et taper ces 4 nombres.
+   rapport à l'axe du socle (combien à gauche, combien en avant). Astuce : mesurer du même coin au même coin (par exemple coin
+   bas gauche du carré noir) revient au même que de centre à centre. Disposition conseillée : rectangle de 400 × 300 mm, marqueur 0
+   à 200 mm à gauche et 180 mm en avant de l'axe du socle ; vérifier que les deux diagonales sont égales (500 mm). Lancer `regler_table.bat` et taper ces 4 nombres.
 4. **Lancer** `voir_table.bat` : les marqueurs vus sont entourés en vert. Cliquer sur un point de l'image affiche sa position,
    l'angle du socle et la distance pour l'atteindre. Touche Q pour quitter.
 
