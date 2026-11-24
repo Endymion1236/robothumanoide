@@ -1,6 +1,8 @@
 # La caméra au-dessus de la table (commencée le 23/11/2026)
 
-**Essayé sur une vue simulée seulement, pas encore avec la vraie caméra.**
+**Premier essai réel le 24/11/2026 : les 4 marqueurs sont reconnus par la C270 et un clic donne une position** (marqueurs
+imprimés à 95 %, rectangle de 400 × 300 mm, marqueur 0 à 200 mm à gauche et 200 mm en avant de l'axe du socle, « a priori »).
+Les positions affichées sont cohérentes avec l'image ; **pas encore comparées à une mesure à la règle**, ni utilisées par le bras.
 
 But : que Câlin sache OÙ se trouve un objet sur la table, en millimètres par rapport à son socle. Le bras ne bouge pas encore :
 cette première étape ne fait que regarder et mesurer.
