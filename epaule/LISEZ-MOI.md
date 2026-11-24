@@ -163,7 +163,9 @@ berceau (constat de Nicolas). Cause : les parois du berceau ne faisaient que 19 
 du boîtier du servo, avec 0,2 mm de jeu de chaque côté → bascule de ± 2°, soit plus d'un centimètre au bout du bras.
 **`berceau_a_inserts.stl` a maintenant des parois de 41 mm** (elles tiennent 32 mm de boîtier, jusqu'à 2 mm sous la bride).
 Même correction dans le support de flexion du poignet (`poignet/sortie/flexion_support.stl`), qui reprend ce berceau.
-Vérifié par le calcul : aucun contact sur toute la course à l'épaule, au coude et à la flexion du poignet. Rien d'imprimé.
+Vérifié par le calcul : aucun contact sur toute la course à l'épaule, au coude et à la flexion du poignet.
+**Monté par Nicolas le 24/11/2026, au coude puis à l'épaule : le servo entre « nickel », « ça tient mieux ».** Au niveau, l'écart
+socle → épaule passe de 1,8° à 1,0° (mesure au téléphone, précise à 1 ou 2° près seulement).
 En attendant la réimpression : deux tours de ruban adhésif autour du boîtier du servo, là où il entre dans le berceau.
 
 ## Ressort posé (23/11/2026) : ce qu'on a appris

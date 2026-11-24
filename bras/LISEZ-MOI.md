@@ -408,3 +408,8 @@ bonne distance mais **4 à 5 cm trop à gauche** (l'objet se retrouve sous la br
 niveau après le nouveau berceau du coude : épaule 1,8° de plus que le socle, coude +0,4°, flexion +0,4°, pince +1,2° ; cela
 explique environ 2 cm. À faire : berceau à parois hautes à l'épaule, puis manchon du support de rotation, puis remesurer ;
 s'il reste un écart, chercher du côté de l'alignement du zéro du socle avec le rectangle de marqueurs.
+
+**Fin du 24/11/2026.** Berceaux à parois hautes montés au coude et à l'épaule. Nouvelles mesures au niveau : socle −1°, épaule 0°,
+coude +2,4°, flexion +3°, pince −2,4° (douteuse : branches en V) — trop dispersées pour chercher au degré près. Décision : on
+ÉTALONNE au lieu de redresser. Prochain essai : deux croix (vers Y 430 et Y 300), écart du milieu des mâchoires mesuré à la règle
+(côté et profondeur), puis ajout d'un réglage de correction (angle du socle + décalage) dans `aller_point`.
