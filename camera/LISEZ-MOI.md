@@ -33,6 +33,13 @@ Repère : origine sur l'axe du socle, **X vers la droite du robot** (vu de derri
 Ces programmes utilisent l'installation de la tête (`tete\installer.bat`, déjà faite). Caméra : `--camera 1` dans le lanceur
 (0 = webcam du portable, voir `tete\lister_cameras.bat`).
 
+## Si la caméra ne voit pas toute la table (24/11/2026)
+
+La C270 n'a pas de zoom : son champ est fixe. `voir_table` demande maintenant l'image en **4/3 (1280 × 960)**, tout le capteur,
+au lieu du 16/9 qui coupait le haut et le bas ; la fenêtre est réduite à l'écran, les mesures se font sur l'image entière.
+Au-delà, il faut **monter la caméra** : elle voit environ 1 m de large et 75 cm de profond à 1 m de haut (ordre de grandeur
+d'après le champ annoncé de 60°, non mesuré), donc compter 80 cm à 1 m au-dessus de la table. On peut aussi la pencher.
+
 ## Ce que le calcul a vérifié (vue simulée, caméra penchée)
 
 - les 4 marqueurs sont reconnus ; un point connu de la table est retrouvé à moins de 1 mm ;
