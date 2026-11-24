@@ -3,11 +3,15 @@
 Lancer : voir_table.bat (après regler_table.bat). Dans la fenêtre :
   - les marqueurs vus sont entourés en vert ; il faut les 4 pour mesurer ;
   - CLIQUER sur un point de l'image affiche sa position sur la table, l'angle du socle et la distance pour l'atteindre ;
+  - touche P : enregistre une photo de la table dans camera\\photos (pour mettre au point la reconnaissance des objets) ;
   - touche Q pour quitter.
 Le bras ne bouge pas : ce programme ne fait que regarder. Première étape de « prends le gobelet »."""
-import argparse, sys
+import argparse, sys, time
+from pathlib import Path
 import cv2
 import table as T
+
+PHOTOS = Path(__file__).with_name('photos')          # reste sur le PC de Nicolas (.gitignore)
 
 def ecrire(image, texte, pos, couleur, taille=0.7):
     """Un texte lisible sur n'importe quel fond : lettres claires sur un bandeau noir (Nicolas, 24/11/2026 : « je ne vois rien »,
@@ -55,18 +59,23 @@ def main():
             X, Y = T.vers_table(etat['h'], x, y); ang, d = T.pour_le_bras(X, Y); etat['clics'] = (etat['clics'] + [(X, Y)])[-3:]
             print(f'Point : X = {X:+.0f} mm (droite), Y = {Y:+.0f} mm (avant) → socle à {ang:+.0f}°, à {d:.0f} mm de l\'axe du socle')
     cv2.namedWindow('Table de Calin'); cv2.setMouseCallback('Table de Calin', souris)
-    print('Fenêtre ouverte. Clique sur un point de la table ; touche Q pour quitter.')
+    print('Fenêtre ouverte. Clique sur un point de la table ; P = photo ; Q = quitter.')
     vu = False
     while True:
         ok, image = cam.read()
         if not ok: print('La caméra ne répond plus.'); break
+        brute = image.copy()
         centres, contours = T.detecter(image); h = T.passage(centres, reglage)
         if h is not None: etat['h'] = h
         dessiner(image, centres, contours, h, etat['clics'] if h is not None else [])
         if not vu: vu = True; print(f'Image de la caméra : {image.shape[1]} × {image.shape[0]} points.')
         etat['ech'] = ech_fenetre(image.shape[0], a.fenetre)
         cv2.imshow('Table de Calin', image if etat['ech'] == 1.0 else cv2.resize(image, None, fx=etat['ech'], fy=etat['ech'], interpolation=cv2.INTER_AREA))
-        if cv2.waitKey(1) & 0xFF in (ord('q'), ord('Q')): break
+        touche = cv2.waitKey(1) & 0xFF
+        if touche in (ord('q'), ord('Q')): break
+        if touche in (ord('p'), ord('P')):                      # P : enregistrer l'image telle que la caméra la voit, sans les dessins
+            PHOTOS.mkdir(exist_ok=True); nom = PHOTOS / time.strftime('table_%Y%m%d_%H%M%S.png')
+            cv2.imwrite(str(nom), brute); print(f'Photo enregistrée : {nom}')
     cam.release(); cv2.destroyAllWindows()
 
 if __name__ == '__main__': main()
