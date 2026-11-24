@@ -85,3 +85,14 @@ Avec la rotation : + 132 mm et + 221 g en tout. Estimation (`epaule/calcul_poign
 Conclusion : avec le poignet complet, le bras de table porte des **objets légers** (gobelet vide, ≈ 100 g), pas un gobelet
 plein bras tendu, même avec le ressort. À confirmer par le protocole après le montage de la rotation.
 Piste pour raccourcir (non dessinée) : un avant-bras neuf qui loge le servo n° 6 entre ses deux plaques (≈ 40 mm et 40 g de moins).
+
+## Jeu du support de flexion sur l'avant-bras (24/11/2026)
+
+Nicolas : le support de flexion bougeait un peu sur le bout de l'avant-bras ; une petite vis posée sur le côté l'a bloqué.
+`flexion_support.stl` a maintenant **4 trous Ø 3,4 sur les flancs du manchon** (2 par flanc, au milieu des 15 mm, à 9 mm de part
+et d'autre du plan de joint de l'avant-bras) pour des **M3 × 6, pas plus longues** : les M3 × 30 et les logements d'inserts
+passent juste derrière (pointe à 1,5 mm). Avant-trous de 2,5 mm à percer dans l'avant-bras, 3 à 4 mm de profondeur, à travers
+les trous du support. Prototype, non monté. Le manchon reste court (15 mm) : s'il bouge encore, l'allonger.
+
+À faire : passage de tournevis central dans la base de pince du poignet, pour serrer la vis centrale du palonnier n° 5 sans tout
+démonter (place vérifiée par le calcul pour Ø 5,4 ; mesures demandées : tête et longueur de la vis centrale, tige du tournevis).

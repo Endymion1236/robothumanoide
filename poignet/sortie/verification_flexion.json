@@ -1,18 +1,20 @@
 {
  "etat": "PROTOTYPE, aucune validation physique",
+ "vis_de_flanc": "4 × M3 × 6 (2 par flanc), prise 3.0 mm dans l'entretoise, pointe à 1.5 mm des M3 × 30",
  "flexion": "aucun contact de −90° à +90°, pince droite ou tournée de ±90°",
  "masses_g": {
-  "support de flexion": 52,
+  "support de flexion": 51,
   "moitié basse": 14,
   "moitié haute": 14,
   "bride": 2,
   "servo": 55
  },
- "ajout_au_bout_du_bras_g": 137,
+ "ajout_au_bout_du_bras_g": 136,
  "allongement_du_bras_mm": 83.0,
  "axe_de_flexion_apres_le_bout_de_l_avant_bras_mm": 41.0,
  "visserie": [
   "2 vis M3 × 30 (manchon, sur l'avant-bras)",
+  "4 vis M3 × 6 (flancs du manchon, avant-trous de 2,5 à percer dans l'avant-bras)",
   "8 vis M2,5 du servo (4 par disque)",
   "2 vis M3 × 30 + 2 inserts M3 (bout de la fourche)",
   "2 vis M3 × 10 + 2 inserts M3 (bride)"

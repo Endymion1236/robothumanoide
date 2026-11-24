@@ -30,6 +30,7 @@ R_SOCLE = 25.5                                    # devant l'axe, le socle est a
 L_FOURCHE = 42.0                                  # de l'axe au bout de la fourche (cherché : le plus court sans contact)
 ENT_L = F.entretoise_B_L                          # entretoise du bout : 15, comme l'avant-bras
 FLEX_MAX = 90
+VIS_FLANC_Y, VIS_FLANC_L = (-9.0, 9.0), 6.0       # vis de blocage sur les flancs du manchon : position, longueur sous tête
 
 def vers_poignet(m): return placer(m, EP.R_BERCEAU, (X_AXE + EP.AXE_BERCEAU, Y_SOCLE, -B.base_W / 2))
 SERVO, BRIDE = vers_poignet(EP.SERVO_C), vers_poignet(EP.BRIDE_C)
@@ -43,6 +44,11 @@ def support():
     for s in (1, -1):                                                                         # deux équerres entre le manchon et le socle
         z0, z1 = sorted((s * (ZI + MUR), s * 25.0)); m += box(-ENT_L, Y_SOCLE, z0, 0, -YI + 8, z1)
     for dz in (-F.vis_M3_Y, F.vis_M3_Y): m -= cyl_y(-ENT_L / 2, dz, YI - 1, YI + MUR + 1, 3.4, 24)   # 2 vis M3 × 30, par le côté +Y (manchon fermé, comme la pince)
+    # 4 vis M3 × 6 de blocage, par les deux flancs (idée de Nicolas, 24/11/2026 : le manchon court pivotait un peu, une petite vis
+    # sur le côté l'a bloqué). Une par demi-entretoise, à 9 mm du plan de joint. Les M3 × 30 passent à z = ±6 : la pointe doit
+    # s'arrêter avant z = 8,5 (logements des inserts compris), donc 3,7 mm de prise au plus → M3 × 6, PAS plus long.
+    for y in VIS_FLANC_Y:
+        m -= mf.Manifold.cylinder(2 * (ZI + MUR) + 2, 1.7, 1.7, 24).translate((-ENT_L / 2, y, -(ZI + MUR) - 1))
     return m - box(-ENT_L - 1, -YI, -ZI, 0.01, YI, ZI)
 
 def moitie(haute):
@@ -80,6 +86,10 @@ if __name__ == '__main__':
     assert len(SUPPORT.decompose()) == 1, 'support en plusieurs morceaux'
     assert (SUPPORT ^ SERVO).volume() < 0.01 and (SUPPORT ^ avb).volume() < 0.01, 'le support touche le servo ou l\'avant-bras'
     assert ((BASSE + HAUTE) ^ SERVO).volume() < 0.5, 'la fourche touche le servo'
+    pointe = ZI + MUR - VIS_FLANC_L                                             # où s'arrête la pointe d'une vis de flanc
+    assert pointe > F.vis_M3_Y + 1.7 + 0.5, 'une vis de flanc toucherait une M3 × 30 du manchon'
+    assert pointe > F.vis_M3_Y + F.insert_D / 2 + 0.5, 'une vis de flanc toucherait le logement d\'un insert'
+    r['vis_de_flanc'] = f'4 × M3 × {VIS_FLANC_L:.0f} (2 par flanc), prise {ZI - pointe:.1f} mm dans l\'entretoise, pointe à {pointe - F.vis_M3_Y - 1.7:.1f} mm des M3 × 30'
     pire = 0.0
     for roulis, delta in ((0, -13.1), (90, 14.0), (-90, -40.2)):
         mob = [BASSE, HAUTE] + suite(delta, roulis)
@@ -92,7 +102,7 @@ if __name__ == '__main__':
     r['ajout_au_bout_du_bras_g'] = sum(r['masses_g'].values())
     r['allongement_du_bras_mm'] = round(X_AXE + L_FOURCHE, 1)
     r['axe_de_flexion_apres_le_bout_de_l_avant_bras_mm'] = X_AXE
-    r['visserie'] = ['2 vis M3 × 30 (manchon, sur l\'avant-bras)', '8 vis M2,5 du servo (4 par disque)', '2 vis M3 × 30 + 2 inserts M3 (bout de la fourche)', '2 vis M3 × 10 + 2 inserts M3 (bride)']
+    r['visserie'] = ['2 vis M3 × 30 (manchon, sur l\'avant-bras)', '4 vis M3 × 6 (flancs du manchon, avant-trous de 2,5 à percer dans l\'avant-bras)', '8 vis M2,5 du servo (4 par disque)', '2 vis M3 × 30 + 2 inserts M3 (bout de la fourche)', '2 vis M3 × 10 + 2 inserts M3 (bride)']
     R_IMPR = [[1, 0, 0], [0, 0, 1], [0, 1, 0]]                           # Y devient la verticale : socle du berceau sur le plateau
     for nom, m, dy in (('flexion_support', SUPPORT, -Y_SOCLE), ('flexion_fourche_basse', BASSE, -Y_BAS), ('flexion_fourche_haute', HAUTE.mirror((0, 1, 0)), -Y_BAS)):
         mesh(placer(m.translate((0, dy, 0)), R_IMPR, (0, 0, 0))).export(OUT / f'{nom}.stl'); r.setdefault('stl', []).append(f'{nom}.stl')
