@@ -3,6 +3,8 @@
 **Premier essai réel le 24/11/2026 : les 4 marqueurs sont reconnus par la C270 et un clic donne une position** (marqueurs
 imprimés à 95 %, rectangle de 400 × 300 mm, marqueur 0 à 200 mm à gauche et 200 mm en avant de l'axe du socle, « a priori »).
 Les positions affichées sont cohérentes avec l'image ; **pas encore comparées à une mesure à la règle**, ni utilisées par le bras.
+**Mesures refaites par Nicolas le 24/11/2026 (les premières « n'étaient pas justes ») : largeur 400 mm, profondeur 289 mm, marqueur 0
+à 198 mm à gauche et 190 mm en avant de l'axe du socle.** Par rapport au premier réglage, un point du fond recule d'environ 2 cm.
 
 But : que Câlin sache OÙ se trouve un objet sur la table, en millimètres par rapport à son socle. Le bras ne bouge pas encore :
 cette première étape ne fait que regarder et mesurer.
