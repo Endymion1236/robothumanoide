@@ -48,3 +48,9 @@ juste pour le bras complet, insuffisant à prévoir avec les deux servos 3095 (c
 12 V ; prévoir la deuxième carte Waveshare et une alimentation 6 V à part. Rien n'est mesuré : à réception, demander boîtier,
 axe, palonnier, vis, câble et connecteur AVANT de dessiner poulie et support. Leur langage de commande (série SCS) n'est pas
 celui des STS3215 : `bras/servos.py` ne les pilotera pas tel quel, à vérifier sur leur fiche.
+
+**24/11/2026 : Nicolas a commandé un Hobbywing UBEC 10A (2-6S, sorties 6 / 7,4 / 8,4 V, avec interrupteur)** pour faire le 6 V de
+la main à partir du 12 V (le Pololu était trop cher). À réception, AVANT tout servo : lire la notice et la position du cavalier
+(6 V attendu sans cavalier, non vérifié sur sa version), mesurer la sortie au multimètre, regarder ce qu'il y a au bout des fils.
+Il tire sur le bloc 12 V : avec le bras, il faudra le bloc de 10 A. Deuxième carte Waveshare et bornier de partage du 12 V :
+Nicolas n'a pas dit s'il les a.
