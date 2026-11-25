@@ -93,4 +93,4 @@ avant-bras à l'horizontale et à vide, 40 % avec un objet léger, près de 80 %
 prévoir plus tard un ressort au coude, ou deux STS3095 de plus. Le ressort d'épaule deviendra sans doute inutile (à vérifier à
 l'essai) ; il imposait le repos à 80°.
 **Mesures du STS3095 par Nicolas (25/11/2026, en cours)** : boîtier **65 de long**, face du logo **30 de large**, **47,8 entre les
-deux faces des palonniers** (mesuré au milieu de la face). Les palonniers sont donc sur les deux faces de 30 × 65. Suite à mesurer : B à E.
+deux faces des palonniers** (mesuré au milieu de la face ; **45,8 du côté des vis**, étendue de ce décrochement à préciser). Les palonniers sont donc sur les deux faces de 30 × 65. Suite à mesurer : B à E.
