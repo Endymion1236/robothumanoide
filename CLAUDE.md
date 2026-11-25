@@ -117,3 +117,8 @@ moins et 3,5 mm de profondeur au moins en face du moyeu et de la tête de vis (6
 disque et le boîtier il ne reste qu'environ 3 mm (6,8 − 3,8, par le calcul) → il faut au moins 3 mm de plastique sous la tête
 (et au plus 5,2 pour garder tout le filetage) : viser 4 mm, pointe à 1,2 sous le disque. À vérifier : M2,5 du coffret de Nicolas
 dans ces trous ? Jamais faire tourner le palonnier avec une vis de 9 mm vissée seule.
+Fixations du boîtier (Nicolas, 25/11/2026) : **3 trous côté logo, 4 sur la face d'en face, les vis fournies Ø 2,1 × 4,3 s'y vissent**
+(M2 probablement). Côté logo, vu sur la photo : 2 trous sous l'étiquette, à gauche et à droite, et 1 au milieu de la languette du
+bout opposé au palonnier, entre les deux vis de coin ; Nicolas : « les 3 à 10,7 du centre des vis de coin » (sens exact à préciser).
+La photo confirme que l'axe est à **17,9 du bout côté palonnier** (47,1 jusqu'au bout à languette). Position précise de chaque trou
+de fixation, poids et côté des prises SVG : encore à demander.
