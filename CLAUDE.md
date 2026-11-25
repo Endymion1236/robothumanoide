@@ -85,3 +85,4 @@ QR code de la boîte n'est pas joignable depuis la session).
 simple, double, croix) et des vis. À vérifier avec Nicolas avant tout branchement : la fiche entre-t-elle dans la carte Waveshare
 (même pas que les STS3215 ?), a-t-il la deuxième carte, tension d'entrée admise par cette carte (à lire dessus ou sur sa notice).
 Mesures à demander avant de dessiner poulie et support : boîtier, axe, palonniers, vis, longueur du câble.
+Nicolas a bien une **deuxième carte Waveshare** (dit le 25/11/2026) : elle sera la carte 6 V de la main.
