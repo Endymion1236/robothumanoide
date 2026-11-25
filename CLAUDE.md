@@ -106,3 +106,5 @@ vis du couvercle) ; **câble fourni : 15 cm** ; **prises SVG sur les deux faces 
 bout côté palonnier et 29,8 du bout opposé** (donc environ 13 mm de long, par différence) : le berceau doit laisser ces deux
 zones libres pour les fiches. Manquent encore : épaisseur par-dessus les disques, filetage et profondeur des trous du palonnier,
 trous de fixation du boîtier, poids, confirmation du 47,1 (bout opposé au palonnier ?).
+**65 mm par-dessus les deux disques** (Nicolas, 25/11/2026). Ne colle pas avec 47,8 + 2 × 7,3 = 62,4 : chaque disque dépasserait
+en moyenne de 8,6 et non de 7,3. Dépassement à remesurer de CHAQUE côté avant de dessiner.
