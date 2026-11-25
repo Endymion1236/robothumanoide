@@ -86,3 +86,9 @@ simple, double, croix) et des vis. À vérifier avec Nicolas avant tout branchem
 (même pas que les STS3215 ?), a-t-il la deuxième carte, tension d'entrée admise par cette carte (à lire dessus ou sur sa notice).
 Mesures à demander avant de dessiner poulie et support : boîtier, axe, palonniers, vis, longueur du câble.
 Nicolas a bien une **deuxième carte Waveshare** (dit le 25/11/2026) : elle sera la carte 6 V de la main.
+
+**Décision du 25/11/2026 (Nicolas n'a que 2 STS3095) : un STS3095 à l'ÉPAULE de chaque bras, les coudes gardent leur STS3215.**
+Seul le berceau de l'épaule est à redessiner. Calcul (masses des pièces, non mesuré) : coude à environ 35 % du couple de blocage
+avant-bras à l'horizontale et à vide, 40 % avec un objet léger, près de 80 % avec une canette de 350 g → pour les canettes,
+prévoir plus tard un ressort au coude, ou deux STS3095 de plus. Le ressort d'épaule deviendra sans doute inutile (à vérifier à
+l'essai) ; il imposait le repos à 80°.
