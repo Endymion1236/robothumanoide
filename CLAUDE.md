@@ -60,3 +60,12 @@ pièce, bras au repos, vu de derrière). Après le nouveau berceau du coude : so
 pince +2,4°. Les écarts qui comptent : **épaule 1,8°** (encore l'ancien berceau à parois basses, à remplacer), coude 0,4° et
 flexion 0,4° (bons), **rotation du poignet 1,2°** (le servo n° 5 ne bouge pas dans son support, barre serrée : Nicolas soupçonne
 le manchon désaxé sur la fourche). **Décision de Nicolas : pour le deuxième bras, contrôle au niveau à chaque étape du montage.**
+
+**25/11/2026 : les 2 servos Feetech STS3095 sont arrivés** (photos de Nicolas). Vu sur les photos, rien de mesuré : boîtier en
+métal noir et rouge, nettement plus gros que le STS3215 ; un palonnier en aluminium de CHAQUE côté, avec 8 trous taraudés sur un
+cercle et une vis centrale cruciforme ; une prise 3 broches marquée « SVG » sur chacun des deux petits côtés ; 4 vis à tête creuse
+aux coins du couvercle. Ils n'entrent sûrement pas dans les berceaux actuels : épaule et coude seront à redessiner.
+Avant tout dessin, demander : boîtier (L × l × h), position de l'axe, palonniers (diamètre, épaisseur, dépassement, cercle et
+filetage des 8 trous), distance entre les deux faces de palonnier, vis fournies, tension sur l'étiquette ou la boîte.
+Avant tout branchement : vérifier le 12 V, et les brancher SEULS pour changer leur numéro (neufs, ils portent sans doute le n° 1,
+celui du socle).
