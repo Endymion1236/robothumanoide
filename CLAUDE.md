@@ -163,3 +163,6 @@ parallèle (S, C+, C−), plus 2 pastilles C+ / C− pour souder une arrivée de
 SCS0009, encore (Nicolas, 25/11/2026) : **axe doré Ø 3,7, dépasse de 3,8** (dit par Nicolas ; le « 3,7 » d'avant était donc ce
 diamètre, pas la partie ronde) ; **palonnier rond : disque 1,2 d'épaisseur, 3,8 avec le moyeu, trous Ø ≈ 0,7** ; un « 1,2 » mesuré sur
 le servo (épaisseur des pattes ?) ; « 6,4 », « 13 » et « 10,8 » : sens à confirmer (6,4 = axe → bout ? 13 = hauteur des pattes ?).
+Confirmé par Nicolas : axe doré Ø 3,7 dépassant de 3,8 ; pattes de 1,2 ; palonnier rond 1,2 (disque) / 3,8 (avec moyeu), trous Ø 0,7 ;
+20,6 = dessous → dessus de la partie ronde. **Faux** : « 6,4 » n'est PAS axe → bout, « 13 » n'est PAS la hauteur des pattes.
+Toujours inconnus : axe → bout le plus proche (≈ 5 sur photo), hauteur des pattes, sens du « 10,8 », trous du palonnier rond.
