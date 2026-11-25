@@ -144,3 +144,8 @@ du bout côté palonnier** (± 1 mm) ; la paire à 3 mm est sous le disque. Plan
 du bâti gêne** (face intérieure à Y = 72 dans `generer_epaule.py`, la fourche élargie y arriverait). Choix demandé à Nicolas :
 scier le mât (conseillé, ressort sans doute inutile) ou réimprimer le bâti. Le plan du bras se décalera d'environ 1 cm de côté :
 mettre à jour `DECALAGE_BRAS` (bras/geometrie.py) et refaire la correction de visée.
+**SCS0009, lecture des photos avec réglet (25/11/2026, ± 1 mm, photos de biais : À CONFIRMER au pied à coulisse)** : boîtier ≈ 23 ×
+12,5, hauteur ≈ 19 sans le bossage rond (≈ 23 avec, ≈ 26 avec la cannelure dorée de ≈ 3 mm) ; pattes ≈ 32 de bout en bout, dessus
+des pattes ≈ 4 sous le dessus du boîtier ; axe ≈ 6 du bout le plus proche ; entraxe des trous des pattes entre 27 et 29 (photo trop
+de biais). Sachet : palonnier rond, en croix, à un bras, 2 vis. La fiche du câble paraît PLUS PETITE que celle des STS3215 :
+vérifier qu'elle entre dans la carte Waveshare avant tout.
