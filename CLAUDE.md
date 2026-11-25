@@ -73,3 +73,8 @@ celui du socle).
 → c'est bien la version 12 V ; trois fois le couple d'un STS3215 (30 kg·cm), un peu plus lent. Ces trois cotes sont celles de la
 boîte, pas des mesures : le détail (axe, palonniers, trous) reste à mesurer, ainsi que la masse (le servo du coude est porté par
 l'épaule). Attention à la force : limiter le couple dans le programme et régler les butées AVANT de monter quoi que ce soit.
+Fiches des revendeurs pour le STS3095-C002 (lues le 25/11/2026, PAS des mesures) : **masse 194,5 g** (un STS3215 : 55 g),
+**courant de blocage 9,8 A à 12 V**, couple nominal 22,5 kg·cm, 31 tr/min à vide, cannelure 15 dents Ø 7,6. Conséquences à garder
+en tête : au coude, 140 g de plus portés par l'épaule ; le bloc 12 V de 5 A ne suffit plus, et même 10 A ne couvre pas deux
+servos bloqués à fond → limiter le couple dans le programme. Cotes des palonniers et des trous : toujours inconnues (le lien du
+QR code de la boîte n'est pas joignable depuis la session).
