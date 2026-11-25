@@ -101,3 +101,8 @@ disque de **1 mm côté logo, 0,5 de l'autre** ; trous du palonnier : bords ext�
 → **cercle des 8 trous ≈ Ø 23,9** (calcul) ; filetage des trous non vérifié. Vis fournies : **8 de Ø 2,6 × 9 sous tête** et
 **6 de Ø 2,1 × 4,3 sous tête**. Restent : épaisseur par-dessus les deux disques (sans les têtes de vis), filetage et profondeur
 des trous du palonnier, étendue du décrochement à 45,8, trous de fixation du boîtier, poids, câble.
+Encore (Nicolas, 25/11/2026) : le décrochement à 45,8 n'est **qu'aux 4 coins, sur des carrés de 6,6 × 6,6** (logements des têtes de
+vis du couvercle) ; **câble fourni : 15 cm** ; **prises SVG sur les deux faces à bande rouge**, vers le bas, au milieu, à **22 mm du
+bout côté palonnier et 29,8 du bout opposé** (donc environ 13 mm de long, par différence) : le berceau doit laisser ces deux
+zones libres pour les fiches. Manquent encore : épaisseur par-dessus les disques, filetage et profondeur des trous du palonnier,
+trous de fixation du boîtier, poids, confirmation du 47,1 (bout opposé au palonnier ?).
