@@ -152,3 +152,8 @@ vérifier qu'elle entre dans la carte Waveshare avant tout.
 Palonniers du SCS0009 (photos sous le réglet, 25/11/2026, ± 0,5 mm) : bras double ≈ 31 de bout en bout, bras simple ≈ 16 du centre au
 bout, en croix ≈ 2 × 16 ; trous Ø ≈ 1 sur chaque bras à ≈ 6,5 / 9,3 / 11,7 / 13,8 mm du centre (pas ≈ 2,4). Piste retenue pour la
 poulie d'un doigt : se visser sur le PALONNIER ROND du sachet (pas d'impression d'une cannelure aussi fine) → mesurer ce palonnier.
+**SCS0009 au pied à coulisse (Nicolas, 25/11/2026)** : boîtier **23,1 × 12,1** ; **20,6** du dessous au dessus de la partie ronde
+(interprétation, sans la cannelure, à confirmer) ; partie ronde autour de l'axe : **Ø 11,7**, dépassant de **3,7** (interprétation) →
+dessus du boîtier ≈ 16,9 du dessous ; **palonnier rond Ø 17,5** ; 2 vis **Ø 1,3 × 6,1** dans le sachet. **La fiche est de la même
+taille que celle des STS3215** : elle entre dans la carte Waveshare. Manquent : pattes (longueur, épaisseur, hauteur, trous),
+axe → bout, cannelure (Ø, dépassement), palonnier rond (épaisseur, moyeu, trous).
