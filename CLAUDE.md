@@ -157,3 +157,6 @@ poulie d'un doigt : se visser sur le PALONNIER ROND du sachet (pas d'impression 
 dessus du boîtier ≈ 16,9 du dessous ; **palonnier rond Ø 17,5** ; 2 vis **Ø 1,3 × 6,1** dans le sachet. **La fiche est de la même
 taille que celle des STS3215** : elle entre dans la carte Waveshare. Manquent : pattes (longueur, épaisseur, hauteur, trous),
 axe → bout, cannelure (Ø, dépassement), palonnier rond (épaisseur, moyeu, trous).
+SCS0009, suite (Nicolas, 25/11/2026) : **pattes 32,4 de bout en bout**, **trous des pattes Ø 2,1**, entraxe ≈ 28 (photo) ; axe ≈ 5 mm du
+bout le plus proche (photo) ; deux mesures à faire préciser : « 13 » et « 10,8 ». Carte de dérivation **SCS-Y4-2012** : 3 prises en
+parallèle (S, C+, C−), plus 2 pastilles C+ / C− pour souder une arrivée de courant (ne pas s'en servir).
