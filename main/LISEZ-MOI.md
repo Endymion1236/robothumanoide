@@ -42,3 +42,38 @@ Doigt de 73 mm, 14 × 14 mm de section, 23 g. Les phalanges s'impriment couchée
 Poulie et support du petit servo (après mesure du servo : boîtier, axe, palonnier, vis), puis la paume et les 5 doigts.
 **5 Feetech SCS0009 commandés le 21/11/2026** (un par doigt). Ils sont en **6 V** : jamais sur le bus 12 V des autres servos ;
 il leur faut leur propre carte (la deuxième Waveshare) et une alimentation 6 V. Leur programme sera différent de `bras/servos.py`.
+
+## Banc d'essai du doigt motorisé (25/11/2026)
+
+**Prototype : vérifié par le calcul, rien n'est imprimé ni monté.** `generer_banc_doigt.py`, aperçu `sortie/apercu_banc_doigt.png`.
+Un SCS0009 tire le doigt d'essai par ses deux fils. Le servo est couché, axe horizontal ; sa poulie à deux gorges (fond Ø 8) tombe
+juste dans le plan des deux canaux du doigt : le fil du dessous (paume) ferme, celui du dessus ouvre, enroulés en sens inverse.
+
+| Fichier (`sortie/`) | Pièce | Environ |
+|---|---|---|
+| `banc_doigt_platine.stl` | platine, montant, cloison à fenêtre pour le servo | 25 g |
+| `banc_doigt_console.stl` | console qui porte la base du doigt au-dessus du vide | 7 g |
+| `banc_doigt_etrier.stl` | étrier qui plaque le servo contre la cloison | 3 g |
+| `banc_doigt_poulie.stl` | poulie, coiffe le palonnier ROND | 2,5 g |
+| `banc_doigt_rondelles.stl` | 2 rondelles de 2 mm | |
+
+Impression : PETG, 4 périmètres, 40 %, sans supports, pièces déjà posées (poulie creux en dessous : le plafond du creux se fait en pont).
+
+Visserie : 6 vis M3 × 10 et 6 inserts M3 (base du doigt sur la console, console sur le montant, étrier par l'avant de la cloison) ;
+1 vis fournie Ø 1,3 × 6,1 pour la poulie ; la vis centrale du palonnier, posée AVANT la poulie.
+
+**Le banc se pose au bord de la table, la console et le doigt dans le vide** (serre-joint sur la platine) : plié à fond, le doigt
+s'enroule et repasse 13 mm sous ses axes, jusqu'à 40 mm en arrière de sa charnière.
+
+Ce que le calcul a vérifié : la poulie tourne sur 360° sans rien toucher ; le servo entre dans la fenêtre, ses pattes s'appuient sur
+la cloison ; le doigt, sur 54 positions de tendu à plié à fond, ne touche ni le banc ni les vis de sa base ; les fils vont droit dans
+leurs canaux (2,3° d'écart). Il faut tourner le servo de **221°** pour plier le doigt à fond (il en fait environ 300). Force dans le fil :
+environ 18 N en usage, 54 N au blocage (couple de la fiche revendeur, 2,3 kg·cm à 6 V).
+
+**À vérifier par Nicolas AVANT d'imprimer** :
+1. une vis fournie (Ø 1,3) se visse-t-elle dans un des deux trous les plus écartés du palonnier rond (trous de 0,7) ? Sinon, les
+   agrandir avec une aiguille chauffée ou un foret de 1 mm ;
+2. palonnier rond posé sur le servo : est-ce bien sa face PLATE en haut, au ras du bout de l'axe doré (moyeu côté servo) ?
+
+Supposés au dessin (non mesurés) : dessus du boîtier à 19,0 du dessous ; moyeu du palonnier côté servo.
+Montage des fils et programme d'essai : à venir (le servo parle le protocole SCS, pas celui du bras).
