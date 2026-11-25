@@ -77,3 +77,23 @@ environ 18 N en usage, 54 N au blocage (couple de la fiche revendeur, 2,3 kg·cm
 
 Supposés au dessin (non mesurés) : dessus du boîtier à 19,0 du dessous ; moyeu du palonnier côté servo.
 Montage des fils et programme d'essai : à venir (le servo parle le protocole SCS, pas celui du bras).
+
+### Plan de montage et programme (25/11/2026)
+
+- **Plan de montage** : `sortie/plan_montage_doigt.pdf` (une page des pièces + 7 étapes : servo préparé seul, inserts, console et
+  doigt, servo et étrier, palonnier et poulie, les deux fils, essai).
+- **Programme** : `tester_doigt.bat` (utilise l'installation du bras, `bras\installer.bat`). **Essayé sur un servo simulé seulement.**
+  `doigt_servo.py` parle le protocole SCS (0 à 1023 pour 300°) ; il **refuse toute carte dont les servos reçoivent plus de 8 V** (la
+  carte du bras est donc écartée d'office) et relâche un servo qui annonce plus de 8 V. Pendant un mouvement, un doigt bloqué
+  s'arrête et tient sa place.
+  Commandes : `i` état · `n 22` changer le numéro · `v` ± 20° à vide · `m` milieu (pour monter les fils) · `c` apprendre la course
+  (le servo cherche lui-même les deux butées du doigt, doucement) · `t` / `p` tendu / plié · `a 50` · `+` / `-` · `r` relâcher · `q`.
+  Course apprise gardée dans `main/doigts.json` (sur le PC, pas dans le dépôt).
+- **Numéros des servos de la main** : pouce 21, index 22, majeur 23, annulaire 24, auriculaire 25 (le doigt d'essai = 22).
+
+### Alimentation de la carte de la main
+
+La deuxième carte Waveshare reçoit le **6 V de l'UBEC** (cavalier enlevé, mesuré au multimètre avant tout servo) ; pour un premier
+essai d'un seul doigt, le petit boîtier 12 V → 5 V 3 A convient (servo moins fort à 5 V). Le servo est alimenté PAR la carte, par son
+câble. **À vérifier** : la tension d'entrée minimale imprimée sur la carte Waveshare (si elle demande 9 V ou plus, il faudra un autre
+montage) et la prise au bout du câble de sortie du boîtier 5 V.
