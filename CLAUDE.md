@@ -128,3 +128,7 @@ l'étiquette sont dans l'alignement des vis de coin, à environ 3,3 mm des bords
 axe → bout. Trou de la languette : centré, près du bout (position exacte inconnue ; le « 10,7 des deux vis » est impossible
 géométriquement). Au dessin : trous OBLONGS dans le plastique, servo tenu d'abord par la forme du boîtier.
 Contrôle demandé : distance du bord du disque au bout du boîtier côté palonnier (≈ 3,1 attendu si l'axe est bien à 17,9).
+Photos du côté à bande rouge et du bout (25/11/2026) : elles **confirment l'axe à ≈ 17,5-18 du bout côté palonnier** et le bord du
+disque à ≈ 3 mm du bout (le disque ne dépasse pas) ; la **prise SVG est collée contre la face OPPOSÉE au logo** (≈ 3 mm de son
+bord), de ≈ 22 à 35 mm du bout côté palonnier ; les décrochements des coins (têtes de vis) sont du côté du LOGO. Restent : photo
+de la face à 4 trous avec réglet, et poids.
