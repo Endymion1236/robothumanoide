@@ -108,3 +108,7 @@ zones libres pour les fiches. Manquent encore : épaisseur par-dessus les disque
 trous de fixation du boîtier, poids, confirmation du 47,1 (bout opposé au palonnier ?).
 **65 mm par-dessus les deux disques** (Nicolas, 25/11/2026). Ne colle pas avec 47,8 + 2 × 7,3 = 62,4 : chaque disque dépasserait
 en moyenne de 8,6 et non de 7,3. Dépassement à remesurer de CHAQUE côté avant de dessiner.
+**Retenu pour le dessin : 61,4 mm entre les faces extérieures des deux disques** (Nicolas, sans compter le moyeu central), soit
+6,8 de dépassement par côté en moyenne (7,3 mesuré d'un côté : écart de mesure ou disques un peu dissymétriques, ±0,5). Le 65
+mesuré avant comptait le moyeu. Au dessin : une fourche qui serre les deux disques a 61,4 + jeu à l'intérieur ; creux de Ø 16 au
+moins et 3,5 mm de profondeur au moins en face du moyeu et de la tête de vis (68,3 hors tout par-dessus les vis).
