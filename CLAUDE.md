@@ -173,3 +173,4 @@ SCS0009 : **dessous des pattes à 17,0 du dessous du boîtier** (Nicolas, 25/11/
 rond (photo) : 10 petits trous en deux arcs de 5, à des rayons différents ; **16,3 entre les deux trous opposés les plus écartés**
 (rayon ≈ 8,1), **12,9 entre les plus proches du centre** (rayon ≈ 6,5) ; 2 petites empreintes de part et d'autre du trou central.
 Les trous font ≈ 0,7 : les vis fournies (Ø 1,3) n'y passent pas sans repercer → la fixation de la poulie sera à choisir au dessin.
+**Décision de Nicolas (25/11/2026) : réimprimer le bâti** (nouveau bâti pour le STS3095, mât repoussé pour garder la possibilité du ressort ; pas urgent).
