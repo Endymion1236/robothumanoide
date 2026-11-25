@@ -138,3 +138,9 @@ sous le disque, une près du bout à languette ; Nicolas en avait compté 4. Dis
 Photo de face avec réglet (25/11/2026, nette) : face opposée au logo, **6 trous par paires à ≈ 2,5 des bords : ≈ 3, ≈ 39 et ≈ 62,5 mm
 du bout côté palonnier** (± 1 mm) ; la paire à 3 mm est sous le disque. Plan coté de synthèse à faire valider par Nicolas :
 `epaule/sts3095/sortie/plan_sts3095.png` (`plan_sts3095.py`). Prochaine étape après validation : berceau d'épaule pour le STS3095.
+**Validé par Nicolas (25/11/2026)** : 3 trous côté logo, 6 face opposée, coins à vis côté logo (prise SVG : à confirmer).
+**Correction de la décision « seul le berceau change »** : la fourche du haut du bras doit passer de ≈ 45 à 61,4 mm entre disques
+→ berceau ET haut du bras (deux moitiés, vissés par les 8 trous M2,6 de chaque disque) sont à refaire, et le **mât du ressort
+du bâti gêne** (face intérieure à Y = 72 dans `generer_epaule.py`, la fourche élargie y arriverait). Choix demandé à Nicolas :
+scier le mât (conseillé, ressort sans doute inutile) ou réimprimer le bâti. Le plan du bras se décalera d'environ 1 cm de côté :
+mettre à jour `DECALAGE_BRAS` (bras/geometrie.py) et refaire la correction de visée.
