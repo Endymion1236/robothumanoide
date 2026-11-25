@@ -122,3 +122,9 @@ Fixations du boîtier (Nicolas, 25/11/2026) : **3 trous côté logo, 4 sur la fa
 bout opposé au palonnier, entre les deux vis de coin ; Nicolas : « les 3 à 10,7 du centre des vis de coin » (sens exact à préciser).
 La photo confirme que l'axe est à **17,9 du bout côté palonnier** (47,1 jusqu'au bout à languette). Position précise de chaque trou
 de fixation, poids et côté des prises SVG : encore à demander.
+Lecture des photos avec réglet (25/11/2026), à prendre avec prudence (perspective) : sur la face du logo, les 2 trous sous
+l'étiquette sont dans l'alignement des vis de coin, à environ 3,3 mm des bords (écartement ≈ 23,4, comme les vis de coin) et à
+10,7 au-dessus d'elles → **à ≈ 14 mm du bout à languette, ≈ 33 mm de l'axe** ; 3,3 + 10,7 + 33,1 = 47,1 : cohérent avec la mesure
+axe → bout. Trou de la languette : centré, près du bout (position exacte inconnue ; le « 10,7 des deux vis » est impossible
+géométriquement). Au dessin : trous OBLONGS dans le plastique, servo tenu d'abord par la forme du boîtier.
+Contrôle demandé : distance du bord du disque au bout du boîtier côté palonnier (≈ 3,1 attendu si l'axe est bien à 17,9).
