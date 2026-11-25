@@ -112,3 +112,8 @@ en moyenne de 8,6 et non de 7,3. Dépassement à remesurer de CHAQUE côté avan
 6,8 de dépassement par côté en moyenne (7,3 mesuré d'un côté : écart de mesure ou disques un peu dissymétriques, ±0,5). Le 65
 mesuré avant comptait le moyeu. Au dessin : une fourche qui serre les deux disques a 61,4 + jeu à l'intérieur ; creux de Ø 16 au
 moins et 3,5 mm de profondeur au moins en face du moyeu et de la tête de vis (68,3 hors tout par-dessus les vis).
+**Trous du palonnier : filetés sur toute l'épaisseur du disque (3,8 mm), traversants ; les vis fournies Ø 2,6 × 9 s'y vissent**
+(Nicolas, 25/11/2026). Conséquence pour le dessin : une vis de 9 mm vissée à fond dépasse SOUS le disque ; entre le dessous du
+disque et le boîtier il ne reste qu'environ 3 mm (6,8 − 3,8, par le calcul) → il faut au moins 3 mm de plastique sous la tête
+(et au plus 5,2 pour garder tout le filetage) : viser 4 mm, pointe à 1,2 sous le disque. À vérifier : M2,5 du coffret de Nicolas
+dans ces trous ? Jamais faire tourner le palonnier avec une vis de 9 mm vissée seule.
