@@ -447,4 +447,5 @@ suivants (moyenne des points appris voisins). 3 ou 4 points à des endroits diff
 Essayé sur servos simulés. `aller_point.bat` (clavier seul) n'applique pas cette correction.
 
 Piste pour la cause du « trop loin » : la longueur axe de flexion → milieu des mâchoires (200,7 mm au programme) n'a jamais été
-mesurée avec la pince V4. À mesurer ; en attendant la correction apprise l'absorbe.
+mesurée avec la pince V4. **Mesurée par Nicolas le 25/11/2026 : 201 mm, c'est juste.** La cause du « trop loin » est donc ailleurs
+(longueurs 120 et 161 non mesurées, ou zéro d'un angle) ; la correction apprise l'absorbe.
