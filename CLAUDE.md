@@ -94,3 +94,10 @@ prévoir plus tard un ressort au coude, ou deux STS3095 de plus. Le ressort d'é
 l'essai) ; il imposait le repos à 80°.
 **Mesures du STS3095 par Nicolas (25/11/2026, en cours)** : boîtier **65 de long**, face du logo **30 de large**, **47,8 entre les
 deux faces des palonniers** (mesuré au milieu de la face ; **45,8 du côté des vis**, étendue de ce décrochement à préciser). Les palonniers sont donc sur les deux faces de 30 × 65. Suite à mesurer : B à E.
+Suite des mesures du STS3095 (Nicolas, 25/11/2026) : axe à **47,1 du bout opposé** → à 17,9 du bout côté palonnier (interprétation,
+à confirmer) ; axe **centré en largeur** (14,3 et 14,4 aux bords, mesure difficile) ; palonnier **Ø 29,6 × 3,8**, dessus du disque à
+**7,3 de la face du boîtier** ; **68,3 au total par-dessus les têtes des vis centrales** ; moyeu central **Ø 13,8**, qui dépasse du
+disque de **1 mm côté logo, 0,5 de l'autre** ; trous du palonnier : bords extérieurs de deux trous opposés à 26,6, trou Ø 2,7
+→ **cercle des 8 trous ≈ Ø 23,9** (calcul) ; filetage des trous non vérifié. Vis fournies : **8 de Ø 2,6 × 9 sous tête** et
+**6 de Ø 2,1 × 4,3 sous tête**. Restent : épaisseur par-dessus les deux disques (sans les têtes de vis), filetage et profondeur
+des trous du palonnier, étendue du décrochement à 45,8, trous de fixation du boîtier, poids, câble.
