@@ -92,3 +92,5 @@ Seul le berceau de l'épaule est à redessiner. Calcul (masses des pièces, non 
 avant-bras à l'horizontale et à vide, 40 % avec un objet léger, près de 80 % avec une canette de 350 g → pour les canettes,
 prévoir plus tard un ressort au coude, ou deux STS3095 de plus. Le ressort d'épaule deviendra sans doute inutile (à vérifier à
 l'essai) ; il imposait le repos à 80°.
+**Mesures du STS3095 par Nicolas (25/11/2026, en cours)** : boîtier **65 de long**, face du logo **30 de large**, **47,8 entre les
+deux faces des palonniers** (mesuré au milieu de la face). Les palonniers sont donc sur les deux faces de 30 × 65. Suite à mesurer : B à E.
