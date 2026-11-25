@@ -132,3 +132,6 @@ Photos du côté à bande rouge et du bout (25/11/2026) : elles **confirment l'a
 disque à ≈ 3 mm du bout (le disque ne dépasse pas) ; la **prise SVG est collée contre la face OPPOSÉE au logo** (≈ 3 mm de son
 bord), de ≈ 22 à 35 mm du bout côté palonnier ; les décrochements des coins (têtes de vis) sont du côté du LOGO. Restent : photo
 de la face à 4 trous avec réglet, et poids.
+**Poids mesuré : 199 g** (Nicolas, 25/11/2026 ; fiches : 194,5). Face opposée au logo (photo avec réglet, perspective forte) :
+je vois **6 petits trous**, par paires à ≈ 2,3 mm des bords (écartement ≈ 25) : une paire aux coins côté palonnier, une juste
+sous le disque, une près du bout à languette ; Nicolas en avait compté 4. Distances au bout à languette demandées.
