@@ -78,3 +78,10 @@ Fiches des revendeurs pour le STS3095-C002 (lues le 25/11/2026, PAS des mesures)
 en tête : au coude, 140 g de plus portés par l'épaule ; le bloc 12 V de 5 A ne suffit plus, et même 10 A ne couvre pas deux
 servos bloqués à fond → limiter le couple dans le programme. Cotes des palonniers et des trous : toujours inconnues (le lien du
 QR code de la boîte n'est pas joignable depuis la session).
+
+**25/11/2026 : les SCS0009 sont arrivés** (photo d'un sachet). Vu, rien de mesuré : le servo a UN SEUL câble, fixe, à 3 fils
+(noir, rouge, blanc) terminé par une fiche blanche à 3 broches ; chaque sachet contient aussi une **petite carte de dérivation à
+3 prises** (pour chaîner des servos qui n'ont qu'une prise), un câble à deux fiches, des palonniers en plastique blanc (bras
+simple, double, croix) et des vis. À vérifier avec Nicolas avant tout branchement : la fiche entre-t-elle dans la carte Waveshare
+(même pas que les STS3215 ?), a-t-il la deuxième carte, tension d'entrée admise par cette carte (à lire dessus ou sur sa notice).
+Mesures à demander avant de dessiner poulie et support : boîtier, axe, palonniers, vis, longueur du câble.
