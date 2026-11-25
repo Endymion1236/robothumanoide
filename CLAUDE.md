@@ -149,3 +149,6 @@ mettre à jour `DECALAGE_BRAS` (bras/geometrie.py) et refaire la correction de v
 des pattes ≈ 4 sous le dessus du boîtier ; axe ≈ 6 du bout le plus proche ; entraxe des trous des pattes entre 27 et 29 (photo trop
 de biais). Sachet : palonnier rond, en croix, à un bras, 2 vis. La fiche du câble paraît PLUS PETITE que celle des STS3215 :
 vérifier qu'elle entre dans la carte Waveshare avant tout.
+Palonniers du SCS0009 (photos sous le réglet, 25/11/2026, ± 0,5 mm) : bras double ≈ 31 de bout en bout, bras simple ≈ 16 du centre au
+bout, en croix ≈ 2 × 16 ; trous Ø ≈ 1 sur chaque bras à ≈ 6,5 / 9,3 / 11,7 / 13,8 mm du centre (pas ≈ 2,4). Piste retenue pour la
+poulie d'un doigt : se visser sur le PALONNIER ROND du sachet (pas d'impression d'une cannelure aussi fine) → mesurer ce palonnier.
