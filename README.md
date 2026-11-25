@@ -80,6 +80,10 @@ Puis bouger (2 servos).
 - Limites : objets de 14 à 110 mm de large (pince V2), pas d'objets plats ni collés les uns aux autres au début.
 - Variante plus tard : apprentissage par démonstration (**LeRobot**, bras « maître » piloté à la main).
 
+**25/11/2026 : premier clic → geste.** `bras/viser_camera.bat` réunit la caméra et le bras : on clique sur un point de la table, le
+bras s'y place ; la visée se règle aux flèches et s'apprend (`bras/correction.py`). Objets d'essai à imprimer pour la
+reconnaissance et le tri : dossier `objets/`. Reste à écrire : trouver les objets sans clic, zones de dépôt, enchaînement.
+
 ## Objectif : jouer à des jeux de société (23/11/2026)
 
 Idée de Nicolas. Un jeu oblige le robot à voir, décider, saisir et poser : c'est un bon test de tout ce qui précède.
