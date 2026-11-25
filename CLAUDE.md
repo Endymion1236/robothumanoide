@@ -168,3 +168,8 @@ Confirmé par Nicolas : axe doré Ø 3,7 dépassant de 3,8 ; pattes de 1,2 ; pal
 Toujours inconnus : axe → bout le plus proche (≈ 5 sur photo), hauteur des pattes, sens du « 10,8 », trous du palonnier rond.
 Palonnier rond du SCS0009 : **10 trous** (Nicolas, 25/11/2026), « à 9,2 du centre » : impossible sur un disque de Ø 17,5 (rayon 8,75) → sans doute 9,2 entre deux trous opposés, soit un cercle de Ø ≈ 9,2 : à confirmer.
 SCS0009 : **dessous des pattes à 17,0 du dessous du boîtier** (Nicolas, 25/11/2026) → dessus des pattes à 18,2 (pattes de 1,2) ; dessus de la partie ronde à 20,6. Restent : axe → bout, cercle des trous du palonnier rond (9,2 = diamètre ?).
+**SCS0009, fin des mesures (Nicolas, 25/11/2026)** : bout du boîtier → bord de l'axe doré **4,8** (« je pense », sans les pattes) →
+**centre de l'axe ≈ 6,6 du bout le plus proche** (4,8 + 3,7/2 ; la partie ronde de Ø 11,7 arrive alors à 0,8 du bout). Palonnier
+rond (photo) : 10 petits trous en deux arcs de 5, à des rayons différents ; **16,3 entre les deux trous opposés les plus écartés**
+(rayon ≈ 8,1), **12,9 entre les plus proches du centre** (rayon ≈ 6,5) ; 2 petites empreintes de part et d'autre du trou central.
+Les trous font ≈ 0,7 : les vis fournies (Ø 1,3) n'y passent pas sans repercer → la fixation de la poulie sera à choisir au dessin.
