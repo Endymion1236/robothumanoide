@@ -160,3 +160,6 @@ axe → bout, cannelure (Ø, dépassement), palonnier rond (épaisseur, moyeu, t
 SCS0009, suite (Nicolas, 25/11/2026) : **pattes 32,4 de bout en bout**, **trous des pattes Ø 2,1**, entraxe ≈ 28 (photo) ; axe ≈ 5 mm du
 bout le plus proche (photo) ; deux mesures à faire préciser : « 13 » et « 10,8 ». Carte de dérivation **SCS-Y4-2012** : 3 prises en
 parallèle (S, C+, C−), plus 2 pastilles C+ / C− pour souder une arrivée de courant (ne pas s'en servir).
+SCS0009, encore (Nicolas, 25/11/2026) : **axe doré Ø 3,7, dépasse de 3,8** (dit par Nicolas ; le « 3,7 » d'avant était donc ce
+diamètre, pas la partie ronde) ; **palonnier rond : disque 1,2 d'épaisseur, 3,8 avec le moyeu, trous Ø ≈ 0,7** ; un « 1,2 » mesuré sur
+le servo (épaisseur des pattes ?) ; « 6,4 », « 13 » et « 10,8 » : sens à confirmer (6,4 = axe → bout ? 13 = hauteur des pattes ?).
