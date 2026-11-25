@@ -413,3 +413,23 @@ s'il reste un écart, chercher du côté de l'alignement du zéro du socle avec 
 coude +2,4°, flexion +3°, pince −2,4° (douteuse : branches en V) — trop dispersées pour chercher au degré près. Décision : on
 ÉTALONNE au lieu de redresser. Prochain essai : deux croix (vers Y 430 et Y 300), écart du milieu des mâchoires mesuré à la règle
 (côté et profondeur), puis ajout d'un réglage de correction (angle du socle + décalage) dans `aller_point`.
+
+## La caméra et le bras dans une seule fenêtre — `viser_camera.bat` (25/11/2026, demande de Nicolas)
+
+`voir_table` et `aller_point` réunis : on **clique** sur un point de la table, le programme annonce le geste, **ENTRÉE** et le bras
+se place au-dessus. Plus de X et Y à recopier. **Essayé sur 6 servos simulés et une image fabriquée, pas avec la vraie caméra.**
+
+| Touche | Effet |
+|---|---|
+| clic | choisir un point (rien ne bouge) |
+| ENTRÉE | y aller : pince au-dessus du point, inclinaison choisie toute seule |
+| D / M | descendre sur le point / remonter |
+| O / S | ouvrir / serrer |
+| R, I | repos, où est la pince |
+| ESPACE | ARRÊT : le geste s'arrête, le bras reste tenu |
+| P, Q | photo de la table, quitter (le programme demande de tenir le bras avant de couper la force) |
+
+- Le bras cache des marqueurs en passant au-dessus de la table : le programme garde le dernier repérage et le dit. La caméra ne
+  doit pas bouger entre-temps.
+- Le lanceur installe la vision (`opencv-python`) dans l'installation du bras au premier lancement : il faut Internet cette fois-là.
+- `aller_point.bat` et `camera\voir_table.bat` restent utilisables séparément.

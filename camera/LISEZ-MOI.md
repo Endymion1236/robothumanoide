@@ -35,6 +35,10 @@ Repère : origine sur l'axe du socle, **X vers la droite du robot** (vu de derri
 Ces programmes utilisent l'installation de la tête (`tete\installer.bat`, déjà faite). Caméra : `--camera 1` dans le lanceur
 (0 = webcam du portable, voir `tete\lister_cameras.bat`).
 
+## Cliquer et le bras y va (25/11/2026)
+
+`bras\viser_camera.bat` réunit `voir_table` et `aller_point` dans une seule fenêtre : voir `bras/LISEZ-MOI.md`.
+
 ## Si la caméra ne voit pas toute la table (24/11/2026)
 
 La C270 n'a pas de zoom : son champ est fixe. `voir_table` demande maintenant l'image en **4/3 (1280 × 960)**, tout le capteur,

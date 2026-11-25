@@ -45,7 +45,8 @@ class Pointeur:
         ok = c._bouger([(c.epaule, E.position(arrivee[0], c.haut)), (c.coude, MILIEU + c.sc * pas(arrivee[1])), (c.flexion, MILIEU + c.sf * pas(arrivee[2]))], nom)
         self.vider(); return ok
 
-    def viser(self, X, Y, imposee=None):
+    def preparer(self, X, Y, imposee=None):
+        """Calcule le geste pour saisir en (X, Y) et l'annonce, SANS bouger. Renvoie (prise, approche), ou None si c'est impossible."""
         c = self.c
         try: incl, prise, haut = G.choisir_inclinaison(X, Y, c.hauteur, imposee)
         except G.HorsDePortee as e:
@@ -55,13 +56,20 @@ class Pointeur:
         if imposee is None and abs(incl) >= 1: self.dire('   (à plat, ce point est trop près : j\'incline la pince juste ce qu\'il faut)')
         self.dire(f"   D'abord au-dessus : épaule {haut['epaule']:+.0f}°, coude {haut['coude']:+.0f}°, poignet {haut['flexion']:+.0f}° (pince à {G.ou_est_la_pince(**haut, hauteur_epaule=c.hauteur)[2]:.0f} mm de la table)")
         if abs(c._roulis()) > 15: self.dire('   La pince est tournée : remets-la droite d\'abord (fenêtre de contrôle, ou tester_poignet).'); return
-        if not self.demander('   J\'y vais ? (o/n) ').strip().lower().startswith('o'): return
-        ae, ac, _ = self.angles()
+        return prise, haut
+
+    def aller(self, prise, haut):
+        """Fait le geste préparé : relève le bras s'il faut tourner, tourne le socle, place la pince au-dessus du point."""
+        c = self.c; ae, ac, _ = self.angles()
         if ae < 55 and abs(degres(c.bus.etat(c.socle)['position'] - MILIEU) - prise['socle']) > 3:
             if not self.poser_bras({'epaule': E.REPOS, 'coude': 0, 'flexion': 0}, 'Bras relevé avant de tourner'): return     # on ne tourne pas bras baissé : il balaierait la table
         if not c._bouger([(c.socle, MILIEU + pas(prise['socle']))], f"Socle à {prise['socle']:+.0f}°"): self.vider(); return
         self.vider()
         if self.poser_bras(haut, 'Pince au-dessus du point'): self.prise, self.haut = prise, haut
+
+    def viser(self, X, Y, imposee=None):
+        plan = self.preparer(X, Y, imposee)
+        if plan and self.demander('   J\'y vais ? (o/n) ').strip().lower().startswith('o'): self.aller(*plan)
 
     def descendre(self):
         if not self.prise: self.dire('   Vise d\'abord un point : v X Y'); return
@@ -103,6 +111,10 @@ def main():
     except ErreurServo as err: print('Impossible de commencer :', err); return 1
     try: p.boucle()
     except KeyboardInterrupt: print('\nInterrompu : le bras reste tenu.')
+    return terminer(p)
+
+def terminer(p):
+    """La fin commune : on ne coupe la force qu'une fois le bras tenu."""
     c = p.c
     print('\nLa force va être coupée : le bras va TOMBER s\'il n\'est pas tenu.')
     try:
