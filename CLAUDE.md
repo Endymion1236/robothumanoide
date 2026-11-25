@@ -135,3 +135,6 @@ de la face à 4 trous avec réglet, et poids.
 **Poids mesuré : 199 g** (Nicolas, 25/11/2026 ; fiches : 194,5). Face opposée au logo (photo avec réglet, perspective forte) :
 je vois **6 petits trous**, par paires à ≈ 2,3 mm des bords (écartement ≈ 25) : une paire aux coins côté palonnier, une juste
 sous le disque, une près du bout à languette ; Nicolas en avait compté 4. Distances au bout à languette demandées.
+Photo de face avec réglet (25/11/2026, nette) : face opposée au logo, **6 trous par paires à ≈ 2,5 des bords : ≈ 3, ≈ 39 et ≈ 62,5 mm
+du bout côté palonnier** (± 1 mm) ; la paire à 3 mm est sous le disque. Plan coté de synthèse à faire valider par Nicolas :
+`epaule/sts3095/sortie/plan_sts3095.png` (`plan_sts3095.py`). Prochaine étape après validation : berceau d'épaule pour le STS3095.
