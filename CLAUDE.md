@@ -167,3 +167,4 @@ Confirmé par Nicolas : axe doré Ø 3,7 dépassant de 3,8 ; pattes de 1,2 ; pal
 20,6 = dessous → dessus de la partie ronde. **Faux** : « 6,4 » n'est PAS axe → bout, « 13 » n'est PAS la hauteur des pattes.
 Toujours inconnus : axe → bout le plus proche (≈ 5 sur photo), hauteur des pattes, sens du « 10,8 », trous du palonnier rond.
 Palonnier rond du SCS0009 : **10 trous** (Nicolas, 25/11/2026), « à 9,2 du centre » : impossible sur un disque de Ø 17,5 (rayon 8,75) → sans doute 9,2 entre deux trous opposés, soit un cercle de Ø ≈ 9,2 : à confirmer.
+SCS0009 : **dessous des pattes à 17,0 du dessous du boîtier** (Nicolas, 25/11/2026) → dessus des pattes à 18,2 (pattes de 1,2) ; dessus de la partie ronde à 20,6. Restent : axe → bout, cercle des trous du palonnier rond (9,2 = diamètre ?).
