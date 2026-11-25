@@ -96,3 +96,14 @@ les trous du support. Prototype, non monté. Le manchon reste court (15 mm) : s'
 
 À faire : passage de tournevis central dans la base de pince du poignet, pour serrer la vis centrale du palonnier n° 5 sans tout
 démonter (place vérifiée par le calcul pour Ø 5,4 ; mesures demandées : tête et longueur de la vis centrale, tige du tournevis).
+
+## Correction du 25/11/2026 : c'était le support de ROTATION qui avait du jeu
+
+J'avais mal compris la photo du 24 : la petite vis de Nicolas bloquait le manchon du **support de rotation** sur le bout de la
+fourche de flexion, pas le support de flexion sur l'avant-bras. Nicolas a imprimé et monté le nouveau `flexion_support.stl`
+(parois hautes, 4 trous de flanc) : la pièce est bonne et utile (parois hautes, 40 %), mais ses trous de flanc ne répondaient pas
+au problème.
+`poignet_support.stl` reçoit donc à son tour **4 trous Ø 3,4 dans le manchon (2 dessus, 2 dessous)**, au milieu des 15 mm, à 9 mm
+de part et d'autre du plan de joint de la fourche, pour des **M3 × 6, pas plus longues** (mêmes M3 × 30 et inserts derrière).
+Cette version a aussi le **manchon fermé sur 4 faces** (depuis le 21/11) : le support que Nicolas a en main est encore l'ancien,
+ouvert sur le dessus. Prototype, non monté.

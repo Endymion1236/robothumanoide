@@ -46,6 +46,7 @@ Z_MURS = Z_LOIN + JEU                                   # dessus des murs = dess
 X_LEVRE0, X_LEVRE1, LEVRE = X_HAUT + 0.2, X_HAUT + 3.0, 1.8      # lèvres devant la partie haute du servo
 Z_LEVRE = Z_HAUTE + 2.5
 CABLE_Z = (Z_LOIN - 29.0, Z_LOIN - 17.0)                # fenêtres des câbles (comme dans la base de la pince)
+VIS_FLANC_Y, VIS_FLANC_L = (-9.0, 9.0), 6.0             # vis de blocage du manchon : position, longueur sous tête
 BOSS = 8.0; X_BARRE = (27.0, 37.0); INSERT_PROF = 5.0   # bossages des inserts de la barre (devant les fentes des câbles)
 def support():
     m = box(-ENT_B, -(YI + MUR), Z_FOND, 0, YI + MUR, ZI) - box(-ENT_B - 1, -YI, -ZI, 0.0, YI, ZI + 1)   # manchon : dessous + 2 joues
@@ -71,6 +72,10 @@ def support():
     # il pouvait glisser de côté sur l'avant-bras et ses trous se décalaient de 1,1 mm (mesure de Nicolas, 21/11/2026).
     m += box(-ENT_B, -(YI + MUR), ZI, 0, YI + MUR, ZI + MUR)
     for dz in (-VIS_ENT_Y, VIS_ENT_Y): m -= cyl_y(YI - 1, YI + MUR + 1, -ENT_B / 2, dz, M3)             # 2 vis M3 × 30 par le côté +Y
+    # 4 vis M3 × 6 de blocage par le dessus et le dessous du manchon (Nicolas, 24-25/11/2026 : c'est CE support qui avait du jeu sur
+    # le bout de la fourche de flexion, et qu'il a bloqué avec une petite vis). Une par demi-entretoise de la fourche, à 9 mm du plan
+    # de joint. Les M3 × 30 et les logements d'inserts de la fourche passent à z = ±6 : M3 × 6, PAS plus long.
+    for y in VIS_FLANC_Y: m -= cyl_z(-ENT_B / 2, y, Z_FOND - 1, ZI + MUR + 1, M3)
     return m
 def barre():
     """Ferme le haut du support. Une LANGUETTE descend derrière le haut du servo : les fentes des câbles ont supprimé
@@ -113,6 +118,9 @@ if __name__ == '__main__':
     r = {'etat': 'PROTOTYPE, aucune validation physique'}
     fixe = SUPPORT + BARRE + SERVO + box(-60, -FOURCHE_EP / 2, -FOURCHE_L / 2, 0, FOURCHE_EP / 2, FOURCHE_L / 2)
     assert (SUPPORT ^ SERVO).volume() < 0.01 and (BARRE ^ SERVO).volume() < 0.01, 'le support touche le servo du poignet'
+    pointe = ZI + MUR - VIS_FLANC_L                      # où s'arrête la pointe d'une vis de blocage du manchon
+    assert pointe > VIS_ENT_Y + 2.0 + 0.5, 'une vis de blocage toucherait une M3 × 30 ou un insert de la fourche'
+    r['vis_de_blocage_du_manchon'] = f'4 × M3 × {VIS_FLANC_L:.0f} (2 dessus, 2 dessous), prise {ZI - pointe:.1f} mm dans le bout de la fourche'
     assert (BASE ^ vers_poignet(G.SERVO)).volume() < 0.01, 'la base touche le servo de la pince'
     # le servo glisse par le haut : aucune matière sur son trajet
     for dz in range(0, 50, 2): assert (SUPPORT ^ SERVO.translate((0, 0, dz))).volume() < 0.01, f'le servo ne glisse pas (bloqué à {dz} mm)'
@@ -133,7 +141,7 @@ if __name__ == '__main__':
     r['masses_g'] = {'support': round(SUPPORT.volume() * dens), 'barre': round(BARRE.volume() * dens, 1), 'base de la pince (poignet)': round(BASE.volume() * dens),
                      'base de la pince (ancienne)': round(G.BASE.volume() * dens), 'servo': 55}
     r['ajout_au_bout_du_bras_g'] = r['masses_g']['support'] + round(r['masses_g']['barre']) + 55 + r['masses_g']['base de la pince (poignet)'] - r['masses_g']['base de la pince (ancienne)']
-    r['visserie'] = ['2 vis M3 × 30 (celles de la pince, sur l\'avant-bras)', '2 vis M3 × 10 + 2 inserts M3 (barre)', '4 vis M2,5 du servo (palonnier)']
+    r['visserie'] = ['2 vis M3 × 30 (celles de la pince, sur l\'avant-bras)', '4 vis M3 × 6 (blocage du manchon, avant-trous de 2,5 à percer dans le bout de la fourche)', '2 vis M3 × 10 + 2 inserts M3 (barre)', '4 vis M2,5 du servo (palonnier)']
     # export, pièces posées pour l'impression
     for nom, m in (('poignet_support', SUPPORT.translate((0, 0, -Z_FOND))), ('poignet_barre', BARRE.rotate((180, 0, 0)).translate((0, 0, Z_MURS + 4))),
                    ('poignet_base_pince', BASE.translate((0, 0, G.ZC - G.Z_BASE)))):

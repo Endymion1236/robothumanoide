@@ -1,5 +1,6 @@
 {
  "etat": "PROTOTYPE, aucune validation physique",
+ "vis_de_blocage_du_manchon": "4 × M3 × 6 (2 dessus, 2 dessous), prise 3.0 mm dans le bout de la fourche",
  "rotation": "aucun contact de −90° à +90°, pince ouverte, au milieu ou fermée",
  "tournevis_palonnier": "libre par l'avant (servo de la pince retiré, mâchoire mobile non montée)",
  "prise_des_vis_dans_le_palonnier_mm": 2.5,
@@ -14,6 +15,7 @@
  "ajout_au_bout_du_bras_g": 93,
  "visserie": [
   "2 vis M3 × 30 (celles de la pince, sur l'avant-bras)",
+  "4 vis M3 × 6 (blocage du manchon, avant-trous de 2,5 à percer dans le bout de la fourche)",
   "2 vis M3 × 10 + 2 inserts M3 (barre)",
   "4 vis M2,5 du servo (palonnier)"
  ],
