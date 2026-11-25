@@ -84,6 +84,21 @@ Puis bouger (2 servos).
 bras s'y place ; la visée se règle aux flèches et s'apprend (`bras/correction.py`). Objets d'essai à imprimer pour la
 reconnaissance et le tri : dossier `objets/`. Reste à écrire : trouver les objets sans clic, zones de dépôt, enchaînement.
 
+## Étape avant le buste : deux bras côte à côte sur la table (25/11/2026)
+
+Idée de Nicolas. Le 2e bras se monte d'abord SUR LA TABLE, à côté du premier, à **35 cm** (l'écart des épaules retenu pour le
+buste) : on met au point le travail à deux bras à plat, bien accessible, et le buste n'aura plus qu'à les recevoir.
+Pince sur le bras n° 1, main à doigts sur le n° 2.
+
+- **Ce que deux bras apportent** : tenir pendant que l'autre agit (dévisser un bouchon, ouvrir une boîte, tenir un gobelet),
+  se passer un objet, retourner un objet, porter à deux (plateau), trier chacun sa moitié de table, jouer à deux couleurs.
+- **Par ordre de difficulté** : 1) chacun sa zone, sans jamais se croiser (marche avec les programmes actuels) ; 2) passage
+  d'objet à un point de rendez-vous fixe ; 3) un bras tient, l'autre agit ; 4) porter ensemble (les deux bougent en même temps).
+- **À prévoir** : interdiction des gestes qui se croisent (le programme connaît la position des deux bras), bloc 12 V de 10 A,
+  6 servos de plus à d'autres numéros, pièces en miroir, programmes rendus « à deux bras », un réglage de visée par bras
+  (la même caméra de table suffit), contrôle au niveau à chaque étape du montage (décision de Nicolas du 24/11).
+- **Pas avant** : les servos 3095 reçus et mesurés (épaule et coude), et un tri complet réussi avec le premier bras.
+
 ## Objectif : jouer à des jeux de société (23/11/2026)
 
 Idée de Nicolas. Un jeu oblige le robot à voir, décider, saisir et poser : c'est un bon test de tout ce qui précède.
