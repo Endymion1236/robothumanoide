@@ -69,3 +69,7 @@ Avant tout dessin, demander : boîtier (L × l × h), position de l'axe, palonni
 filetage des 8 trous), distance entre les deux faces de palonnier, vis fournies, tension sur l'étiquette ou la boîte.
 Avant tout branchement : vérifier le 12 V, et les brancher SEULS pour changer leur numéro (neufs, ils portent sans doute le n° 1,
 celui du socle).
+Étiquette de la boîte (photo du 25/11/2026) : **STS3095, code ST-3095-C002, taille 30 × 65 × 48 mm, 95 kg·cm et 0,322 s/60° à 12 V**
+→ c'est bien la version 12 V ; trois fois le couple d'un STS3215 (30 kg·cm), un peu plus lent. Ces trois cotes sont celles de la
+boîte, pas des mesures : le détail (axe, palonniers, trous) reste à mesurer, ainsi que la masse (le servo du coude est porté par
+l'épaule). Attention à la force : limiter le couple dans le programme et régler les butées AVANT de monter quoi que ce soit.
