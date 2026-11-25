@@ -433,3 +433,18 @@ se place au-dessus. Plus de X et Y à recopier. **Essayé sur 6 servos simulés 
   doit pas bouger entre-temps.
 - Le lanceur installe la vision (`opencv-python`) dans l'installation du bras au premier lancement : il faut Internet cette fois-là.
 - `aller_point.bat` et `camera\voir_table.bat` restent utilisables séparément.
+
+### Régler la visée sans règle (25/11/2026)
+
+Premiers essais réels de `viser_camera` (Nicolas) : le clic, ENTRÉE et la descente fonctionnent. Lu sur ses captures, pince à plat
+et descendue, en (149, 419) et (5, 420) : le milieu des mâchoires arrive **3 à 4,5 cm trop à gauche et 4 à 6 cm trop loin**
+(lecture à 1,5 cm près : la pince est au-dessus de la table, la vue en biais la décale). Même écart aux deux points.
+
+Plutôt que mesurer, on **apprend** l'écart (`correction.py`, `correction_point.json` sur le PC de Nicolas) :
+pince descendue sur un repère, **flèches** (ou J gauche, L droite, U plus loin, N plus près, 5 mm par appui) jusqu'à ce qu'elle soit
+pile dessus, puis **C**. La correction est gardée en « tourner le socle de tant, allonger de tant » et sert à tous les clics
+suivants (moyenne des points appris voisins). 3 ou 4 points à des endroits différents ; **E deux fois** efface tout.
+Essayé sur servos simulés. `aller_point.bat` (clavier seul) n'applique pas cette correction.
+
+Piste pour la cause du « trop loin » : la longueur axe de flexion → milieu des mâchoires (200,7 mm au programme) n'a jamais été
+mesurée avec la pince V4. À mesurer ; en attendant la correction apprise l'absorbe.

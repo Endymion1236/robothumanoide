@@ -21,7 +21,7 @@ class Pointeur:
         self.c = Controleur.__new__(Controleur); c = self.c
         c.bus = bus or Bus(port); c.journal = queue.Queue(); c.reglages = {'vitesse': 300, 'acceleration': 20, 'serrage_doux': P.FORCE_DOUCE, 'serrage_fort': P.FORCE_FERME, 'maintien': P.FORCE_MAINTIEN}
         import threading; c.arret = threading.Event()
-        c._preparer(); self.demander, self.dire, self.prise, self.haut = demander, dire, None, None
+        c._preparer(); self.demander, self.dire, self.prise, self.haut, self.incl = demander, dire, None, None, 0.0
         if not (c.socle and c.flexion): raise ErreurServo('Il faut le socle (n° 1) et la flexion du poignet (n° 6) pour aller à un point.')
         self.vider()
 
@@ -52,6 +52,7 @@ class Pointeur:
         except G.HorsDePortee as e:
             z = G.zone_toutes(c.hauteur); self.dire(f'   Hors de portée : {e}. Zone possible droit devant : de {z[0]} à {z[1]} mm du socle.'); return
         comment = 'à plat' if abs(incl) < 1 else 'pointée vers le bas' if incl <= -89 else f'inclinée de {abs(incl):.0f}° vers le bas'
+        self.incl = incl
         self.dire(f"   Pour saisir en X {X:+.0f}, Y {Y:+.0f}, pince {comment}{'' if imposee is None else ' (demandé)'} : socle {prise['socle']:+.0f}°, épaule {prise['epaule']:+.0f}°, coude {prise['coude']:+.0f}°, poignet {prise['flexion']:+.0f}°")
         if imposee is None and abs(incl) >= 1: self.dire('   (à plat, ce point est trop près : j\'incline la pince juste ce qu\'il faut)')
         self.dire(f"   D'abord au-dessus : épaule {haut['epaule']:+.0f}°, coude {haut['coude']:+.0f}°, poignet {haut['flexion']:+.0f}° (pince à {G.ou_est_la_pince(**haut, hauteur_epaule=c.hauteur)[2]:.0f} mm de la table)")
@@ -72,11 +73,24 @@ class Pointeur:
         if plan and self.demander('   J\'y vais ? (o/n) ').strip().lower().startswith('o'): self.aller(*plan)
 
     def descendre(self):
-        if not self.prise: self.dire('   Vise d\'abord un point : v X Y'); return
-        self.poser_bras(self.prise, 'Descente sur le point')
+        if not self.prise: self.dire('   Vise d\'abord un point : v X Y'); return False
+        return self.poser_bras(self.prise, 'Descente sur le point')
     def monter(self):
-        if not self.haut: self.dire('   Vise d\'abord un point : v X Y'); return
-        self.poser_bras(self.haut, 'Remontée')
+        if not self.haut: self.dire('   Vise d\'abord un point : v X Y'); return False
+        return self.poser_bras(self.haut, 'Remontée')
+    def glisser(self, X, Y, en_bas):
+        """Petit déplacement de la pince vers un point voisin (X, Y), sans changer son inclinaison ni remonter : socle, épaule,
+        coude et poignet bougent ensemble. en_bas : la pince est descendue sur le point (sinon elle est à l'approche)."""
+        c = self.c
+        if not self.prise: self.dire('   Vise d\'abord un point.'); return False
+        prise, haut = G.prise_et_approche(X, Y, c.hauteur, self.incl)
+        cible = prise if en_bas else haut; arrivee = [cible['epaule'], cible['coude'], cible['flexion']]
+        c._verifier(*arrivee)
+        if not G.trajet_sur(list(self.angles()), arrivee, c.hauteur): raise ErreurServo('ce décalage ferait passer la pince trop près de la table (rien n\'a bougé)')
+        ok = c._bouger([(c.socle, MILIEU + pas(cible['socle'])), (c.epaule, E.position(arrivee[0], c.haut)), (c.coude, MILIEU + c.sc * pas(arrivee[1])), (c.flexion, MILIEU + c.sf * pas(arrivee[2]))], 'Pince décalée')
+        self.vider()
+        if ok: self.prise, self.haut = prise, haut
+        return ok
     def repos(self):
         self.poser_bras({'epaule': E.REPOS, 'coude': 0, 'flexion': 0}, 'Repos'); self.prise = self.haut = None
     def infos(self):
