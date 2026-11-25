@@ -166,3 +166,4 @@ le servo (épaisseur des pattes ?) ; « 6,4 », « 13 » et « 10,8 » : sens à
 Confirmé par Nicolas : axe doré Ø 3,7 dépassant de 3,8 ; pattes de 1,2 ; palonnier rond 1,2 (disque) / 3,8 (avec moyeu), trous Ø 0,7 ;
 20,6 = dessous → dessus de la partie ronde. **Faux** : « 6,4 » n'est PAS axe → bout, « 13 » n'est PAS la hauteur des pattes.
 Toujours inconnus : axe → bout le plus proche (≈ 5 sur photo), hauteur des pattes, sens du « 10,8 », trous du palonnier rond.
+Palonnier rond du SCS0009 : **10 trous** (Nicolas, 25/11/2026), « à 9,2 du centre » : impossible sur un disque de Ø 17,5 (rayon 8,75) → sans doute 9,2 entre deux trous opposés, soit un cercle de Ø ≈ 9,2 : à confirmer.
