@@ -79,6 +79,10 @@ la cloison ; le doigt, sur 54 positions de tendu à plié à fond, ne touche ni 
 leurs canaux (2,3° d'écart). Il faut tourner le servo de **221°** pour plier le doigt à fond (il en fait environ 300). Force dans le fil :
 environ 18 N en usage, 54 N au blocage (couple de la fiche revendeur, 2,3 kg·cm à 6 V).
 
+**Poulie corrigée le 26/11/2026** : les deux petits trous d'ancrage des fils (Ø 1,2, fermés) ne se formaient pas à l'impression.
+Ils sont remplacés par deux **fentes ouvertes** de 1,4 mm, une par gorge, de part et d'autre du tambour : le fil s'y glisse par le
+côté et se noue sur le dessus du tambour. Réimprimer `banc_doigt_poulie.stl`.
+
 **À vérifier par Nicolas AVANT d'imprimer** :
 1. une vis fournie (Ø 1,3) se visse-t-elle dans un des deux trous les plus écartés du palonnier rond (trous de 0,7) ? Sinon, les
    agrandir avec une aiguille chauffée ou un foret de 1 mm ;

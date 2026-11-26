@@ -95,8 +95,8 @@ def e5(fig):
     PM.etiquette(ax, (B.XP, 30 + B.y_de_h(B.H_P2), B.H + 5), 'poulie', (40, 70), taille=11)
 
 @etape('Les deux fils', ['le fil de pêche du doigt (un brin, noué au bout)', 'une pince à épiler', 'colle cyano'],
-       ['Plie le doigt à MOITIÉ (environ 45° à chaque charnière) et tiens-le ainsi.', 'Fil du DESSOUS (il ferme) : il passe SOUS la poulie, dans la gorge côté servo, fait un tour complet, entre dans le petit trou du fond de sa gorge et ressort sur le dessus. Tends-le, fais 3 nœuds.',
-        'Fil du DESSUS (il ouvre) : il passe PAR-DESSUS la poulie, dans la gorge côté toi, fait un tour complet dans l\'AUTRE sens, entre dans son petit trou. Tends-le, fais 3 nœuds.',
+       ['Plie le doigt à MOITIÉ (environ 45° à chaque charnière) et tiens-le ainsi.', 'Fil du DESSOUS (il ferme) : il passe SOUS la poulie, dans la gorge côté servo, fait un tour complet, puis se glisse PAR LE CÔTÉ dans la fente de sa gorge et remonte sur le dessus du tambour. Tends-le, fais 3 nœuds serrés au ras du dessus : le nœud est plus gros que la fente.',
+        'Fil du DESSUS (il ouvre) : il passe PAR-DESSUS la poulie, dans la gorge côté toi, fait un tour complet dans l\'AUTRE sens, se glisse dans SA fente (de l\'autre côté du tambour). Tends-le, fais 3 nœuds.',
         'Les deux fils doivent être tendus comme une corde de guitare molle : sans mou, sans tirer le doigt.', 'Une goutte de colle cyano sur chaque nœud, coupe le surplus à 3 mm.'],
        'Les deux tours sont en sens INVERSE : quand la poulie tourne, l\'un s\'enroule, l\'autre se déroule. Si les deux s\'enroulent ensemble, le doigt se bloque : refais le fil du dessus dans l\'autre sens.',
        [(C['fil'], 'les fils'), (C['poulie'], 'poulie')])

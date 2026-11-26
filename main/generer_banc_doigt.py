@@ -63,6 +63,7 @@ R_FOND, R_JOUE = 4.0, 5.5                # fond des gorges (Ø 8, comme conseill
 GORGES = [(H_P1 + 1.0, H_P1 + 2.5), (H_P1 + 3.5, H_P1 + 5.0)]     # gorge « ferme » (côté servo), gorge « ouvre »
 H_P2 = H_P1 + 6.0                        # dessus du tambour
 H_FILS = (GORGES[0][1] + GORGES[1][0]) / 2                        # plan médian des deux gorges : il doit tomber dans le plan du doigt
+LARGEUR_FENTE = 1.4
 ANCRES = [(90.0, 0), (270.0, 1)]         # (angle, gorge) : un petit trou par fil, du fond de sa gorge jusqu'au dessus du tambour
 
 def poulie():
@@ -74,8 +75,11 @@ def poulie():
         x, y = R_TROU_PAL * math.cos(math.radians(a)), R_TROU_PAL * math.sin(math.radians(a))
         p -= mf.Manifold.cylinder(H_P1 - H_P0 + 1, 0.75, 0.75, 16).translate((x, y, H_P0 - 0.5))
     for a, g in ANCRES:
-        x, y = (R_FOND + 0.3) * math.cos(math.radians(a)), (R_FOND + 0.3) * math.sin(math.radians(a))
-        p -= mf.Manifold.cylinder(H_P2 - GORGES[g][0] + 1, 0.6, 0.6, 16).translate((x, y, GORGES[g][0]))
+        # Ancrage du fil : une FENTE ouverte vers l'extérieur, large de 1,4 mm, du fond de sa gorge jusqu'au dessus du tambour.
+        # Avant : un trou fermé de Ø 1,2, qui ne s'est pas formé à l'impression (Nicolas, 26/11/2026 : « impossible de faire passer
+        # le fil »). Le fil se glisse dans la fente par le côté ; son nœud, sur le dessus du tambour, est plus gros qu'elle.
+        fente = mf.Manifold.cube((R_JOUE + 1 - (R_FOND - 0.6), LARGEUR_FENTE, H_P2 - GORGES[g][0] + 1)).translate((R_FOND - 0.6, -LARGEUR_FENTE / 2, GORGES[g][0]))
+        p -= fente.rotate((0, 0, a))
     return p
 
 # ---------------- Placement dans le banc ----------------
