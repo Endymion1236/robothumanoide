@@ -67,16 +67,17 @@ def angles_pour(X, Y, hauteur_axe=None, hauteur_epaule=179.0, inclinaison=0.0):
     try: return dict(angles_plan(s, hauteur_axe, inclinaison, hauteur_epaule), socle=socle)
     except HorsDePortee as e: raise HorsDePortee(f'{e} ({R:.0f} mm du socle)')
 
-def prise_et_approche(X, Y, hauteur_epaule=179.0, inclinaison=0.0):
+def prise_et_approche(X, Y, hauteur_epaule=179.0, inclinaison=0.0, leve=0.0):
     """Les deux positions d'un geste de prise, pour une inclinaison donnée : (prise, approche). Lève HorsDePortee si l'une des deux est
     impossible ou si la descente de l'une à l'autre frôlerait la table.
     Pince à plat : l'approche est la position d'avant (épaule relevée de 25°), essayée en vrai le 24/11/2026.
-    Pince inclinée : on cherche d'abord une approche À LA VERTICALE du point (7, puis 5,5, puis 4 cm plus haut)."""
-    prise = angles_pour(X, Y, None, hauteur_epaule, inclinaison)
+    Pince inclinée : on cherche d'abord une approche À LA VERTICALE du point (7, puis 5,5, puis 4 cm plus haut).
+    leve : la prise (ou la pose) se fait `leve` mm plus haut que d'habitude (objet reposé un peu penché : on le lâche au-dessus)."""
+    prise = angles_pour(X, Y, hauteur_prise(inclinaison) + leve, hauteur_epaule, inclinaison)
     if B.bas_de_pince(hauteur_epaule, prise['epaule'], prise['coude'], prise['flexion'], roulis=0.0) < B.MARGE_TABLE: raise HorsDePortee('la pince toucherait la table')
     # tout près du socle, pince pointée vers le bas, le poignet n'a plus assez de course pour monter à la verticale sans changer
     # d'inclinaison : on accepte alors une approche un peu moins raide (5, 10 puis 15° de moins), toujours au-dessus du point.
-    essais = [] if abs(inclinaison) < 1 else [lambda dz=dz, di=di: angles_pour(X, Y, hauteur_prise(inclinaison) + dz, hauteur_epaule, min(0.0, inclinaison + di))
+    essais = [] if abs(inclinaison) < 1 else [lambda dz=dz, di=di: angles_pour(X, Y, hauteur_prise(inclinaison) + leve + dz, hauteur_epaule, min(0.0, inclinaison + di))
                                               for di in (0.0, 5.0, 10.0, 15.0) for dz in (70.0, 55.0, 40.0)]
     erreur = None
     for essai in essais + [lambda: au_dessus(prise)]:
@@ -89,13 +90,13 @@ def prise_et_approche(X, Y, hauteur_epaule=179.0, inclinaison=0.0):
         erreur = erreur or HorsDePortee('la descente passerait trop près de la table')
     raise HorsDePortee(f'pas de position d\'approche ({erreur})')
 
-def choisir_inclinaison(X, Y, hauteur_epaule=179.0, imposee=None):
+def choisir_inclinaison(X, Y, hauteur_epaule=179.0, imposee=None, leve=0.0):
     """Choisit l'inclinaison de la pince pour saisir en (X, Y) : la plus à plat qui marche (0°, puis −15°, −30°… jusqu'à −90°).
     `imposee` : n'essayer que celle-là. Renvoie (inclinaison, prise, approche) ou lève HorsDePortee (la raison donnée est celle de la
     pince à plat si le point est loin, celle de la pince pointée vers le bas s'il est près)."""
     erreurs = {}
     for incl in (INCLINAISONS if imposee is None else (float(imposee),)):
-        try: return (incl,) + prise_et_approche(X, Y, hauteur_epaule, incl)
+        try: return (incl,) + prise_et_approche(X, Y, hauteur_epaule, incl, leve)
         except HorsDePortee as e: erreurs[incl] = e
     if imposee is not None: raise erreurs[float(imposee)]
     pres = 'trop près' in str(erreurs[0]) or 'coude' in str(erreurs[0])

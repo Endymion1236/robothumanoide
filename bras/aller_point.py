@@ -45,10 +45,10 @@ class Pointeur:
         ok = c._bouger([(c.epaule, E.position(arrivee[0], c.haut)), (c.coude, MILIEU + c.sc * pas(arrivee[1])), (c.flexion, MILIEU + c.sf * pas(arrivee[2]))], nom)
         self.vider(); return ok
 
-    def preparer(self, X, Y, imposee=None):
+    def preparer(self, X, Y, imposee=None, leve=0.0):
         """Calcule le geste pour saisir en (X, Y) et l'annonce, SANS bouger. Renvoie (prise, approche), ou None si c'est impossible."""
         c = self.c
-        try: incl, prise, haut = G.choisir_inclinaison(X, Y, c.hauteur, imposee)
+        try: incl, prise, haut = G.choisir_inclinaison(X, Y, c.hauteur, imposee, leve)
         except G.HorsDePortee as e:
             if imposee is not None:
                 bd = G.bande(imposee, c.hauteur, math.degrees(math.atan2(X, Y)))

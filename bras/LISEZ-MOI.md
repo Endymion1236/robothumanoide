@@ -474,3 +474,16 @@ de pince qu'à la prise.** Chaque inclinaison n'est possible que dans une bande 
   d'objets à trier entre les deux traits orange d'une zone.
 - `viser_camera` : après S (serrer) pince descendue, le clic suivant garde l'inclinaison de la prise ; si le point est trop près
   ou trop loin, il dit entre quelles distances poser. O (ouvrir) libère cette règle.
+
+### Agrandir les zones : tolérance de 15° et option bac (26/11/2026, demandes de Nicolas)
+
+**Tolérance de 15°** : si la place manque à l'inclinaison de la prise, l'objet est posé avec 15° de plus ou de moins, **lâché 13 mm
+plus haut** (son coin ne touche jamais la table) ; il se redresse seul (bascule au-delà de 23° pour la barre, 25° pour le petit rond,
+par le calcul). Calcul : une zone qui prenait 3 objets pris à 60° en prend 9. **À vérifier en vrai** : l'objet retombe-t-il droit ?
+
+**Option bac** (`regler_bac.bat`, gardé dans `bras/bacs.json` sur le PC) : la zone des petits ou des gros peut être un bac. Le bras
+lâche l'objet au-dessus (bas de l'objet 25 mm au-dessus du bord), avec l'inclinaison de la prise si possible. Le réglage demande le
+centre du bac (X, Y lus dans `camera\voir_table`), sa taille intérieure et la hauteur du bord, et vérifie par le calcul que le
+bras peut y lâcher un objet quelle que soit sa prise. Calcul, bac 150 × 120 : bord de 4 à 12 cm accepté entre environ 30 et 43 cm
+du socle ; trop loin (50 cm) ou trop près avec un bord haut, refusé. **Le bac doit être en place AVANT la photo du fond (F).**
+Les objets vus dans un bac sont ignorés.

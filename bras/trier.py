@@ -6,6 +6,7 @@ Dans la fenêtre :
   F         photo du FOND : table VIDE, bras au repos. À refaire si la caméra ou la lumière change beaucoup.
   (ensuite) les objets trouvés sont entourés, numérotés, avec leur largeur ; les deux zones de dépôt (à gauche et à droite) sont
             entre deux traits orange : n'y mets pas les objets à trier
+  Une zone peut être un BAC (regler_bac.bat) : l'objet y est lâché d'au-dessus. Bac en place AVANT la photo du fond (F).
   Un objet pris pince inclinée est REPOSÉ avec la même inclinaison (sinon il penche) : la distance de pose suit celle de la prise.
   T         TRIER : il prend les objets un par un jusqu'à ce qu'il n'y en ait plus (ou ESPACE)
   1         n'en trier qu'UN (pour les premiers essais)
@@ -27,11 +28,41 @@ from viser_camera import Poste, sans_accents, FLECHES
 # reposé avec la MÊME inclinaison, sinon il penche et tombe (Nicolas, 26/11/2026). Chaque inclinaison n'est possible que dans une
 # bande de distances (environ 5 à 8 cm de large) : on pose donc dans la direction de la zone, à la distance qui va avec la prise.
 ZONES = {'petit': -40.0, 'gros': 40.0}
+PLURIEL = {'petit': 'petits', 'gros': 'gros'}
 SECTEUR = 16.0                                                    # degrés de part et d'autre : on n'y cherche pas d'objets à trier
 ECART_DEPOT = 50.0                                                # mm entre deux objets posés dans une zone
+# Pour agrandir la zone de pose (demande de Nicolas, 26/11/2026) : on accepte de poser avec la pince inclinée 15° de PLUS ou de
+# MOINS qu'à la prise. L'objet arrive penché de 15° : ses coins descendraient sous la pince, on le lâche donc 13 mm plus haut ; il
+# retombe droit tout seul (il ne bascule qu'au-delà de 23° pour la barre, 25° pour le petit rond, par le calcul).
+ECART_INCL = 15.0
+LEVE_PENCHE = 13.0                                                # mm : 32 (demi-longueur de la barre) × sin 15° + 5 de marge
 SEUIL_TAILLE = 32.0                                               # mm, largeur mesurée par la pince : en dessous, « petit »
 ECART_MIN = 55.0                                                  # mm entre deux objets : plus près, la pince ouverte risque de toucher le voisin
 ESSAIS_MAX = 2                                                    # tentatives au même endroit avant d'abandonner l'objet
+# Option BAC (demande de Nicolas, 26/11/2026) : une zone peut être un bac posé sur la table (réglé par regler_bac.bat, gardé
+# dans bacs.json sur le PC). Le bras lâche alors l'objet AU-DESSUS du bac : n'importe quelle inclinaison convient, plus de
+# problème de place. Le bas de l'objet passe GARDE_BAC mm au-dessus du bord. Le bac doit être en place AVANT la photo du fond.
+FICHIER_BACS = Path(__file__).with_name('bacs.json')
+GARDE_BAC = 25.0
+def charger_bacs():
+    try:
+        b = __import__('json').loads(FICHIER_BACS.read_text(encoding='utf-8'))
+        return {z: v for z, v in b.items() if z in ZONES and all(k in v for k in ('X', 'Y', 'bord', 'largeur', 'profondeur'))}
+    except Exception: return {}
+def dans_un_bac(X, Y, bacs, marge=30.0):
+    return any(abs(X - b['X']) < b['largeur'] / 2 + marge and abs(Y - b['Y']) < b['profondeur'] / 2 + marge for b in bacs.values())
+def pose_dans_bac(bac, incl_prise, hauteur_epaule=179.0):
+    """Comment lâcher au-dessus du bac : (point, inclinaison, levée) ou None. L'objet pend sous la pince d'environ la hauteur de
+    prise ; on le monte du bord + la garde, en essayant d'abord l'inclinaison de la prise (l'objet descend droit), puis les autres."""
+    ordre = sorted(G.INCLINAISONS, key=lambda i: abs(i - incl_prise))
+    for i in ordre:
+        leve = bac['bord'] + GARDE_BAC + max(0.0, abs(i - incl_prise)) * 0.6       # un objet penché descend un peu plus bas
+        for dx, dy in ((0, 0), (15, 0), (-15, 0), (0, 15), (0, -15)):
+            pt = (bac['X'] + dx, bac['Y'] + dy)
+            try: G.prise_et_approche(*pt, hauteur_epaule, i, leve); return pt, i, leve
+            except G.HorsDePortee: pass
+    return None
+
 FICHIER_FOND = Path(__file__).resolve().parent.parent / 'camera' / 'fond_table.png'
 AIDE = 'F = photo du fond (table VIDE) | T = TRIER | 1 = un seul objet | R repos | ESPACE = ARRET | P photo | Q quitter'
 
@@ -53,6 +84,8 @@ class Trieur(Poste):
         self.demande, self.reponse = threading.Event(), threading.Event()
         self.au_repos, self.tries, self.rates = True, {'petit': 0, 'gros': 0}, []
         self.deposes = {z: [] for z in ZONES}
+        self.bacs = charger_bacs()
+        for z, b in self.bacs.items(): self.dire(f'Les {PLURIEL[z]} vont dans le bac (X {b["X"]:+.0f}, Y {b["Y"]:.0f}, bord à {b["bord"]:.0f} mm).')
         if FICHIER_FOND.exists(): self.fond = cv2.imread(str(FICHIER_FOND)); self.dire('Photo du fond reprise du dernier essai (F pour la refaire si la caméra a bougé).')
 
     def voir(self, image):
@@ -60,7 +93,8 @@ class Trieur(Poste):
         centres, contours = super().voir(image)
         if self.fond is not None and self.vus and self.h is not None and self.au_repos and self.fond.shape == image.shape:
             self.objets = [o for o in O.trouver(image, self.fond, self.h, self.reglage, self.hauteur)
-                           if not any(abs(math.degrees(math.atan2(o['X'], o['Y'])) - a) < SECTEUR for a in ZONES.values())]
+                           if not dans_un_bac(o['X'], o['Y'], self.bacs)
+                           and not any(abs(math.degrees(math.atan2(o['X'], o['Y'])) - a) < SECTEUR for z, a in ZONES.items() if z not in self.bacs)]
             if self.demande.is_set(): self.demande.clear(); self.reponse.set()
         return centres, contours
 
@@ -80,7 +114,29 @@ class Trieur(Poste):
         if self.p.c.arret.is_set(): raise ErreurServo('arrêt demandé')
         if not ok: raise ErreurServo(f'{quoi} n\'a pas pu se faire')
 
+    def lacher_dans_bac(self, z, incl, largeur):
+        p, c = self.p, self.p.c
+        pose = pose_dans_bac(self.bacs[z], incl, c.hauteur)
+        if not pose: raise ErreurServo(f'le bac des {PLURIEL[z]} est hors de portée : objet toujours tenu. R, puis tiens-le et ouvre la pince à la main.')
+        pt, i, leve = pose
+        self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le lâche dans son bac (pince à {abs(i):.0f}°, {leve:.0f} mm au-dessus de la hauteur de prise).')
+        plan = p.preparer(*C.corriger(*pt, self.corrections), i, leve)
+        if not plan: raise ErreurServo('pose dans le bac impossible : objet toujours tenu. R, puis tiens-le et ouvre la pince à la main.')
+        p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
+        self.etape(p.descendre(), 'l\'arrivée au-dessus du bac'); c._pince('o'); p.vider(); time.sleep(0.3)
+        self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1
+        return True
+
     def place_libre(self, zone, incl):
+        """Où poser et comment : (point, inclinaison, levée) ou None. D'abord avec l'inclinaison de la prise (objet posé droit),
+        sinon avec 15° de plus ou de moins (objet lâché 13 mm plus haut, il se redresse seul)."""
+        for i, leve in ((incl, 0.0), (incl + ECART_INCL, LEVE_PENCHE), (incl - ECART_INCL, LEVE_PENCHE)):
+            if not -90.0 <= i <= 0.0: continue
+            pt = self.place_libre_incl(zone, i, leve)
+            if pt: return pt, i, leve
+        return None
+
+    def place_libre_incl(self, zone, incl, leve=0.0):
         """Un point de la zone où poser avec l'inclinaison `incl` : dans la direction de la zone, à une distance possible pour
         cette inclinaison, loin des objets déjà posés. On essaie d'abord le milieu de la bande, puis de part et d'autre."""
         a = ZONES[zone]; bd = G.bande(incl, self.p.c.hauteur, a)
@@ -90,7 +146,7 @@ class Trieur(Poste):
             for da in (0.0, -10.0, 10.0):
                 pt = G.point_dans_direction(a + da, R)
                 if all(math.hypot(pt[0] - x, pt[1] - y) >= ECART_DEPOT for x, y in self.deposes[zone]):
-                    try: G.prise_et_approche(*pt, self.p.c.hauteur, incl); return pt
+                    try: G.prise_et_approche(*pt, self.p.c.hauteur, incl, leve); return pt
                     except G.HorsDePortee: pass
         return None
 
@@ -123,10 +179,14 @@ class Trieur(Poste):
             return True
         self.suite_ratee = 0
         z = zone_de(largeur); incl = p.incl
-        spot = self.place_libre(z, incl)
-        if spot is None: raise ErreurServo(f'plus de place dans la zone des {z}s à la bonne distance : objet toujours tenu. Vide la zone, puis R (tiens l\'objet).')
-        self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {"gauche" if ZONES[z] < 0 else "droite"}, pince inclinée comme à la prise ({abs(incl):.0f}°).')
-        plan = p.preparer(*C.corriger(*spot, self.corrections), incl)
+        if z in self.bacs: return self.lacher_dans_bac(z, incl, largeur)
+        place = self.place_libre(z, incl)
+        spot, incl_pose, leve = place if place else (None, None, None)
+        if spot is None: raise ErreurServo(f'plus de place dans la zone des {PLURIEL[z]} à la bonne distance : objet toujours tenu. Vide la zone, puis R (tiens l\'objet).')
+        cote = "gauche" if ZONES[z] < 0 else "droite"
+        if leve: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince à {abs(incl_pose):.0f}° (prise à {abs(incl):.0f}°) : lâché {leve:.0f} mm plus haut, il se redresse seul.')
+        else: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince inclinée comme à la prise ({abs(incl):.0f}°).')
+        plan = p.preparer(*C.corriger(*spot, self.corrections), incl_pose, leve)
         if not plan: raise ErreurServo(f'pose impossible : objet toujours tenu. R, puis tiens-le et ouvre la pince à la main (O dans viser_camera).')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
         self.etape(p.descendre(), 'la pose'); c._pince('o'); p.vider()
@@ -167,10 +227,15 @@ class Trieur(Poste):
 
     def dessiner(self, image, centres, contours):
         if self.h is not None:
+            for nom, b in self.bacs.items():
+                w, d = b['largeur'] / 2, b['profondeur'] / 2
+                pts = np.array([T.vers_image(self.h, b['X'] + sx * w, b['Y'] + sy * d) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))], np.int32)
+                cv2.polylines(image, [pts], True, (255, 160, 0), 2); V.ecrire(image, f'bac des {PLURIEL[nom]}', T.vers_image(self.h, b['X'] - w, b['Y'] + d + 15), (255, 200, 80), 0.6)
             for nom, a in ZONES.items():
+                if nom in self.bacs: continue
                 for b in (a - SECTEUR, a + SECTEUR):
                     cv2.line(image, T.vers_image(self.h, *G.point_dans_direction(b, 190)), T.vers_image(self.h, *G.point_dans_direction(b, 480)), (255, 160, 0), 2)
-                V.ecrire(image, f'zone {nom}s', T.vers_image(self.h, *G.point_dans_direction(a, 480)), (255, 200, 80), 0.6)
+                V.ecrire(image, f'zone des {PLURIEL[nom]}', T.vers_image(self.h, *G.point_dans_direction(a, 480)), (255, 200, 80), 0.6)
                 for x, y in self.deposes[nom]: cv2.circle(image, T.vers_image(self.h, x, y), 8, (255, 160, 0), 2)
             for n, o in enumerate(self.objets, 1):
                 pts = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']], np.int32)
@@ -187,9 +252,14 @@ class Trieur(Poste):
 
 def verifier_zones(hauteur_epaule=179.0):
     """Chaque zone doit accepter toutes les inclinaisons de prise : sinon un objet pris pourrait ne pas pouvoir y être posé."""
-    for nom, a in ZONES.items():
+    bacs = charger_bacs()
+    for nom, b in bacs.items():
         for incl in G.INCLINAISONS:
-            if not G.bande(incl, hauteur_epaule, a): raise G.HorsDePortee(f'zone des {nom}s ({a:+.0f}°) : impossible de poser pince inclinée de {abs(incl)}°')
+            if not pose_dans_bac(b, incl, hauteur_epaule): raise G.HorsDePortee(f'bac des {PLURIEL[nom]} : impossible d\'y lâcher un objet pris pince à {abs(incl)}° (relance regler_bac.bat)')
+    for nom, a in ZONES.items():
+        if nom in bacs: continue
+        for incl in G.INCLINAISONS:
+            if not G.bande(incl, hauteur_epaule, a): raise G.HorsDePortee(f'zone des {PLURIEL[nom]} ({a:+.0f}°) : impossible de poser pince inclinée de {abs(incl)}°')
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
