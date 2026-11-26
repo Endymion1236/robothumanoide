@@ -65,11 +65,19 @@ def pose_dans_bac(bac, incl_prise, hauteur_epaule=179.0):
     ordre = sorted(G.INCLINAISONS, key=lambda i: abs(i - incl_prise))
     for i in ordre:
         leve = bac['bord'] + GARDE_BAC + max(0.0, abs(i - incl_prise)) * 0.6       # un objet penché descend un peu plus bas
-        for dx, dy in ((0, 0), (15, 0), (-15, 0), (0, 15), (0, -15)):
-            pt = (bac['X'] + dx, bac['Y'] + dy)
+        for pt in points_du_bac(bac):
             try: G.prise_et_approche(*pt, hauteur_epaule, i, leve); return pt, i, leve
             except G.HorsDePortee: pass
     return None
+
+MARGE_PAROI = 45.0              # mm entre le point de lâcher et la paroi intérieure du bac (demi-objet + jeu)
+def points_du_bac(bac, pas=15.0):
+    """Les points où lâcher dans le bac, du plus PROCHE du socle au plus loin. Nicolas, 26/11/2026 : bacs de 18 cm de haut posés
+    plus loin, le milieu n'était plus atteignable assez haut (« pose dans le bac impossible ») ; tout le fond du bac est bon."""
+    dx, dy = max(bac['largeur'] / 2 - MARGE_PAROI, 0.0), max(bac['profondeur'] / 2 - MARGE_PAROI, 0.0)
+    nx, ny = int(dx // pas), int(dy // pas)
+    pts = [(bac['X'] + i * pas, bac['Y'] + j * pas) for i in range(-nx, nx + 1) for j in range(-ny, ny + 1)]
+    return sorted(pts, key=lambda q: math.hypot(*q))
 
 FICHIER_FOND = Path(__file__).resolve().parent.parent / 'camera' / 'fond_table.png'
 AIDE = 'F = fond (table VIDE) | T = TRIER | 1 = un seul objet | O ouvrir | R repos | ESPACE = ARRET | P photo | Q quitter'
@@ -96,6 +104,8 @@ def ouverture_prise(o, roulis=0.0):
 # sur elle-même pour serrer en travers. Seulement si la pince est assez penchée vers le bas : à plat, tourner mettrait une mâchoire
 # en dessous de l'autre au lieu de la faire pivoter au-dessus de la table.
 ALLONGE_ROTATION = 1.5          # long / étroit au pied, mesuré sur la photo : au-delà, on tourne la pince
+LONG_ROTATION = 55.0            # mm : et seulement si l'objet est vraiment long. Tri du 26/11/2026 à 17 h 31 : les ronds de 28 et 40 mm,
+                                # vus « 21 × 41 » sur la photo (pied mal vu), faisaient tourner la pince pour rien ; la barre fait 64-77
 INCL_ROTATION = 45.0            # degrés : pince au moins aussi penchée pour tourner
 ROULIS_MAX = 88.0               # degrés (butées du poignet : ±90)
 SENS_ROULIS = 1                 # + = le haut de la pince part à gauche vu de derrière (tester_poignet, 21/11/2026) ; -1 si c'est l'inverse
@@ -104,7 +114,7 @@ def roulis_pour(o, incl, socle):
     """De combien tourner la pince (degrés) pour que ses mâchoires serrent l'objet en travers ; 0 s'il n'est pas allongé ou si la
     pince est trop à plat. Vu d'en haut, les mâchoires d'une pince penchée de i et tournée de r serrent dans la direction
     cos r · (travers du bras) + sin r · sin i · (devant) : on cherche r qui donne la direction étroite de l'objet."""
-    if o.get('allonge_vraie', 1.0) < ALLONGE_ROTATION or abs(incl) < INCL_ROTATION: return 0.0
+    if o.get('allonge_vraie', 1.0) < ALLONGE_ROTATION or o.get('long', 0.0) < LONG_ROTATION or abs(incl) < INCL_ROTATION: return 0.0
     a, s_ = math.radians(o['axe_court']), math.radians(socle)
     e = (math.cos(a), math.sin(a)); n = (math.cos(s_), -math.sin(s_)); r = (math.sin(s_), math.cos(s_))
     A, B_ = e[0] * n[0] + e[1] * n[1], e[0] * r[0] + e[1] * r[1]
