@@ -502,9 +502,13 @@ Bras modélisé avec 28 mm de demi-largeur et 8 mm de marge (le bac n'est pas en
 
 ### Rapport de tri (26/11/2026, demande de Nicolas)
 
+**Rapport AUTOMATIQUE** : à la fin du tri, `rapport.html` s'ouvre tout seul dans le navigateur, photos comprises, et
+`bras\rapports\index.html` résume tous les essais. Après chaque objet, le programme **contrôle lui-même sur la photo** : objet
+introuvable à l'endroit de la pose (tombé, roulé), forme vue d'en haut différente de celle du départ (couché ou renversé), ou
+« debout, à N mm du point visé » ; pour un raté : toujours à sa place, déplacé, ou disparu. Rien à remplir.
 Chaque appui sur T ou 1 crée un dossier `bras\rapports\tri_AAAAMMJJ_HHMMSS\` (sur le PC, pas dans le dépôt) : `rapport.txt`
 (réglages, caméra calculée, objet par objet : vu où, visé où, pince à quel angle et ouverte de combien, largeur mesurée, catégorie,
-posé où, durée, puis le journal complet, et des lignes « à remplir par Nicolas »), `resultats.csv` (une ligne par objet, pour un
+posé où, durée, puis le journal complet, ), `resultats.csv` (une ligne par objet, pour un
 tableur), et les photos : `00_debut`, `objet_NN_avant` (objet choisi en rouge), `objet_NN_apres`, `fin` — chacune brute et `_vu`
 (avec ce que le programme a reconnu). Essayé en simulation.
 Remarque du calcul : un objet à moins de 20 cm du socle, dans l'axe, est compté comme gênant pour un objet pris à plat derrière lui

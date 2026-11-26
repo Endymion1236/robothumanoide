@@ -222,7 +222,7 @@ class Trieur(Poste):
         voisin = min([math.hypot(o['X'] - a['X'], o['Y'] - a['Y']) for a in objets if a is not o] or [999.0])
         self.objets_tri, self.objet_pris = objets, o
         if self.rap:
-            n = self.rap.nouvel_essai(o); self.rap.photo(f'objet_{n:02d}_avant', self.image, self.annoter(self.image, o))
+            n = self.rap.nouvel_essai(o); self.rap.note(longueur_vue=o['longueur']); self.rap.photo(f'objet_{n:02d}_avant', self.image, self.annoter(self.image, o))
         if voisin < ECART_MIN: self.dire(f'Attention : l\'objet en X {o["X"]:+.0f} Y {o["Y"]:.0f} a un voisin à {voisin:.0f} mm, la pince pourrait le toucher.')
         visee = C.corriger(o['X'], o['Y'], self.corrections)
         self.dire(f'Je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} (vu {o["largeur"]:.0f} mm de large).')
@@ -259,6 +259,27 @@ class Trieur(Poste):
             self.dire(f'   {err} Je le repose là où je l\'ai pris.'); self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX
             self.note(résultat='reposé où il a été pris', remarque=str(err))
             self.reposer_ou_pris(); return True
+
+    def controle_photo(self, e):
+        """Regarde sur la photo d'après si l'objet a quitté sa place et s'il est bien DEBOUT là où il a été posé : on compare sa forme
+        vue d'en haut à celle du départ (un objet couché paraît bien plus long). Tout est vu, zones de dépôt comprises."""
+        try: tous = O.trouver(self.image, self.fond, self.h, self.reglage, self.hauteur)
+        except Exception: return
+        pres = lambda x, y, r: min(tous, key=lambda o: math.hypot(o['X'] - x, o['Y'] - y), default=None) if any(math.hypot(o['X'] - x, o['Y'] - y) < r for o in tous) else None
+        if e.get('résultat') == 'trié' and 'posé en X' in e and 'lâché dans le bac' not in str(e.get('remarque', '')):
+            o = pres(e['posé en X'], e['posé en Y'], 35)
+            if o is None: verdict = 'introuvable à l\'endroit de la pose (tombé ? roulé ?)'
+            else:
+                avant = sorted((e['largeur vue'], e.get('longueur vue', e['largeur vue']))); apres = sorted((o['largeur'], o['longueur']))
+                ecart = math.hypot(o['X'] - e['posé en X'], o['Y'] - e['posé en Y'])
+                debout = apres[1] <= avant[1] * 1.35 + 12 and apres[0] <= avant[0] * 1.35 + 12
+                verdict = (f'debout, à {ecart:.0f} mm du point visé' if debout else f'forme différente ({apres[0]:.0f} × {apres[1]:.0f} mm au lieu de {avant[0]:.0f} × {avant[1]:.0f}) : couché ou renversé ?')
+            if pres(e['X vu'], e['Y vu'], 25): verdict += ' ; un objet est encore à l\'endroit de la prise'
+        elif e.get('résultat', '').startswith('raté') or e.get('résultat') == 'reposé où il a été pris':
+            o = pres(e['X vu'], e['Y vu'], 40)
+            verdict = 'toujours à sa place' if o and math.hypot(o['X'] - e['X vu'], o['Y'] - e['Y vu']) < 15 else (f'déplacé de {math.hypot(o["X"] - e["X vu"], o["Y"] - e["Y vu"]):.0f} mm' if o else 'disparu de sa place (renversé ?)')
+        else: return
+        e['contrôle photo'] = verdict; self.dire(f'   Contrôle sur la photo : {verdict}.')
 
     def note(self, **champs):
         if self.rap: self.rap.note(**champs)
@@ -334,7 +355,9 @@ class Trieur(Poste):
             self.dire(f'{len(objets)} objet(s) sur la table.')
             if not self.un_objet(objets): break
             objets = self.regarder()                                          # bras revenu au repos : la table après ce geste
-            if self.rap.essai: self.rap.photo(f'objet_{self.rap.essai["n"]:02d}_apres', self.image, self.annoter(self.image))
+            if self.rap.essai:
+                self.rap.photo(f'objet_{self.rap.essai["n"]:02d}_apres', self.image, self.annoter(self.image))
+                self.controle_photo(self.rap.essai)
             n += 1
         reste = [o for o in self.regarder()]
         txt = (f'Fini : {self.tries["petit"]} petit(s) à gauche, {self.tries["gros"]} gros à droite.' + (f' {len(reste)} objet(s) laissé(s) (hors de portée ou ratés).' if reste and combien is None else ''))

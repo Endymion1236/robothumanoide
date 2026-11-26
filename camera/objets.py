@@ -17,7 +17,7 @@ import numpy as np, cv2
 import table as T
 
 HAUTEUR_OBJETS = 60.0                     # mm
-MARGE = 40.0                              # mm : on regarde aussi un peu autour du rectangle des marqueurs
+MARGE = 100.0                             # mm : on regarde aussi un peu autour du rectangle des marqueurs
 SEUIL_COULEUR, SEUIL_CLAIR = 18.0, 28.0
 SEUIL_FONCE, SEUIL_JAUNE, SEUIL_NOIR = 12.0, 0.06, 45.0  # objet gris : 12 plus foncé, et nettement moins jaune pour sa luminosité   # différences avec le fond (échelle Lab d'OpenCV) au-delà desquelles c'est un objet
 DEMI_MARQUEUR = 45.0                      # mm : carré ignoré autour du centre de chaque marqueur (papier et scotch compris). Nicolas,
