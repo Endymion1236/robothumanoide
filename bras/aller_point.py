@@ -11,7 +11,7 @@ Commandes :
   m       remonter au-dessus      o / s   ouvrir / serrer la pince
   r       repos                   i       où est la pince        q   quitter
 Chaque geste est vérifié avant d'être fait (butées, table) ; un geste arrêté RETIENT le bras."""
-import queue, sys
+import math, queue, sys
 from servos import Bus, ErreurServo, degres, pas
 import test_epaule as E, test_pince as P, piloter_bras as B, geometrie as G
 from controle_bras import Controleur, MILIEU
@@ -50,6 +50,9 @@ class Pointeur:
         c = self.c
         try: incl, prise, haut = G.choisir_inclinaison(X, Y, c.hauteur, imposee)
         except G.HorsDePortee as e:
+            if imposee is not None:
+                bd = G.bande(imposee, c.hauteur, math.degrees(math.atan2(X, Y)))
+                self.dire(f'   Impossible avec la pince inclinée de {abs(imposee):.0f}° ({e}). ' + (f'Dans cette direction, il faut poser entre {bd[0]} et {bd[1]} mm du socle.' if bd else 'Aucune distance possible dans cette direction.')); return
             z = G.zone_toutes(c.hauteur); self.dire(f'   Hors de portée : {e}. Zone possible droit devant : de {z[0]} à {z[1]} mm du socle.'); return
         comment = 'à plat' if abs(incl) < 1 else 'pointée vers le bas' if incl <= -89 else f'inclinée de {abs(incl):.0f}° vers le bas'
         self.incl = incl

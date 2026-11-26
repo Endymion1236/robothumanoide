@@ -39,6 +39,7 @@ class Poste:
         self.p, self.reglage, self.attendre = pointeur, reglage, attendre
         self.h = None; self.vus = True; self.cible = None; self.plan = None; self.messages = []; self.occupe = None; self.fil = None
         self.visee = None; self.bas = False; self.place = False; self.corrections = C.charger(); self.effacer = 0
+        self.incl_objet = None                                    # inclinaison de la pince quand elle a serré un objet
         pointeur.dire = self.dire
     def dire(self, texte):
         print(texte)
@@ -60,7 +61,8 @@ class Poste:
         X, Y = T.vers_table(self.h, x, y); self.cible, self.plan, self.place = (X, Y), None, False
         self.visee = C.corriger(X, Y, self.corrections)          # où viser pour que la pince tombe sur le point cliqué
         if self.corrections: self.dire(f'Point cliqué : X {X:+.0f}, Y {Y:+.0f}. Correction apprise : je vise {C.en_clair(self.cible, self.visee)}.')
-        try: self.plan = self.p.preparer(*self.visee)
+        if self.incl_objet is not None: self.dire(f'Objet tenu : je le pose avec la pince inclinée comme à la prise ({abs(self.incl_objet):.0f}°), pour qu\'il reste droit.')
+        try: self.plan = self.p.preparer(*self.visee, self.incl_objet)
         except ErreurServo as err: self.dire(f'Refusé : {err}')
         if self.plan: self.dire('ENTRÉE pour y aller, ou clique ailleurs.')
 
@@ -117,7 +119,10 @@ class Poste:
             self.effacer += 1
             if self.effacer < 2: self.dire(f'Effacer les {len(self.corrections)} correction(s) apprise(s) ? Appuie encore une fois sur E.')
             else: self.corrections = []; C.enregistrer([]); self.effacer = 0; self.dire('Corrections effacées : le bras vise de nouveau d\'après le seul calcul.')
-        elif k in ('o', 's'): self._lancer('la pince', lambda: (p.c._pince(k), p.vider()))
+        elif k == 's':
+            if self.bas and self.place: self.incl_objet = p.incl                 # serré sur la table : on retient l'inclinaison de la prise
+            self._lancer('la pince', lambda: (p.c._pince(k), p.vider()))
+        elif k == 'o': self.incl_objet = None; self._lancer('la pince', lambda: (p.c._pince(k), p.vider()))
         elif k == 'i': self._lancer('lecture', p.infos)
         return True
 

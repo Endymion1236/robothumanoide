@@ -125,6 +125,19 @@ def trajet_sur(depart, arrivee, hauteur_epaule=179.0, pas=12):
     if h[0] >= B.MARGE_TABLE: return min(h) >= B.MARGE_TABLE
     return h[-1] >= B.MARGE_TABLE and all(y >= x - 0.5 for x, y in zip(h, h[1:]))
 
+def point_dans_direction(angle, R):
+    """Le point de la table à la distance R de l'axe du socle, dans la direction `angle` (degrés, + = à droite, 0 = droit devant)."""
+    a = math.radians(angle); return R * math.sin(a), R * math.cos(a)
+
+def bande(inclinaison, hauteur_epaule=179.0, angle=0.0):
+    """Distances au socle (mini, maxi), dans la direction `angle`, où la pince peut SAISIR ou POSER avec cette inclinaison.
+    Un objet pris pince inclinée doit être reposé avec la MÊME inclinaison, sinon il penche (Nicolas, 26/11/2026)."""
+    ok = []
+    for R in range(150, 520, 5):
+        try: prise_et_approche(*point_dans_direction(angle, R), hauteur_epaule, inclinaison); ok.append(R)
+        except HorsDePortee: pass
+    return (min(ok), max(ok)) if ok else None
+
 def zone_toutes(hauteur_epaule=179.0):
     """Distances au socle, droit devant, que la pince atteint en choisissant son inclinaison : (mini, maxi) en mm."""
     ok = []

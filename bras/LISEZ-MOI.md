@@ -462,3 +462,15 @@ droite (X +235, Y 330)**. Il regarde de nouveau, bras au repos, après chaque ob
 Sécurités : objet hors de portée laissé et signalé ; 2 essais ratés au même endroit → objet abandonné ; **3 ratés de suite → arrêt**
 (visée décalée : refaire la correction aux flèches). Un voisin à moins de 55 mm est signalé.
 En simulation : rond 28 → 27 mm, barre 26 → 25, carré 36 → 35, rond 40 → 39 ; objet à 176 mm du socle laissé (trop près).
+
+### Reposer un objet droit (26/11/2026, remarque de Nicolas)
+
+« Parfois on le prend en biais ; si on le pose plus loin, on ne peut pas le reposer à plat. » Cause : l'objet tourne avec la pince.
+Pris pince inclinée de 60°, puis posé pince à plat, il arrive penché de 60°. **Règle : un objet se repose avec la MÊME inclinaison
+de pince qu'à la prise.** Chaque inclinaison n'est possible que dans une bande de distances au socle (calcul, droit devant) :
+à plat 370-455 mm, −15° 390-470, −30° 380-455, −45° 345-420, −60° 295-375, −75° 245-325, pointée vers le bas 205-255.
+- `trier` : les zones de dépôt sont des directions (−40° pour les petits, +40° pour les gros) ; l'objet est posé dans la direction
+  de sa zone, à la distance qui va avec l'inclinaison de sa prise, loin des objets déjà posés (`place_libre`). Ne pas mettre
+  d'objets à trier entre les deux traits orange d'une zone.
+- `viser_camera` : après S (serrer) pince descendue, le clic suivant garde l'inclinaison de la prise ; si le point est trop près
+  ou trop loin, il dit entre quelles distances poser. O (ouvrir) libère cette règle.

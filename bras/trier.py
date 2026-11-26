@@ -4,7 +4,9 @@ les pose dans la zone de leur taille (petits à GAUCHE, gros à DROITE, vu de de
 Lancer : trier.bat (FD et la fenêtre de contrôle fermés, 12 V allumé, caméra branchée, regler_table.bat déjà fait).
 Dans la fenêtre :
   F         photo du FOND : table VIDE, bras au repos. À refaire si la caméra ou la lumière change beaucoup.
-  (ensuite) les objets trouvés sont entourés, numérotés, avec leur position ; les deux zones de dépôt sont dessinées en cercle
+  (ensuite) les objets trouvés sont entourés, numérotés, avec leur largeur ; les deux zones de dépôt (à gauche et à droite) sont
+            entre deux traits orange : n'y mets pas les objets à trier
+  Un objet pris pince inclinée est REPOSÉ avec la même inclinaison (sinon il penche) : la distance de pose suit celle de la prise.
   T         TRIER : il prend les objets un par un jusqu'à ce qu'il n'y en ait plus (ou ESPACE)
   1         n'en trier qu'UN (pour les premiers essais)
   R         repos        ESPACE   ARRÊT (le bras reste tenu)        P   photo        Q   quitter
@@ -21,8 +23,12 @@ import aller_point as A, correction as C, geometrie as G, test_pince as PI
 from servos import ErreurServo
 from viser_camera import Poste, sans_accents, FLECHES
 
-ZONES = {'petit': (-235.0, 330.0), 'gros': (235.0, 330.0)}      # où poser (mm) ; petits à gauche, gros à droite, vu de derrière
-R_ZONE = 60.0                                                     # rayon autour d'une zone où on ne cherche pas d'objet
+# Les zones de dépôt sont des DIRECTIONS (angle du socle, + = à droite vu de derrière) : un objet pris pince inclinée doit être
+# reposé avec la MÊME inclinaison, sinon il penche et tombe (Nicolas, 26/11/2026). Chaque inclinaison n'est possible que dans une
+# bande de distances (environ 5 à 8 cm de large) : on pose donc dans la direction de la zone, à la distance qui va avec la prise.
+ZONES = {'petit': -40.0, 'gros': 40.0}
+SECTEUR = 16.0                                                    # degrés de part et d'autre : on n'y cherche pas d'objets à trier
+ECART_DEPOT = 50.0                                                # mm entre deux objets posés dans une zone
 SEUIL_TAILLE = 32.0                                               # mm, largeur mesurée par la pince : en dessous, « petit »
 ECART_MIN = 55.0                                                  # mm entre deux objets : plus près, la pince ouverte risque de toucher le voisin
 ESSAIS_MAX = 2                                                    # tentatives au même endroit avant d'abandonner l'objet
@@ -46,13 +52,15 @@ class Trieur(Poste):
         self.hauteur, self.fond, self.objets, self.image = hauteur, None, [], None
         self.demande, self.reponse = threading.Event(), threading.Event()
         self.au_repos, self.tries, self.rates = True, {'petit': 0, 'gros': 0}, []
+        self.deposes = {z: [] for z in ZONES}
         if FICHIER_FOND.exists(): self.fond = cv2.imread(str(FICHIER_FOND)); self.dire('Photo du fond reprise du dernier essai (F pour la refaire si la caméra a bougé).')
 
     def voir(self, image):
         self.image = image.copy()
         centres, contours = super().voir(image)
         if self.fond is not None and self.vus and self.h is not None and self.au_repos and self.fond.shape == image.shape:
-            self.objets = O.trouver(image, self.fond, self.h, self.reglage, self.hauteur, exclure=[(x, y, R_ZONE) for x, y in ZONES.values()])
+            self.objets = [o for o in O.trouver(image, self.fond, self.h, self.reglage, self.hauteur)
+                           if not any(abs(math.degrees(math.atan2(o['X'], o['Y'])) - a) < SECTEUR for a in ZONES.values())]
             if self.demande.is_set(): self.demande.clear(); self.reponse.set()
         return centres, contours
 
@@ -71,6 +79,20 @@ class Trieur(Poste):
     def etape(self, ok, quoi):
         if self.p.c.arret.is_set(): raise ErreurServo('arrêt demandé')
         if not ok: raise ErreurServo(f'{quoi} n\'a pas pu se faire')
+
+    def place_libre(self, zone, incl):
+        """Un point de la zone où poser avec l'inclinaison `incl` : dans la direction de la zone, à une distance possible pour
+        cette inclinaison, loin des objets déjà posés. On essaie d'abord le milieu de la bande, puis de part et d'autre."""
+        a = ZONES[zone]; bd = G.bande(incl, self.p.c.hauteur, a)
+        if not bd: return None
+        milieu = (bd[0] + bd[1]) / 2
+        for R in sorted(range(int(bd[0]) + 5, int(bd[1]) - 4, 5), key=lambda r: abs(r - milieu)):
+            for da in (0.0, -10.0, 10.0):
+                pt = G.point_dans_direction(a + da, R)
+                if all(math.hypot(pt[0] - x, pt[1] - y) >= ECART_DEPOT for x, y in self.deposes[zone]):
+                    try: G.prise_et_approche(*pt, self.p.c.hauteur, incl); return pt
+                    except G.HorsDePortee: pass
+        return None
 
     def serrer(self):
         c = self.p.c; r = c.reglages; c.bus.tenir(c.pince)
@@ -100,13 +122,15 @@ class Trieur(Poste):
             if self.suite_ratee >= 3: raise ErreurServo('3 prises ratées de suite : la visée est sans doute décalée. Refais la correction aux flèches dans viser_camera, puis reviens.')
             return True
         self.suite_ratee = 0
-        z = zone_de(largeur); zx, zy = ZONES[z]
-        self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {"gauche" if zx < 0 else "droite"}.')
-        plan = p.preparer(*C.corriger(zx, zy, self.corrections))
-        if not plan: raise ErreurServo(f'la zone des {z} est hors de portée : objet toujours tenu, pose-le à la main (r puis tiens-le)')
+        z = zone_de(largeur); incl = p.incl
+        spot = self.place_libre(z, incl)
+        if spot is None: raise ErreurServo(f'plus de place dans la zone des {z}s à la bonne distance : objet toujours tenu. Vide la zone, puis R (tiens l\'objet).')
+        self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {"gauche" if ZONES[z] < 0 else "droite"}, pince inclinée comme à la prise ({abs(incl):.0f}°).')
+        plan = p.preparer(*C.corriger(*spot, self.corrections), incl)
+        if not plan: raise ErreurServo(f'pose impossible : objet toujours tenu. R, puis tiens-le et ouvre la pince à la main (O dans viser_camera).')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
         self.etape(p.descendre(), 'la pose'); c._pince('o'); p.vider()
-        self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1
+        self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1; self.deposes[z].append(spot)
         return True
 
     def trier(self, combien=None):
@@ -143,9 +167,11 @@ class Trieur(Poste):
 
     def dessiner(self, image, centres, contours):
         if self.h is not None:
-            for nom, (x, y) in ZONES.items():
-                pts = np.array([T.vers_image(self.h, x + R_ZONE * math.cos(a), y + R_ZONE * math.sin(a)) for a in np.linspace(0, 2 * math.pi, 40)], np.int32)
-                cv2.polylines(image, [pts], True, (255, 160, 0), 2); V.ecrire(image, f'zone {nom}s', T.vers_image(self.h, x - 40, y + R_ZONE + 15), (255, 200, 80), 0.6)
+            for nom, a in ZONES.items():
+                for b in (a - SECTEUR, a + SECTEUR):
+                    cv2.line(image, T.vers_image(self.h, *G.point_dans_direction(b, 190)), T.vers_image(self.h, *G.point_dans_direction(b, 480)), (255, 160, 0), 2)
+                V.ecrire(image, f'zone {nom}s', T.vers_image(self.h, *G.point_dans_direction(a, 480)), (255, 200, 80), 0.6)
+                for x, y in self.deposes[nom]: cv2.circle(image, T.vers_image(self.h, x, y), 8, (255, 160, 0), 2)
             for n, o in enumerate(self.objets, 1):
                 pts = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']], np.int32)
                 cv2.polylines(image, [pts], True, (0, 255, 255), 2)
@@ -160,7 +186,10 @@ class Trieur(Poste):
             V.ecrire(image, sans_accents(m)[:110], (10, haut - 14 - (n + 1) * pas), (0, 230, 255) if n == 0 else (190, 190, 190), 0.55)
 
 def verifier_zones(hauteur_epaule=179.0):
-    for nom, (x, y) in ZONES.items(): G.choisir_inclinaison(*(x, y), hauteur_epaule)
+    """Chaque zone doit accepter toutes les inclinaisons de prise : sinon un objet pris pourrait ne pas pouvoir y être posé."""
+    for nom, a in ZONES.items():
+        for incl in G.INCLINAISONS:
+            if not G.bande(incl, hauteur_epaule, a): raise G.HorsDePortee(f'zone des {nom}s ({a:+.0f}°) : impossible de poser pince inclinée de {abs(incl)}°')
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
