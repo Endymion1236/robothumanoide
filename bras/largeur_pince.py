@@ -14,7 +14,13 @@ def ecart(position, ouvert, etal=None):
     """Écart entre les mâchoires (mm). Avec étalonnage : droite par les points mesurés ; sinon le calcul du dessin."""
     etal = etal if etal is not None else charger()
     if not etal: return PI.ecart_mm(position, ouvert)
-    (p1, l1), (p2, l2) = etal['points'][:2]
+    # entre deux points mesurés : on relie ces deux points ; au-delà du dernier : on prolonge le segment le plus proche.
+    # Avec seulement les deux ronds (28 et 40 mm), une ouverture de 60-80 mm est devinée bien loin des mesures (essai du
+    # 26/11/2026) : d'où la barre en long et la pince grande ouverte, mesurées en plus par etalonner_largeur.
+    pts = sorted({int(p): float(l) for p, l in etal['points']}.items())
+    i = 0
+    while i < len(pts) - 2 and position > pts[i + 1][0]: i += 1
+    (p1, l1), (p2, l2) = pts[i], pts[i + 1]
     return l1 + (position - p1) * (l2 - l1) / (p2 - p1)
 
 def position_pour(mm, ouvert, ferme, etal=None):
