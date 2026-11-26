@@ -51,7 +51,7 @@ ESSAIS_MAX = 2                                                    # tentatives a
 # dans bacs.json sur le PC). Le bras lâche alors l'objet AU-DESSUS du bac : n'importe quelle inclinaison convient, plus de
 # problème de place. Le bas de l'objet passe GARDE_BAC mm au-dessus du bord. Le bac doit être en place AVANT la photo du fond.
 FICHIER_BACS = Path(__file__).with_name('bacs.json')
-GARDE_BAC = 25.0
+GARDE_BAC = 45.0                # Nicolas, 26/11/2026 : avec 25, une mâchoire frottait sur le bord du bac
 def charger_bacs():
     try:
         b = __import__('json').loads(FICHIER_BACS.read_text(encoding='utf-8'))
@@ -73,7 +73,7 @@ def pose_dans_bac(bac, incl_prise, hauteur_epaule=179.0, corriger=None):
             except G.HorsDePortee: pass
     return None
 
-MARGE_PAROI = 45.0              # mm entre le point de lâcher et la paroi intérieure du bac (demi-objet + jeu)
+MARGE_PAROI = 60.0              # mm entre le point de lâcher et la paroi intérieure du bac (demi-pince + jeu ; 45 : la mâchoire frottait)
 def points_du_bac(bac, pas=15.0):
     """Les points où lâcher dans le bac, du plus PROCHE du socle au plus loin. Nicolas, 26/11/2026 : bacs de 18 cm de haut posés
     plus loin, le milieu n'était plus atteignable assez haut (« pose dans le bac impossible ») ; tout le fond du bac est bon."""
@@ -220,7 +220,7 @@ class Trieur(Poste):
         plan = p.preparer(*C.corriger(*pt, self.corrections), i, leve)
         if not plan: raise ErreurServo('Pose dans le bac impossible.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
-        self.etape(p.descendre(), 'l\'arrivée au-dessus du bac'); c._pince('o'); p.vider(); time.sleep(0.3); self.tenu = None
+        self.etape(p.descendre(), 'l\'arrivée au-dessus du bac'); self.ouvrir_a(largeur + 25); time.sleep(0.3); self.tenu = None      # pas grande ouverte : les mâchoires toucheraient la paroi
         self.etape(p.monter(), 'la remontée'); self.redresser(); p.repos(); self.tries[z] += 1
         return True
 
