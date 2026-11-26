@@ -19,7 +19,7 @@ import table as T
 HAUTEUR_OBJETS = 60.0                     # mm
 MARGE = 40.0                              # mm : on regarde aussi un peu autour du rectangle des marqueurs
 SEUIL_COULEUR, SEUIL_CLAIR = 18.0, 28.0
-SEUIL_FONCE, RAPPORT_GRIS = 15.0, 0.4      # objet gris : au moins 15 plus foncé que le bois, et moins de 40 % de sa saturation   # différences avec le fond (échelle Lab d'OpenCV) au-delà desquelles c'est un objet
+SEUIL_FONCE, SEUIL_JAUNE, SEUIL_NOIR = 12.0, 0.06, 45.0  # objet gris : 12 plus foncé, et nettement moins jaune pour sa luminosité   # différences avec le fond (échelle Lab d'OpenCV) au-delà desquelles c'est un objet
 AIRE_MIN = 250.0                          # mm² : en dessous, c'est une poussière ou un reflet
 F_PAR_DEFAUT = 1537.0                     # points, pour une image de 1280 de large : C270 (55° en diagonale, fiche du fabricant)
 
@@ -60,11 +60,15 @@ def masque(vue, fond):
     a = cv2.cvtColor(cv2.GaussianBlur(vue, (5, 5), 0), cv2.COLOR_BGR2LAB).astype(np.float32)
     b = cv2.cvtColor(cv2.GaussianBlur(fond, (5, 5), 0), cv2.COLOR_BGR2LAB).astype(np.float32)
     teinte = np.hypot(a[..., 1] - b[..., 1], a[..., 2] - b[..., 2]); clair = a[..., 0] - b[..., 0]
-    # objets GRIS ou NOIRS (ceux de Nicolas, 26/11/2026) : plus foncés que le bois ET sans sa couleur. Une ombre fonce le bois mais
-    # lui laisse une partie de sa couleur (au moins 50 % de sa saturation, même forte) : elle n'est pas prise.
-    sat_a, sat_b = np.hypot(a[..., 1] - 128, a[..., 2] - 128), np.hypot(b[..., 1] - 128, b[..., 2] - 128)
-    gris = (clair < -SEUIL_FONCE) & (sat_a < RAPPORT_GRIS * sat_b) & (sat_b > 12)
-    m = ((teinte > SEUIL_COULEUR) | (clair > SEUIL_CLAIR) | gris).astype(np.uint8) * 255
+    # objets GRIS FONCÉ (ceux de Nicolas, photo du 26/11/2026) : plus foncés que le bois ET moins JAUNES que lui (le bois de sa
+    # table est jaune pâle, le plastique gris tire légèrement vers le bleu) ; les faces très sombres sont prises sur leur seule
+    # luminosité. Une ombre légère fonce le bois sans lui ôter son jaune : elle n'est pas prise.
+    # le jaune est compté RAPPORTÉ à la luminosité : une ombre, même forte, fonce le bois sans changer ce rapport ; un plastique
+    # gris le fait chuter. Les faces très sombres (moins de 50 sur 255) sont prises sur leur seule luminosité.
+    jaune = lambda x: (x[..., 2] - 128) / np.maximum(x[..., 0], 20)
+    gris = (clair < -SEUIL_FONCE) & (jaune(a) - jaune(b) < -SEUIL_JAUNE)
+    noir = (clair < -SEUIL_NOIR) & (a[..., 0] < 50)
+    m = ((teinte > SEUIL_COULEUR) | (clair > SEUIL_CLAIR) | gris | noir).astype(np.uint8) * 255
     m[(vue.sum(axis=2) == 0) | (fond.sum(axis=2) == 0)] = 0                      # hors de l'image de la caméra
     m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
     return cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
@@ -82,6 +86,7 @@ def trouver(image, fond, h, reglage, hauteur=HAUTEUR_OBJETS, exclure=()):
     objets = []
     for c in cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]:
         if cv2.contourArea(c) < AIRE_MIN: continue
+        c = cv2.convexHull(c)                                                    # les objets d'essai sont convexes : on bouche les creux du contour
         mo = cv2.moments(c); gu, gv = mo['m10'] / mo['m00'], mo['m01'] / mo['m00']
         gX, gY = vue_vers_table(reglage, gu, gv)
         # on voit le pied et le sommet ; leur milieu apparent est à mi-chemin entre le pied (facteur 1) et le sommet (facteur k)
