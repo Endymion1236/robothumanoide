@@ -41,6 +41,7 @@ ECART_DEPOT = 50.0                                                # mm entre deu
 # retombe droit tout seul (il ne bascule qu'au-delà de 23° pour la barre, 25° pour le petit rond, par le calcul).
 ECART_INCL = 15.0
 LEVE_PENCHE = 13.0                                                # mm : 32 (demi-longueur de la barre) × sin 15° + 5 de marge
+PRES_DU_SOCLE = 150.0                                             # mm : plus près, c'est le robot lui-même (socle, câbles), jamais un objet
 SEUIL_TAILLE = 37.0                                               # mm, largeur mesurée par la pince : en dessous, « petit »
 # Tri de Nicolas du 26/11/2026 : la pince lit environ 5 mm de trop (petit rond 28 → 33, hexagone 38 → 41, carré 36 → 43) ;
 # avec 32, le petit rond partait chez les gros. 37 passe au milieu de l'écart entre 33 et 41.
@@ -138,10 +139,11 @@ class Trieur(Poste):
         if image is None or self.h is None: return None
         vue = image.copy()
         for n, o in enumerate(self.objets, 1):
-            pts = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']], np.int32); rouge = o is choisi
-            cv2.polylines(vue, [pts], True, (0, 0, 255) if rouge else (0, 255, 255), 3 if rouge else 2)
+            pts = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']], np.int32); rouge = o is choisi; hp = o.get('portee')
+            coul = (0, 0, 255) if rouge else (0, 140, 255) if hp else (0, 255, 255)
+            cv2.polylines(vue, [pts], True, coul, 3 if rouge else 2)
             pt = T.vers_image(self.h, o['X'], o['Y']); cv2.circle(vue, pt, 6, (0, 0, 255), -1)
-            V.ecrire(vue, f'{n} : {o["largeur"]:.0f} mm  (X {o["X"]:+.0f} Y {o["Y"]:.0f})', (pt[0] + 10, pt[1] - 10), (0, 0, 255) if rouge else (0, 255, 255), 0.55)
+            V.ecrire(vue, f'{n} : {o["largeur"]:.0f} mm  (X {o["X"]:+.0f} Y {o["Y"]:.0f})' + (f' - {hp}' if hp else ''), (pt[0] + 10, pt[1] - 10), coul, 0.55)
         return vue
 
     def voir(self, image):
@@ -150,9 +152,23 @@ class Trieur(Poste):
         if self.fond is not None and self.vus and self.h is not None and self.au_repos and self.fond.shape == image.shape:
             self.objets = [o for o in O.trouver(image, self.fond, self.h, self.reglage, self.hauteur)
                            if not dans_un_bac(o['X'], o['Y'], self.bacs)
-                           and not any(abs(math.degrees(math.atan2(o['X'], o['Y'])) - a) < SECTEUR for z, a in ZONES.items() if z not in self.bacs)]
+                           and not any(abs(math.degrees(math.atan2(o['X'], o['Y'])) - a) < SECTEUR for z, a in ZONES.items() if z not in self.bacs)
+                           and math.hypot(o['X'], o['Y']) >= PRES_DU_SOCLE]
+            for o in self.objets: o['portee'] = self.portee(o)
             if self.demande.is_set(): self.demande.clear(); self.reponse.set()
         return centres, contours
+
+    def portee(self, o):
+        """'' si le bras peut prendre l'objet (correction de visée comprise), sinon ce qu'il faut faire, en clair."""
+        try:
+            v = C.corriger(o['X'], o['Y'], self.corrections); G.choisir_inclinaison(*v, self.p.c.hauteur); return ''
+        except G.HorsDePortee:
+            if getattr(self, '_zone', None) is None: self._zone = G.zone_toutes(self.p.c.hauteur)      # calcul long : une fois
+            d = math.hypot(*v); mini, maxi = self._zone
+            if d < mini: return f'trop pres : eloigne-le de {(mini - d) / 10 + 1:.0f} cm'
+            if d > maxi: return f'trop loin : rapproche-le de {(d - maxi) / 10 + 1:.0f} cm'
+            return 'hors de portee'
+        except Exception: return ''
 
     def photo_fond(self):
         if self.occupe or not self.au_repos: self.dire('Bras au repos d\'abord (R), table vide.'); return
@@ -421,6 +437,13 @@ class Trieur(Poste):
         n = 0; self.suite_ratee = 0; avant = dict(self.tries)       # les compteurs courent depuis le lancement : on ne compte que CE tri
         self.p.repos(); self.redresser()                              # un arrêt a pu laisser la pince tournée
         objets = self.regarder(); self.rap.photo('00_debut', self.image, self.annoter(self.image))
+        loin = [o for o in objets if o.get('portee')]
+        if loin:                                                      # demande de Nicolas (26/11/2026) : le dire AVANT de commencer
+            self.dire(f'⚠️  AVANT DE COMMENCER : {len(loin)} objet(s) hors de portée, je ne les toucherai pas (en orange à l\'écran) :')
+            for o in loin:
+                self.dire(f'   objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} : {o["portee"].replace("pres", "près").replace("eloigne", "éloigne").replace("portee", "portée")}')
+                self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX
+            if len(loin) == len(objets): raise ErreurServo('aucun objet à portée : déplace-les (voir ci-dessus), puis T.')
         while combien is None or n < combien:
             if not objets: break
             self.dire(f'{len(objets)} objet(s) sur la table.')
@@ -469,13 +492,14 @@ class Trieur(Poste):
                 V.ecrire(image, f'zone des {PLURIEL[nom]}', T.vers_image(self.h, *G.point_dans_direction(a, 480)), (255, 200, 80), 0.6)
                 for x, y in self.deposes[nom]: cv2.circle(image, T.vers_image(self.h, x, y), 8, (255, 160, 0), 2)
             for n, o in enumerate(self.objets, 1):
-                pts = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']], np.int32)
-                cv2.polylines(image, [pts], True, (0, 255, 255), 2)
+                pts = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']], np.int32); hp = o.get('portee')
+                coul = (0, 140, 255) if hp else (0, 255, 255)
+                cv2.polylines(image, [pts], True, coul, 2)
                 pt = T.vers_image(self.h, o['X'], o['Y']); cv2.circle(image, pt, 6, (0, 0, 255), -1)
-                V.ecrire(image, f'{n} : {o["largeur"]:.0f} mm', (pt[0] + 10, pt[1] - 10), (0, 255, 255), 0.6)
+                V.ecrire(image, f'{n} : {o["largeur"]:.0f} mm' + (f' - {hp}' if hp else ''), (pt[0] + 10, pt[1] - 10), coul, 0.6)
         haut = image.shape[0]; pas = int(30 * haut / 720)
         etat = ('Le bras trie... ESPACE = ARRET' if self.occupe else 'Photo du fond manquante : table VIDE, bras au repos, touche F' if self.fond is None
-                else f'{len(self.objets)} objet(s) vu(s). T = trier' if self.vus else 'Marqueurs caches : dernier reperage garde')
+                else f'{len(self.objets)} objet(s) vu(s)' + (f', dont {sum(1 for o in self.objets if o.get("portee"))} HORS DE PORTEE (en orange)' if any(o.get('portee') for o in self.objets) else '') + '. T = trier' if self.vus else 'Marqueurs caches : dernier reperage garde')
         V.ecrire(image, sans_accents(etat), (10, 40), (0, 200, 255) if self.occupe or self.fond is None else (120, 255, 120))
         if self.fond is not None and getattr(O.trouver, 'lumiere', None):
             V.ecrire(image, 'La lumiere a change depuis la photo du fond : retire les objets, puis F', (10, 80), (80, 80, 255))
