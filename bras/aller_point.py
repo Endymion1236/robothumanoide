@@ -59,7 +59,7 @@ class Pointeur:
         self.dire(f"   Pour saisir en X {X:+.0f}, Y {Y:+.0f}, pince {comment}{'' if imposee is None else ' (demandé)'} : socle {prise['socle']:+.0f}°, épaule {prise['epaule']:+.0f}°, coude {prise['coude']:+.0f}°, poignet {prise['flexion']:+.0f}°")
         if imposee is None and abs(incl) >= 1: self.dire('   (à plat, ce point est trop près : j\'incline la pince juste ce qu\'il faut)')
         self.dire(f"   D'abord au-dessus : épaule {haut['epaule']:+.0f}°, coude {haut['coude']:+.0f}°, poignet {haut['flexion']:+.0f}° (pince à {G.ou_est_la_pince(**haut, hauteur_epaule=c.hauteur)[2]:.0f} mm de la table)")
-        if abs(c._roulis()) > 15: self.dire('   La pince est tournée : remets-la droite d\'abord (fenêtre de contrôle, ou tester_poignet).'); return
+        if abs(c._roulis()) > 15 and not getattr(self, 'roulis_permis', False): self.dire('   La pince est tournée : remets-la droite d\'abord (fenêtre de contrôle, ou tester_poignet).'); return
         return prise, haut
 
     def aller(self, prise, haut):

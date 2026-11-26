@@ -529,3 +529,14 @@ marqueur n° 0** (centre en −198, 190) : le marqueur a disparu de la vue → a
 marqueur est ignorée par la détection). Cause : zones à ±40°, et pince à 60-90° la bande de pose passait sur les marqueurs de devant
 (±46°, 27 cm). **Zones déplacées à ±65°**, et aucune pose à moins de 75 mm du centre d'un marqueur. Une pose hors de la vue de la
 caméra est signalée « à vérifier à l'œil » ; un objet retrouvé à plus de 25 mm du point visé, « glissé, roulé ou mal vu ? ».
+
+**Tris de 16 h 10 à 16 h 31 (26/11/2026)** :
+- La pince s'ouvre maintenant à la largeur vue + 55 mm (115 au plus ; elle s'ouvre à 133 mm). Avec + 30 mm, une mâchoire tombait sur le gros rond.
+- Étalonnage de la largeur sur 4 mesures : les deux ronds, la barre prise en long, l'écart au réglet pince grande ouverte.
+- Résultat : **4 prises réussies sur 4**. Mais la pince lit environ 5 mm de trop (petit rond 28 → 33 mm) : **seuil petit / gros porté à 37 mm**.
+
+**Rotation du poignet pour les objets allongés (26/11/2026, essayée en simulation seulement)** :
+- **Ce qui la déclenche** : la barre de 64 × 26 était prise dans sa longueur, donc rangée « gros ». La caméra lit maintenant le sens de chaque objet au pied (`forme_au_pied` dans `camera/objets.py`), en retirant le « penché ». Dans les photos simulées, le sens est retrouvé à 2° près.
+- **Quand la pince tourne** : si l'objet est au moins 1,5 fois plus long que large, et si la pince est penchée d'au moins 45°, elle tourne sur elle-même (servo n° 5) pour serrer en travers (`roulis_pour` dans `trier.py`).
+- **Les étapes** : elle tourne bras levé, avant d'aller au-dessus de l'objet, et saisit un peu plus haut, car une mâchoire descend plus bas que l'autre. Elle pose avec la même inclinaison et la même rotation (sinon l'objet pencherait), puis se redresse, pince vide, avant le repos. Au début de chaque tri, la pince est remise droite.
+- **À vérifier au premier essai réel** : les mâchoires doivent arriver de part et d'autre des GRANDS côtés de la barre. Si elles arrivent sur les petits bouts, le sens est inversé : mettre `SENS_ROULIS = -1` dans `trier.py`.

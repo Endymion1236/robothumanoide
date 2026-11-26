@@ -19,9 +19,10 @@ def _vers_table(socle, s, z, v=0.0):
     th = math.radians(socle); d = G.DECALAGE_BRAS + v
     return d * math.cos(th) + s * math.sin(th), -d * math.sin(th) + s * math.cos(th), z
 
-def points_du_bras(socle, epaule, coude, flexion, hauteur_epaule=179.0, ouverture=0.0, tenu=None):
+def points_du_bras(socle, epaule, coude, flexion, hauteur_epaule=179.0, ouverture=0.0, tenu=None, roulis=0.0):
     """Liste de (X, Y, Z, rayon). ouverture : écart des mâchoires (mm). tenu : (inclinaison à la prise, hauteur de prise, hauteur et
-    rayon de l'objet) si la pince tient un objet."""
+    rayon de l'objet) si la pince tient un objet. roulis : rotation de la pince sur elle-même (degrés, + = le haut part à gauche vu de
+    derrière) : les mâchoires ne sont plus de part et d'autre du plan du bras, l'une passe au-dessus, l'autre en dessous."""
     a, ag, t = math.radians(epaule), math.radians(epaule + coude), math.radians(epaule + coude + flexion)
     e = (0.0, hauteur_epaule)
     c = (e[0] + B.L_BRAS * math.cos(a), e[1] + B.L_BRAS * math.sin(a))
@@ -33,11 +34,14 @@ def points_du_bras(socle, epaule, coude, flexion, hauteur_epaule=179.0, ouvertur
             s_, z_ = p[0] + (q[0] - p[0]) * k / n, p[1] + (q[1] - p[1]) * k / n
             pts.append((*_vers_table(socle, s_, z_), RAYON_BRAS))
     u, d = (math.cos(t), math.sin(t)), (math.sin(t), -math.cos(t))            # le long de la pince, et « sous » la pince
+    cr, sr = math.cos(math.radians(roulis)), math.sin(math.radians(roulis))
     for dv in ((-1, 1) if ouverture else (0,)):
         v = dv * (ouverture / 2 + RAYON_MACHOIRE)
+        # pince tournée : l'écart des mâchoires se partage entre le travers (cos) et le « dessus » de la pince (sin), qui est -d
+        vt, vh = v * cr, v * sr
         for du in (-MACHOIRES_ARRIERE, 0.0, MACHOIRES_AVANT / 2, MACHOIRES_AVANT):
             for dd in (0.0, MACHOIRES_BAS / 2, MACHOIRES_BAS):
-                pts.append((*_vers_table(socle, m[0] + du * u[0] + dd * d[0], m[1] + du * u[1] + dd * d[1], v), RAYON_MACHOIRE))
+                pts.append((*_vers_table(socle, m[0] + du * u[0] + (dd - vh) * d[0], m[1] + du * u[1] + (dd - vh) * d[1], vt), RAYON_MACHOIRE))
     if tenu:
         t0, h_prise, h_obj, r_obj = tenu
         dt = t - math.radians(t0)                                            # l'objet a tourné avec la pince depuis la prise
@@ -55,13 +59,13 @@ def heurte(points, obstacles):
                 return o
     return None
 
-def geste_libre(socle, positions, obstacles, hauteur_epaule=179.0, ouverture=0.0, tenu=None, pas=6):
+def geste_libre(socle, positions, obstacles, hauteur_epaule=179.0, ouverture=0.0, tenu=None, pas=6, roulis=0.0):
     """positions : suite de dicts (epaule, coude, flexion) parcourus dans l'ordre, en ligne droite d'un à l'autre.
     Renvoie l'obstacle heurté, ou None si tout le geste est libre."""
     cles = ('epaule', 'coude', 'flexion')
     for p, q in zip(positions, positions[1:]):
         for k in range(pas + 1):
             ang = [p[c] + (q[c] - p[c]) * k / pas for c in cles]
-            o = heurte(points_du_bras(socle, *ang, hauteur_epaule, ouverture, tenu), obstacles)
+            o = heurte(points_du_bras(socle, *ang, hauteur_epaule, ouverture, tenu, roulis), obstacles)
             if o: return o
     return None

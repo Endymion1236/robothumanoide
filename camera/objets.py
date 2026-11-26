@@ -77,10 +77,26 @@ def masque(vue, fond):
     m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
     return cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
 
+def forme_au_pied(pts, decalage):
+    """Largeur étroite, largeur en travers, et sens de la largeur étroite (degrés, dans le repère de la table) de l'objet, mesurés
+    sur son contour vu d'en haut. Ce contour réunit le pied et le sommet, décalé de `decalage` (mm) par le « penché » : dans chaque
+    direction, sa largeur est celle de l'objet PLUS la part du décalage dans cette direction ; on la retire. On cherche la
+    direction où l'objet est le plus étroit : c'est là que la pince doit serrer (la barre de 64 × 26 : en travers, Nicolas 26/11/2026)."""
+    best = None
+    for d in range(0, 180, 2):
+        e = np.array([math.cos(math.radians(d)), math.sin(math.radians(d))])
+        w = float(np.ptp(pts @ e)) - abs(decalage[0] * e[0] + decalage[1] * e[1])
+        if best is None or w < best[0]: best = (w, d)
+    w, d = best
+    e = np.array([-math.sin(math.radians(d)), math.cos(math.radians(d))])
+    travers = float(np.ptp(pts @ e)) - abs(decalage[0] * e[0] + decalage[1] * e[1])
+    return max(w, 1.0), max(travers, w, 1.0), float(d)
+
 def trouver(image, fond, h, reglage, hauteur=HAUTEUR_OBJETS, exclure=()):
     """Les objets sur la table. image et fond : images de la caméra (le fond = table vide). exclure : cercles (X, Y, rayon) à
     ignorer (zones de dépôt). Renvoie une liste de dicts : X, Y (pied de l'objet, mm), largeur et longueur vues (mm), aire,
-    allonge (longueur / largeur), contour (mm, pour dessiner)."""
+    allonge (longueur / largeur), contour (mm, pour dessiner), et la forme au pied : etroit, long (mm), axe_court (sens, en degrés,
+    dans lequel l'objet est le plus étroit) et allonge_vraie (long / etroit)."""
     vue, vfond = redresser(image, h, reglage), redresser(fond, h, reglage)
     m = masque(vue, vfond)
     x0, y0, x1, y1 = cadre(reglage)
@@ -105,7 +121,9 @@ def trouver(image, fond, h, reglage, hauteur=HAUTEUR_OBJETS, exclure=()):
         (_, _), (a1, a2), _ = cv2.minAreaRect(pts.astype(np.float32))
         if larg > TAILLE_MAX or long_ > TAILLE_MAX * 1.4:
             lumiere.append((X, Y, larg)); continue                               # tache de soleil, ombre portée d'une personne…
+        etroit, long2, axe = forme_au_pied(pts, ((k - 1) * (X - cX), (k - 1) * (Y - cY)))
         objets.append({'X': X, 'Y': Y, 'largeur': larg, 'longueur': max(long_, 1.0), 'aire': cv2.contourArea(c),
-                       'allonge': max(long_, larg) / max(min(long_, larg), 1.0), 'contour': pts})
+                       'allonge': max(long_, larg) / max(min(long_, larg), 1.0), 'contour': pts,
+                       'etroit': etroit, 'long': long2, 'axe_court': axe, 'allonge_vraie': long2 / max(etroit, 1.0)})
     trouver.lumiere = lumiere                                                   # ce qui a été écarté : le programme prévient
     return sorted(objets, key=lambda o: -o['Y'])

@@ -87,7 +87,35 @@ REPOS = {'epaule': EP.REPOS, 'coude': 0.0, 'flexion': 0.0}
 # le contrôle des obstacles en tient compte). Nicolas, 26/11/2026 : avec + 30 mm, une mâchoire tombait sur le gros rond (il ne
 # restait que 15 à 20 mm de chaque côté pour l'erreur de visée) ; sa pince s'ouvre à 133 mm.
 MARGE_OUVERTURE, OUVERTURE_MAX = 55.0, 115.0
-def ouverture_prise(o): return min(OUVERTURE_MAX, max(o['largeur'], 30.0) + MARGE_OUVERTURE)
+def ouverture_prise(o, roulis=0.0):
+    larg = o.get('etroit', o['largeur']) if roulis else o['largeur']                      # pince tournée : en travers de l'objet
+    return min(OUVERTURE_MAX, max(larg, 30.0) + MARGE_OUVERTURE)
+
+# Rotation du poignet pour un objet ALLONGÉ (la barre de 64 × 26 était prise dans sa longueur, Nicolas 26/11/2026) : la pince tourne
+# sur elle-même pour serrer en travers. Seulement si la pince est assez penchée vers le bas : à plat, tourner mettrait une mâchoire
+# en dessous de l'autre au lieu de la faire pivoter au-dessus de la table.
+ALLONGE_ROTATION = 1.5          # long / étroit au pied, mesuré sur la photo : au-delà, on tourne la pince
+INCL_ROTATION = 45.0            # degrés : pince au moins aussi penchée pour tourner
+ROULIS_MAX = 88.0               # degrés (butées du poignet : ±90)
+SENS_ROULIS = 1                 # + = le haut de la pince part à gauche vu de derrière (tester_poignet, 21/11/2026) ; -1 si c'est l'inverse
+
+def roulis_pour(o, incl, socle):
+    """De combien tourner la pince (degrés) pour que ses mâchoires serrent l'objet en travers ; 0 s'il n'est pas allongé ou si la
+    pince est trop à plat. Vu d'en haut, les mâchoires d'une pince penchée de i et tournée de r serrent dans la direction
+    cos r · (travers du bras) + sin r · sin i · (devant) : on cherche r qui donne la direction étroite de l'objet."""
+    if o.get('allonge_vraie', 1.0) < ALLONGE_ROTATION or abs(incl) < INCL_ROTATION: return 0.0
+    a, s_ = math.radians(o['axe_court']), math.radians(socle)
+    e = (math.cos(a), math.sin(a)); n = (math.cos(s_), -math.sin(s_)); r = (math.sin(s_), math.cos(s_))
+    A, B_ = e[0] * n[0] + e[1] * n[1], e[0] * r[0] + e[1] * r[1]
+    phi = math.degrees(math.atan2(B_, A * math.sin(math.radians(abs(incl)))))
+    if phi > 90: phi -= 180
+    if phi <= -90: phi += 180
+    if abs(phi) < 10: return 0.0
+    return SENS_ROULIS * max(-ROULIS_MAX, min(ROULIS_MAX, phi))
+
+def leve_roulis(ouverture, incl, roulis):
+    """De combien saisir plus haut (mm) : pince tournée et penchée, une mâchoire descend plus bas que l'autre."""
+    return (ouverture / 2 + 6.0) * abs(math.sin(math.radians(roulis))) * math.cos(math.radians(abs(incl)))
 def zone_de(largeur): return 'petit' if largeur < SEUIL_TAILLE else 'gros'
 
 class Trieur(Poste):
@@ -164,13 +192,15 @@ class Trieur(Poste):
         if not plan: raise ErreurServo('Pose dans le bac impossible.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
         self.etape(p.descendre(), 'l\'arrivée au-dessus du bac'); c._pince('o'); p.vider(); time.sleep(0.3); self.tenu = None
-        self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1
+        self.etape(p.monter(), 'la remontée'); self.redresser(); p.repos(); self.tries[z] += 1
         return True
 
     def place_libre(self, zone, incl):
         """Où poser et comment : (point, inclinaison, levée) ou None. D'abord avec l'inclinaison de la prise (objet posé droit),
         sinon avec 15° de plus ou de moins (objet lâché 13 mm plus haut, il se redresse seul)."""
-        for i, leve in ((incl, 0.0), (incl + ECART_INCL, LEVE_PENCHE), (incl - ECART_INCL, LEVE_PENCHE)):
+        l0 = getattr(self, 'leve_prise', 0.0)                                       # saisi plus haut : posé d'autant plus haut
+        essais = ((incl, l0),) if getattr(self, 'roulis', 0.0) else ((incl, l0), (incl + ECART_INCL, l0 + LEVE_PENCHE), (incl - ECART_INCL, l0 + LEVE_PENCHE))
+        for i, leve in essais:                     # pince tournée : changer l'inclinaison pencherait l'objet de côté
             if not -90.0 <= i <= 0.0: continue
             pt = self.place_libre_incl(zone, i, leve)
             if pt: return pt, i, leve
@@ -196,6 +226,16 @@ class Trieur(Poste):
                     except G.HorsDePortee: pass
         return None
 
+    def tourner(self, angle):
+        """Tourne la pince sur elle-même (bras en l'air, au repos ou au-dessus du point). La pose se fera pince tournée aussi."""
+        c = self.p.c; c._poignet(angle); self.p.vider(); self.p.roulis_permis = abs(angle) > 15
+
+    def redresser(self):
+        """Remet la pince droite, pince vide et remontée, avant le repos."""
+        c = self.p.c; self.roulis = 0.0; self.leve_prise = 0.0
+        if c.poignet and abs(c._roulis()) > 3: c._poignet(0); self.p.vider()
+        self.p.roulis_permis = False
+
     def serrer(self):
         c = self.p.c; r = c.reglages; c.bus.tenir(c.pince)
         texte, pos, tenu = c.bus.serrer(c.pince, c.ferme, r['serrage_doux'], maintien=min(r['maintien'], r['serrage_doux']))
@@ -214,7 +254,8 @@ class Trieur(Poste):
         visee = C.corriger(o['X'], o['Y'], self.corrections)
         try: incl, prise, haut = G.choisir_inclinaison(*visee, self.p.c.hauteur)
         except G.HorsDePortee: return None, None
-        gene = OB.geste_libre(prise['socle'], [REPOS, haut, prise], self.obstacles(objets, o), self.p.c.hauteur, ouverture_prise(o))
+        rl = roulis_pour(o, incl, prise['socle']) if self.p.c.poignet else 0.0
+        gene = OB.geste_libre(prise['socle'], [REPOS, haut, prise], self.obstacles(objets, o), self.p.c.hauteur, ouverture_prise(o, rl), roulis=rl)
         return gene, (None if gene else (incl, prise, haut))
 
     def choisir(self, objets):
@@ -242,7 +283,14 @@ class Trieur(Poste):
         if voisin < ECART_MIN: self.dire(f'Attention : l\'objet en X {o["X"]:+.0f} Y {o["Y"]:.0f} a un voisin à {voisin:.0f} mm, la pince pourrait le toucher.')
         visee = C.corriger(o['X'], o['Y'], self.corrections)
         self.dire(f'Je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} (vu {o["largeur"]:.0f} mm de large).')
-        plan = p.preparer(*visee)
+        plan = p.preparer(*visee); rl, self.leve_prise = 0.0, 0.0
+        if plan and c.poignet:
+            rl = roulis_pour(o, p.incl, plan[0]['socle'])
+            if rl:
+                lv = leve_roulis(ouverture_prise(o, rl), p.incl, rl); incl0 = p.incl
+                plan2 = p.preparer(*visee, incl0, lv)
+                if plan2: plan, self.leve_prise = plan2, lv
+                else: rl = 0.0; p.preparer(*visee)                                      # trop haut pour cette distance : prise ordinaire
         self.note(visée_X=visee[0], visée_Y=visee[1])
         if not plan:
             self.note(résultat='hors de portée'); self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX
@@ -252,8 +300,13 @@ class Trieur(Poste):
             else: self.dire('   Hors de portée : je le laisse.')
             return True
         self.au_repos = False
-        self.note(**{'pince_à_la_prise_(°)': abs(p.incl), 'ouverture_(mm)': ouverture_prise(o)})
-        self.ouvrir_a(ouverture_prise(o))
+        self.note(**{'pince_à_la_prise_(°)': abs(p.incl), 'ouverture_(mm)': ouverture_prise(o, rl)})
+        if rl:
+            self.dire(f'   Objet allongé ({o["etroit"]:.0f} × {o["long"]:.0f} mm au pied) : je tourne la pince de {rl:+.0f}° pour le serrer en travers'
+                      + (f', et je le saisis {self.leve_prise:.0f} mm plus haut' if self.leve_prise >= 1 else '') + '.')
+            self.note(remarque=f'pince tournée de {rl:+.0f}°'); self.tourner(rl)
+        self.roulis = rl
+        self.ouvrir_a(ouverture_prise(o, rl))
         p.aller(*plan); self.etape(p.prise is plan[0], 'l\'approche')
         self.etape(p.descendre(), 'la descente')
         tenu, largeur = self.serrer(); self.tenu = (p.incl, G.hauteur_prise(p.incl), self.hauteur, max(largeur, 20.0) / 2 + 2)
@@ -261,8 +314,8 @@ class Trieur(Poste):
         self.note(**{'largeur_mesurée_(mm)': largeur if tenu else 0.0})
         if not tenu:
             self.note(résultat='raté : rien entre les doigts')
-            self.rates.append((o['X'], o['Y'])); self.suite_ratee += 1; self.ouvrir_a(ouverture_prise(o))
-            self.dire('   Raté : rien entre les doigts. Je regarde à nouveau.'); p.repos()
+            self.rates.append((o['X'], o['Y'])); self.suite_ratee += 1; self.ouvrir_a(ouverture_prise(o, rl))
+            self.dire('   Raté : rien entre les doigts. Je regarde à nouveau.'); self.redresser(); p.repos()
             if self.suite_ratee >= 3: raise ErreurServo('3 prises ratées de suite : la visée est sans doute décalée. Refais la correction aux flèches dans viser_camera, puis reviens.')
             return True
         self.suite_ratee = 0
@@ -323,7 +376,7 @@ class Trieur(Poste):
         p, c = self.p, self.p.c
         p.aller(*self.plan_prise); self.etape(p.prise is self.plan_prise[0], 'le retour au point de prise')
         self.etape(p.descendre(), 'la descente'); self.ouvrir_a(2 * self.tenu[3] + 16); self.tenu = None
-        self.etape(p.monter(), 'la remontée'); p.repos()
+        self.etape(p.monter(), 'la remontée'); self.redresser(); p.repos()
 
     def poser(self, z, incl, largeur):
         p, c = self.p, self.p.c
@@ -332,14 +385,14 @@ class Trieur(Poste):
         spot, incl_pose, leve = place if place else (None, None, None)
         if spot is None: raise ErreurServo(f'Plus de place dans la zone des {PLURIEL[z]} à la bonne distance.')
         cote = "gauche" if ZONES[z] < 0 else "droite"
-        if leve: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince à {abs(incl_pose):.0f}° (prise à {abs(incl):.0f}°) : lâché {leve:.0f} mm plus haut, il se redresse seul.')
+        if leve and incl_pose != incl: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince à {abs(incl_pose):.0f}° (prise à {abs(incl):.0f}°) : lâché {leve:.0f} mm plus haut, il se redresse seul.')
         else: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince inclinée comme à la prise ({abs(incl):.0f}°).')
         self.note(posé_en_X=spot[0], posé_en_Y=spot[1], **{'pince_à_la_pose_(°)': abs(incl_pose), 'lâché_plus_haut_(mm)': leve})
         plan = p.preparer(*C.corriger(*spot, self.corrections), incl_pose, leve)
         if not plan: raise ErreurServo('Pose impossible à cet endroit.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
         self.etape(p.descendre(), 'la pose'); self.ouvrir_a(2 * self.tenu[3] + 16)
-        self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1; self.deposes[z].append(spot); self.tenu = None
+        self.etape(p.monter(), 'la remontée'); self.redresser(); p.repos(); self.tries[z] += 1; self.deposes[z].append(spot); self.tenu = None
         return True
 
     def trier(self, combien=None):
@@ -366,7 +419,7 @@ class Trieur(Poste):
 
     def _trier(self, combien=None):
         n = 0; self.suite_ratee = 0; avant = dict(self.tries)       # les compteurs courent depuis le lancement : on ne compte que CE tri
-        self.p.repos()
+        self.p.repos(); self.redresser()                              # un arrêt a pu laisser la pince tournée
         objets = self.regarder(); self.rap.photo('00_debut', self.image, self.annoter(self.image))
         while combien is None or n < combien:
             if not objets: break
@@ -393,7 +446,7 @@ class Trieur(Poste):
             self._lancer('tri en cours', geste); return True
         if kk == 'r':
             def repos():
-                self.p.repos(); self.au_repos = True
+                self.p.repos(); self.redresser(); self.au_repos = True
             self.plan = None; self._lancer('retour au repos', repos); return True
         if kk == 'o':
             self._lancer('la pince', lambda: (self.p.c._pince('o'), self.p.vider())); return True
