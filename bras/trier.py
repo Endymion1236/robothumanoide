@@ -59,14 +59,17 @@ def charger_bacs():
     except Exception: return {}
 def dans_un_bac(X, Y, bacs, marge=30.0):
     return any(abs(X - b['X']) < b['largeur'] / 2 + marge and abs(Y - b['Y']) < b['profondeur'] / 2 + marge for b in bacs.values())
-def pose_dans_bac(bac, incl_prise, hauteur_epaule=179.0):
+def pose_dans_bac(bac, incl_prise, hauteur_epaule=179.0, corriger=None):
     """Comment lâcher au-dessus du bac : (point, inclinaison, levée) ou None. L'objet pend sous la pince d'environ la hauteur de
     prise ; on le monte du bord + la garde, en essayant d'abord l'inclinaison de la prise (l'objet descend droit), puis les autres."""
     ordre = sorted(G.INCLINAISONS, key=lambda i: abs(i - incl_prise))
     for i in ordre:
         leve = bac['bord'] + GARDE_BAC + max(0.0, abs(i - incl_prise)) * 0.6       # un objet penché descend un peu plus bas
         for pt in points_du_bac(bac):
-            try: G.prise_et_approche(*pt, hauteur_epaule, i, leve); return pt, i, leve
+            # le bras visera le point CORRIGÉ (correction de visée apprise) : c'est lui qu'on vérifie, exactement comme le fera
+            # la pose (tri du 26/11/2026 à 17 h 42 : point bon sans correction, 55 mm plus près avec, hors de portée)
+            v = corriger(*pt) if corriger else pt
+            try: G.choisir_inclinaison(*v, hauteur_epaule, i, leve); return pt, i, leve
             except G.HorsDePortee: pass
     return None
 
@@ -209,7 +212,7 @@ class Trieur(Poste):
 
     def lacher_dans_bac(self, z, incl, largeur):
         p, c = self.p, self.p.c
-        pose = pose_dans_bac(self.bacs[z], incl, c.hauteur)
+        pose = pose_dans_bac(self.bacs[z], incl, c.hauteur, lambda x, y: C.corriger(x, y, self.corrections))
         if not pose: raise ErreurServo(f'Le bac des {PLURIEL[z]} est hors de portée pour cette prise.')
         pt, i, leve = pose
         self.note(posé_en_X=pt[0], posé_en_Y=pt[1], remarque='lâché dans le bac', **{'pince_à_la_pose_(°)': abs(i), 'lâché_plus_haut_(mm)': leve})
@@ -529,10 +532,10 @@ class Trieur(Poste):
 
 def verifier_zones(hauteur_epaule=179.0):
     """Chaque zone doit accepter toutes les inclinaisons de prise : sinon un objet pris pourrait ne pas pouvoir y être posé."""
-    bacs = charger_bacs()
+    bacs = charger_bacs(); corr = C.charger()
     for nom, b in bacs.items():
         for incl in G.INCLINAISONS:
-            if not pose_dans_bac(b, incl, hauteur_epaule): raise G.HorsDePortee(f'bac des {PLURIEL[nom]} : impossible d\'y lâcher un objet pris pince à {abs(incl)}° (relance regler_bac.bat)')
+            if not pose_dans_bac(b, incl, hauteur_epaule, lambda x, y: C.corriger(x, y, corr)): raise G.HorsDePortee(f'bac des {PLURIEL[nom]} : impossible d\'y lâcher un objet pris pince à {abs(incl)}° (relance regler_bac.bat)')
     for nom, a in ZONES.items():
         if nom in bacs: continue
         for incl in G.INCLINAISONS:

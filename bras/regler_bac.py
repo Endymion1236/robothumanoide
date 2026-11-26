@@ -2,7 +2,7 @@
 Lancer : regler_bac.bat. Pour trouver la position du centre du bac : camera\\voir_table.bat, clic au milieu du bac (lire X et Y).
 Le calcul vérifie, sans bouger le bras, que le bras peut lâcher un objet au-dessus du bac quelle que soit sa façon de l'avoir pris."""
 import json, sys
-import piloter_bras as B, geometrie as G, trier as TR
+import piloter_bras as B, geometrie as G, trier as TR, correction as C
 
 def nombre(question, mini, maxi):
     while True:
@@ -27,7 +27,8 @@ def main():
         prof = nombre('   profondeur INTÉRIEURE du bac, d\'avant en arrière (mm) : ', 40, 400)
         bord = nombre('   hauteur du BORD au-dessus de la table (mm) : ', 0, 200)
         b = {'X': X, 'Y': Y, 'largeur': larg, 'profondeur': prof, 'bord': bord}
-        rates = [abs(i) for i in G.INCLINAISONS if not TR.pose_dans_bac(b, i)]
+        corr = C.charger(); vise = lambda x, y: C.corriger(x, y, corr)        # comme au tri : correction de visée comprise
+        rates = [abs(i) for i in G.INCLINAISONS if not TR.pose_dans_bac(b, i, corriger=vise)]
         if rates:
             print(f'   ⚠️  Le bras ne peut pas lâcher au-dessus de ce bac un objet pris pince à {rates}°.')
             print('      Rapproche le bac (entre 30 et 40 cm du socle) ou prends un bac plus bas. Bac NON enregistré.'); continue
