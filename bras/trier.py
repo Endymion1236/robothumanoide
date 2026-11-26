@@ -21,6 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'camera'))
 import cv2, numpy as np
 import table as T, voir_table as V, objets as O
+import rapport_tri as RT
 import aller_point as A, correction as C, geometrie as G, test_pince as PI, obstacles as OB, test_epaule as EP
 from servos import ErreurServo
 from viser_camera import Poste, sans_accents, FLECHES
@@ -86,10 +87,25 @@ class Trieur(Poste):
         self.hauteur, self.fond, self.objets, self.image = hauteur, None, [], None
         self.demande, self.reponse = threading.Event(), threading.Event()
         self.au_repos, self.tries, self.rates = True, {'petit': 0, 'gros': 0}, []
-        self.deposes = {z: [] for z in ZONES}; self.tenu = None; self.objets_tri, self.objet_pris = [], None
+        self.deposes = {z: [] for z in ZONES}; self.tenu = None; self.objets_tri, self.objet_pris = [], None; self.rap = None
         self.bacs = charger_bacs()
         for z, b in self.bacs.items(): self.dire(f'Les {PLURIEL[z]} vont dans le bac (X {b["X"]:+.0f}, Y {b["Y"]:.0f}, bord à {b["bord"]:.0f} mm).')
         if FICHIER_FOND.exists(): self.fond = cv2.imread(str(FICHIER_FOND)); self.dire('Photo du fond reprise du dernier essai (F pour la refaire si la caméra a bougé).')
+
+    def dire(self, texte):
+        super().dire(texte)
+        if getattr(self, 'rap', None): self.rap.journal(texte)
+
+    def annoter(self, image, choisi=None):
+        """Une copie de l'image avec les objets reconnus (pour le rapport) ; l'objet choisi en rouge."""
+        if image is None or self.h is None: return None
+        vue = image.copy()
+        for n, o in enumerate(self.objets, 1):
+            pts = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']], np.int32); rouge = o is choisi
+            cv2.polylines(vue, [pts], True, (0, 0, 255) if rouge else (0, 255, 255), 3 if rouge else 2)
+            pt = T.vers_image(self.h, o['X'], o['Y']); cv2.circle(vue, pt, 6, (0, 0, 255), -1)
+            V.ecrire(vue, f'{n} : {o["largeur"]:.0f} mm  (X {o["X"]:+.0f} Y {o["Y"]:.0f})', (pt[0] + 10, pt[1] - 10), (0, 0, 255) if rouge else (0, 255, 255), 0.55)
+        return vue
 
     def voir(self, image):
         self.image = image.copy()
@@ -127,6 +143,7 @@ class Trieur(Poste):
         pose = pose_dans_bac(self.bacs[z], incl, c.hauteur)
         if not pose: raise ErreurServo(f'Le bac des {PLURIEL[z]} est hors de portée pour cette prise.')
         pt, i, leve = pose
+        self.note(posé_en_X=pt[0], posé_en_Y=pt[1], remarque='lâché dans le bac', **{'pince_à_la_pose_(°)': abs(i), 'lâché_plus_haut_(mm)': leve})
         self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le lâche dans son bac (pince à {abs(i):.0f}°, {leve:.0f} mm au-dessus de la hauteur de prise).')
         plan = p.preparer(*C.corriger(*pt, self.corrections), i, leve)
         if not plan: raise ErreurServo('Pose dans le bac impossible.')
@@ -204,35 +221,47 @@ class Trieur(Poste):
         if o is None: return False
         voisin = min([math.hypot(o['X'] - a['X'], o['Y'] - a['Y']) for a in objets if a is not o] or [999.0])
         self.objets_tri, self.objet_pris = objets, o
+        if self.rap:
+            n = self.rap.nouvel_essai(o); self.rap.photo(f'objet_{n:02d}_avant', self.image, self.annoter(self.image, o))
         if voisin < ECART_MIN: self.dire(f'Attention : l\'objet en X {o["X"]:+.0f} Y {o["Y"]:.0f} a un voisin à {voisin:.0f} mm, la pince pourrait le toucher.')
         visee = C.corriger(o['X'], o['Y'], self.corrections)
         self.dire(f'Je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} (vu {o["largeur"]:.0f} mm de large).')
         plan = p.preparer(*visee)
+        self.note(visée_X=visee[0], visée_Y=visee[1])
         if not plan:
-            self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX
+            self.note(résultat='hors de portée'); self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX
             if math.hypot(visee[0] - o['X'], visee[1] - o['Y']) > 20 and self._atteignable(o):
                 self.dire(f'   C\'est la CORRECTION de visée apprise qui l\'envoie hors de portée (elle vise {C.en_clair((o["X"], o["Y"]), visee)}). '
                           'Si tu as remonté des pièces depuis, refais la correction dans viser_camera (E deux fois, puis flèches + C, près ET loin).')
             else: self.dire('   Hors de portée : je le laisse.')
             return True
         self.au_repos = False
+        self.note(**{'pince_à_la_prise_(°)': abs(p.incl), 'ouverture_(mm)': ouverture_prise(o)})
         self.ouvrir_a(ouverture_prise(o))
         p.aller(*plan); self.etape(p.prise is plan[0], 'l\'approche')
         self.etape(p.descendre(), 'la descente')
         tenu, largeur = self.serrer(); self.tenu = (p.incl, G.hauteur_prise(p.incl), self.hauteur, max(largeur, 20.0) / 2 + 2)
         self.etape(p.monter(), 'la remontée')
+        self.note(**{'largeur_mesurée_(mm)': largeur if tenu else 0.0})
         if not tenu:
+            self.note(résultat='raté : rien entre les doigts')
             self.rates.append((o['X'], o['Y'])); self.suite_ratee += 1; self.ouvrir_a(ouverture_prise(o))
             self.dire('   Raté : rien entre les doigts. Je regarde à nouveau.'); p.repos()
             if self.suite_ratee >= 3: raise ErreurServo('3 prises ratées de suite : la visée est sans doute décalée. Refais la correction aux flèches dans viser_camera, puis reviens.')
             return True
         self.suite_ratee = 0
         z = zone_de(largeur); incl = p.incl; self.plan_prise = plan
-        try: return self.poser(z, incl, largeur)
+        self.note(catégorie=z)
+        try:
+            r = self.poser(z, incl, largeur); self.note(résultat='trié'); return r
         except ErreurServo as err:
             if c.arret.is_set(): raise
             self.dire(f'   {err} Je le repose là où je l\'ai pris.'); self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX
+            self.note(résultat='reposé où il a été pris', remarque=str(err))
             self.reposer_ou_pris(); return True
+
+    def note(self, **champs):
+        if self.rap: self.rap.note(**champs)
 
     def ouvrir_a(self, mm):
         """Ouvre la pince à `mm` d'écart seulement (pas grande ouverte : elle toucherait les voisins)."""
@@ -266,6 +295,7 @@ class Trieur(Poste):
         cote = "gauche" if ZONES[z] < 0 else "droite"
         if leve: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince à {abs(incl_pose):.0f}° (prise à {abs(incl):.0f}°) : lâché {leve:.0f} mm plus haut, il se redresse seul.')
         else: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince inclinée comme à la prise ({abs(incl):.0f}°).')
+        self.note(posé_en_X=spot[0], posé_en_Y=spot[1], **{'pince_à_la_pose_(°)': abs(incl_pose), 'lâché_plus_haut_(mm)': leve})
         plan = p.preparer(*C.corriger(*spot, self.corrections), incl_pose, leve)
         if not plan: raise ErreurServo('Pose impossible à cet endroit.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
@@ -274,16 +304,41 @@ class Trieur(Poste):
         return True
 
     def trier(self, combien=None):
+        try:
+            cx, cy, cz, _ = O.camera(self.h, (self.image.shape[1], self.image.shape[0]))
+            cam = f'{cz / 10:.0f} cm au-dessus de la table (X {cx:+.0f}, Y {cy:.0f})'
+        except Exception: cam = 'inconnue'
+        self.rap = RT.Rapport({'mode': 'un seul objet' if combien == 1 else 'tout trier', 'caméra calculée': cam,
+                               'corrections de visée apprises': len(self.corrections), 'seuil petit / gros (mm)': SEUIL_TAILLE,
+                               'zones': ', '.join(f'{PLURIEL[z]} ' + ('dans le bac' if z in self.bacs else f'à {a:+.0f}°') for z, a in ZONES.items()),
+                               'hauteur des objets (mm)': self.hauteur})
+        conclusion = ''
+        try:
+            conclusion = self._trier(combien)
+        except ErreurServo as err:
+            conclusion = f'ARRÊT : {err}'; raise
+        finally:
+            try:
+                reste = self.regarder() if not self.p.c.arret.is_set() else self.objets
+                self.rap.photo('fin', self.image, self.annoter(self.image))
+            except ErreurServo: pass
+            d = self.rap.fermer(conclusion); self.rap = None
+            self.dire(f'Rapport enregistré : bras\\rapports\\{d.name}')
+
+    def _trier(self, combien=None):
         n = 0; self.suite_ratee = 0
         self.p.repos()
+        objets = self.regarder(); self.rap.photo('00_debut', self.image, self.annoter(self.image))
         while combien is None or n < combien:
-            objets = self.regarder()
             if not objets: break
             self.dire(f'{len(objets)} objet(s) sur la table.')
             if not self.un_objet(objets): break
+            objets = self.regarder()                                          # bras revenu au repos : la table après ce geste
+            if self.rap.essai: self.rap.photo(f'objet_{self.rap.essai["n"]:02d}_apres', self.image, self.annoter(self.image))
             n += 1
         reste = [o for o in self.regarder()]
-        self.dire(f'Fini : {self.tries["petit"]} petit(s) à gauche, {self.tries["gros"]} gros à droite.' + (f' {len(reste)} objet(s) laissé(s) (hors de portée ou ratés).' if reste and combien is None else ''))
+        txt = (f'Fini : {self.tries["petit"]} petit(s) à gauche, {self.tries["gros"]} gros à droite.' + (f' {len(reste)} objet(s) laissé(s) (hors de portée ou ratés).' if reste and combien is None else ''))
+        self.dire(txt); return txt
 
     def touche(self, k):
         kk = chr(k).lower() if 0 < k < 128 else ''

@@ -499,3 +499,13 @@ long du bras et des mâchoires (et de l'objet tenu, qui tourne avec la pince) :
 - la pince ne s'ouvre plus en grand : largeur vue + 30 mm à la prise, largeur mesurée + 16 mm à la pose.
 Simulation : rond à 42 cm caché derrière un petit rond à 30 cm → le bras prend d'abord le petit, puis le grand. Rien d'essayé en vrai.
 Bras modélisé avec 28 mm de demi-largeur et 8 mm de marge (le bac n'est pas encore compté comme obstacle).
+
+### Rapport de tri (26/11/2026, demande de Nicolas)
+
+Chaque appui sur T ou 1 crée un dossier `bras\rapports\tri_AAAAMMJJ_HHMMSS\` (sur le PC, pas dans le dépôt) : `rapport.txt`
+(réglages, caméra calculée, objet par objet : vu où, visé où, pince à quel angle et ouverte de combien, largeur mesurée, catégorie,
+posé où, durée, puis le journal complet, et des lignes « à remplir par Nicolas »), `resultats.csv` (une ligne par objet, pour un
+tableur), et les photos : `00_debut`, `objet_NN_avant` (objet choisi en rouge), `objet_NN_apres`, `fin` — chacune brute et `_vu`
+(avec ce que le programme a reconnu). Essayé en simulation.
+Remarque du calcul : un objet à moins de 20 cm du socle, dans l'axe, est compté comme gênant pour un objet pris à plat derrière lui
+(avant-bras modélisé large de 56 mm, prudent).
