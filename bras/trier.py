@@ -10,6 +10,7 @@ Dans la fenêtre :
   Un objet pris pince inclinée est REPOSÉ avec la même inclinaison (sinon il penche) : la distance de pose suit celle de la prise.
   T         TRIER : il prend les objets un par un jusqu'à ce qu'il n'y en ait plus (ou ESPACE)
   1         n'en trier qu'UN (pour les premiers essais)
+  O         ouvrir la pince (secours)
   R         repos        ESPACE   ARRÊT (le bras reste tenu)        P   photo        Q   quitter
 Il se sert des corrections de visée apprises dans viser_camera (flèches + C).
 
@@ -64,7 +65,7 @@ def pose_dans_bac(bac, incl_prise, hauteur_epaule=179.0):
     return None
 
 FICHIER_FOND = Path(__file__).resolve().parent.parent / 'camera' / 'fond_table.png'
-AIDE = 'F = photo du fond (table VIDE) | T = TRIER | 1 = un seul objet | R repos | ESPACE = ARRET | P photo | Q quitter'
+AIDE = 'F = fond (table VIDE) | T = TRIER | 1 = un seul objet | O ouvrir | R repos | ESPACE = ARRET | P photo | Q quitter'
 
 def choisir(objets, rates):
     """L'objet à prendre maintenant : le plus isolé, parmi ceux qui n'ont pas déjà raté ESSAIS_MAX fois au même endroit."""
@@ -121,11 +122,11 @@ class Trieur(Poste):
     def lacher_dans_bac(self, z, incl, largeur):
         p, c = self.p, self.p.c
         pose = pose_dans_bac(self.bacs[z], incl, c.hauteur)
-        if not pose: raise ErreurServo(f'le bac des {PLURIEL[z]} est hors de portée : objet toujours tenu. R, puis tiens-le et ouvre la pince à la main.')
+        if not pose: raise ErreurServo(f'Le bac des {PLURIEL[z]} est hors de portée pour cette prise.')
         pt, i, leve = pose
         self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le lâche dans son bac (pince à {abs(i):.0f}°, {leve:.0f} mm au-dessus de la hauteur de prise).')
         plan = p.preparer(*C.corriger(*pt, self.corrections), i, leve)
-        if not plan: raise ErreurServo('pose dans le bac impossible : objet toujours tenu. R, puis tiens-le et ouvre la pince à la main.')
+        if not plan: raise ErreurServo('Pose dans le bac impossible.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
         self.etape(p.descendre(), 'l\'arrivée au-dessus du bac'); c._pince('o'); p.vider(); time.sleep(0.3)
         self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1
@@ -150,7 +151,9 @@ class Trieur(Poste):
             for da in (0.0, -10.0, 10.0):
                 pt = G.point_dans_direction(a + da, R)
                 if all(math.hypot(pt[0] - x, pt[1] - y) >= ECART_DEPOT for x, y in self.deposes[zone]):
-                    try: G.prise_et_approche(*pt, self.p.c.hauteur, incl, leve); return pt
+                    # on vérifie le point que le bras visera vraiment, correction de visée comprise (Nicolas, 26/11/2026 : place
+                    # trouvée à 245 mm, corrigée à 235, hors de portée pour la pince à 75° : bras arrêté objet en main)
+                    try: G.prise_et_approche(*C.corriger(*pt, self.corrections), self.p.c.hauteur, incl, leve); return pt
                     except G.HorsDePortee: pass
         return None
 
@@ -188,16 +191,32 @@ class Trieur(Poste):
             if self.suite_ratee >= 3: raise ErreurServo('3 prises ratées de suite : la visée est sans doute décalée. Refais la correction aux flèches dans viser_camera, puis reviens.')
             return True
         self.suite_ratee = 0
-        z = zone_de(largeur); incl = p.incl
+        z = zone_de(largeur); incl = p.incl; self.plan_prise = plan
+        try: return self.poser(z, incl, largeur)
+        except ErreurServo as err:
+            if c.arret.is_set(): raise
+            self.dire(f'   {err} Je le repose là où je l\'ai pris.'); self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX
+            self.reposer_ou_pris(); return True
+
+    def reposer_ou_pris(self):
+        """Le bras tient un objet qu'il ne peut pas poser dans sa zone : il le remet exactement où il l'a pris (même point, même
+        inclinaison : c'est toujours possible, il venait de là), ouvre, remonte, revient au repos."""
+        p, c = self.p, self.p.c
+        p.aller(*self.plan_prise); self.etape(p.prise is self.plan_prise[0], 'le retour au point de prise')
+        self.etape(p.descendre(), 'la descente'); c._pince('o'); p.vider()
+        self.etape(p.monter(), 'la remontée'); p.repos()
+
+    def poser(self, z, incl, largeur):
+        p, c = self.p, self.p.c
         if z in self.bacs: return self.lacher_dans_bac(z, incl, largeur)
         place = self.place_libre(z, incl)
         spot, incl_pose, leve = place if place else (None, None, None)
-        if spot is None: raise ErreurServo(f'plus de place dans la zone des {PLURIEL[z]} à la bonne distance : objet toujours tenu. Vide la zone, puis R (tiens l\'objet).')
+        if spot is None: raise ErreurServo(f'Plus de place dans la zone des {PLURIEL[z]} à la bonne distance.')
         cote = "gauche" if ZONES[z] < 0 else "droite"
         if leve: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince à {abs(incl_pose):.0f}° (prise à {abs(incl):.0f}°) : lâché {leve:.0f} mm plus haut, il se redresse seul.')
         else: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince inclinée comme à la prise ({abs(incl):.0f}°).')
         plan = p.preparer(*C.corriger(*spot, self.corrections), incl_pose, leve)
-        if not plan: raise ErreurServo(f'pose impossible : objet toujours tenu. R, puis tiens-le et ouvre la pince à la main (O dans viser_camera).')
+        if not plan: raise ErreurServo('Pose impossible à cet endroit.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
         self.etape(p.descendre(), 'la pose'); c._pince('o'); p.vider()
         self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1; self.deposes[z].append(spot)
@@ -229,7 +248,9 @@ class Trieur(Poste):
             def repos():
                 self.p.repos(); self.au_repos = True
             self.plan = None; self._lancer('retour au repos', repos); return True
-        if kk in ('d', 'm', 'c', 'e', 'o', 's', 'i', 'j', 'l', 'u', 'n', '\r', '\n') or k in FLECHES:
+        if kk == 'o':
+            self._lancer('la pince', lambda: (self.p.c._pince('o'), self.p.vider())); return True
+        if kk in ('d', 'm', 'c', 'e', 's', 'i', 'j', 'l', 'u', 'n', '\r', '\n') or k in FLECHES:
             return True                                                  # gestes à la main : dans viser_camera, pas ici
         return super().touche(k)
 
