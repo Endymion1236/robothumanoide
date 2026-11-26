@@ -179,3 +179,72 @@ plus éloignée de l'épaule (x = −46, z = 50).
 - Accroché en bas du mât, le ressort se décroche quand il se détend : ne pas utiliser les rangées du bas sans butée sur la tige.
 - Pour retrouver la verticale avec ce ressort, il faudrait une accroche vers x = −60, z = 24 (trou à percer au bord arrière du mât) :
   l'aide tombe alors de 8,5 à 4,3 kg·cm bras à l'horizontale, là où elle sert le plus. Non retenu : le repos à 80° est préférable.
+
+## Épaule avec le gros servo STS3095 (26/11/2026)
+
+**Prototype : dessinée et contrôlée par le calcul, jamais imprimée ni montée.** `generer_epaule_3095.py`, aperçu
+`sortie/apercu_epaule_3095.png`, contrôles `sortie/verification_epaule_3095.json`.
+
+### Ce qui change
+- **Le servo descend par le haut dans un berceau en forme de boîte.** Il est tenu par la forme (fond, mur arrière, deux joues,
+  lèvre devant) et par une bride vissée dessus. Aucune petite vis du boîtier n'est utilisée : leur place n'est connue qu'à 1 mm près.
+- **La fourche du haut du bras passe de 45 à 61,4 mm** entre les deux disques. Les deux moitiés se vissent sur les disques par
+  les vis fournies Ø 2,6 × 9 (8 par disque, 4 mm de plastique sous la tête, têtes noyées dans une cuvette).
+- **Nouveau bâti** : même pied, mêmes 4 trous (il se revisse sur le plateau du socle sans rien changer au socle). Le mur est
+  reculé au bord du pied, le mât du ressort repoussé derrière la fourche élargie.
+- **Ne changent pas** : hauteur de l'axe (95 mm au-dessus du pied), longueur épaule → coude (120 mm), platine et berceau du
+  coude, avant-bras, poignet, pince.
+
+### À imprimer (PETG, 4 périmètres, 40 %, couches de 0,2, sans support, déjà orientées)
+
+| Pièce | Fichier (`sortie/`) | Environ |
+|---|---|---|
+| Berceau du STS3095 | `epaule3095_berceau.stl` | 109 g, 79 × 76 × 53 mm |
+| Bride | `epaule3095_bride.stl` | 8 g |
+| Haut du bras, moitié basse (côté mur) | `epaule3095_bras_bas.stl` | 48 g |
+| Haut du bras, moitié haute (avec la platine du coude) | `epaule3095_bras_haut.stl` | 72 g |
+| Bâti | `epaule3095_bati.stl` | 258 g, 129 × 110 × 157 mm : la grosse impression |
+
+**Ordre conseillé : le berceau d'abord** (2 à 3 h). On y essaie le servo avant de lancer le reste : il doit descendre par le
+haut sans forcer, se poser à plat au fond, sans jeu sensible (0,2 mm prévu de chaque côté). Si c'est bon : la bride et les deux
+moitiés du bras, puis le bâti en dernier (mêmes précautions que le premier : filament sec, bordure de 8 mm, plateau à 85-90 °C).
+Les deux moitiés du bras ont une cuvette ronde côté plateau : son plafond s'imprime en pont (anneau de 9 mm), sans support.
+
+### Visserie
+
+| Quoi | Nombre | Où |
+|---|---|---|
+| Inserts M3 (Ø 4,7 × 3,8) | 11 | 4 dans le socle du berceau (côté mur), 2 sur le dessus des joues (bride), 4 dans la moitié basse du bras (entretoises), 1 dans la moitié haute (vis du ressort, facultatif) |
+| Vis M3 × 10 | 6 (+ 4) | berceau sur le mur, par-derrière (4) ; bride (2) ; et les 4 du berceau du coude sur la platine, comme avant |
+| Vis M3 × 30 | 4 | entretoises du haut du bras : au fond de puits de 13 mm dans la moitié haute (tournevis fin) ; 5 mm de prise dans la moitié basse |
+| Vis Ø 2,6 × 9 fournies avec le servo | 8 à 16 | disques du servo (4 par disque suffisent pour un premier essai) |
+
+### Montage, dans l'ordre (plan illustré à faire quand les pièces seront validées)
+1. **Avant tout : le servo seul sur la carte**, pour changer son numéro (neuf, il a sans doute le n° 1 du socle) et régler ses
+   butées. Vérifier le 12 V sur l'étiquette. Limiter le couple dans le programme : ce servo est trois fois plus fort.
+2. Inserts : 4 dans le socle du berceau (par la face qui touche le mur), 2 sur le dessus des joues, 4 dans la moitié basse.
+3. **Moitié basse sur le disque côté LOGO** (vis Ø 2,6 × 9, par la cuvette). À faire AVANT de poser le servo : ces têtes sont
+   ensuite contre le mur, on n'y accède plus.
+4. Berceau sur le mur du bâti : 4 vis M3 × 10 par-derrière.
+5. Le servo descend dans le berceau, **logo côté mur**, bout long vers l'arrière : la moitié basse passe entre le socle et le
+   servo. Les prises SVG se retrouvent côté extérieur, dessus et dessous. Poser la bride (2 vis M3 × 10).
+6. Moitié haute sur l'autre disque (vis Ø 2,6 × 9), puis les 4 vis M3 × 30 des entretoises.
+7. Berceau du coude sur la platine, APRÈS avoir fermé le haut du bras (il recouvre 2 des têtes de vis), comme sur l'ancien bras.
+
+### Ce que le calcul a vérifié
+- le servo et ses deux disques descendent dans le berceau par le haut sans rien toucher ; une fois en place, il est retenu
+  vers le bas, l'avant, l'arrière et les deux côtés par le berceau, vers le haut par la bride ;
+- les deux prises SVG restent libres (échancrure dans le fond pour celle du dessous) ;
+- bras de −30° à +90° : au plus près 1,5 mm (disques / fond du berceau), 2 mm (moitié basse / berceau), 7 mm du bâti ;
+- avant-bras et pince grande ouverte, coude de −90° à +90° : aucun contact avec le bâti, le berceau ni le haut du bras ;
+- longueurs de vis (tableau ci-dessus) ; pièces fermées, d'un seul bloc, posées à plat.
+
+### À faire dans les programmes une fois monté
+- **Le plan du bras se décale de 8 mm de côté : `DECALAGE_BRAS` passe de −53,5 à −61,5** (`bras/geometrie.py`), puis refaire
+  l'apprentissage de la visée (touche A de `trier`).
+- Butées et limite de couple du nouveau servo ; le ressort devient sans doute inutile (le mât reste, au cas où).
+
+### Ce que le calcul ne dit pas
+La tenue du berceau quand le servo force (il peut développer 95 kg·cm : limiter le couple), le jeu réel du servo dans sa
+boîte, l'alimentation (bloc 12 V de 5 A trop juste : 9,8 A au blocage d'après la fiche). Cotes du servo lues sur photo (± 1 mm) :
+seule la place des prises SVG en dépend, l'échancrure a 1 mm de marge de chaque côté.

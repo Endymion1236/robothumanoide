@@ -175,3 +175,12 @@ rond (photo) : 10 petits trous en deux arcs de 5, à des rayons différents ; **
 Les trous font ≈ 0,7 : les vis fournies (Ø 1,3) n'y passent pas sans repercer → la fixation de la poulie sera à choisir au dessin.
 **Décision de Nicolas (25/11/2026) : réimprimer le bâti** (nouveau bâti pour le STS3095, mât repoussé pour garder la possibilité du ressort ; pas urgent).
 **Prise SVG confirmée par Nicolas : côté OPPOSÉ au logo** (servo à plat logo en haut → prise en bas). Toutes les mesures du STS3095 sont validées : le dessin de l'épaule (bâti, berceau, haut du bras) peut commencer.
+
+**26/11/2026 : épaule STS3095 dessinée** (`epaule/generer_epaule_3095.py`, 5 STL `epaule3095_*`, prototype jamais imprimé) : berceau en
+boîte où le servo descend par le haut (tenu par la forme + une bride, aucune vis du boîtier), logo côté mur, fourche de 61,4 mm,
+nouveau bâti (même pied et mêmes trous, mur au bord du pied). **Une fois monté : `DECALAGE_BRAS` −53,5 → −61,5** et refaire
+l'apprentissage de la visée. Non mesuré, contourné au dessin : diamètre et hauteur de la tête des vis Ø 2,6 × 9 (cuvettes larges).
+Ordre d'impression conseillé : le berceau d'abord, pour y essayer le servo.
+**Le même jour** : tri validé sur le bras (pince étalonnée, bacs, voix avec Claude qui reconnaît les formes sur photo, humour),
+apprentissage automatique de la visée (touche A, « poser et regarder »), plan de montage des phalanges, poulie du doigt à fentes.
+Bacs de Nicolas : centres vers X ±385, Y 200-250, bord ≈ 14-18 cm. Sa pince s'ouvre à 133 mm.

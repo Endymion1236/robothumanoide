@@ -1,0 +1,137 @@
+{
+ "etat": "PROTOTYPE : vérifié par le calcul, jamais imprimé ni monté",
+ "pieces": {
+  "epaule3095_bati": {
+   "fermée": true,
+   "blocs": 1,
+   "encombrement (mm)": [
+    129.0,
+    110.1,
+    157.0
+   ],
+   "masse environ (g)": 258,
+   "surface sur le plateau (mm²)": 14000,
+   "plafonds en pont (mm²)": 355
+  },
+  "epaule3095_berceau": {
+   "fermée": true,
+   "blocs": 1,
+   "encombrement (mm)": [
+    79.1,
+    75.8,
+    53.0
+   ],
+   "masse environ (g)": 109,
+   "surface sur le plateau (mm²)": 4735,
+   "plafonds en pont (mm²)": 63
+  },
+  "epaule3095_bride": {
+   "fermée": true,
+   "blocs": 1,
+   "encombrement (mm)": [
+    20.0,
+    71.8,
+    6.0
+   ],
+   "masse environ (g)": 8,
+   "surface sur le plateau (mm²)": 1418,
+   "plafonds en pont (mm²)": 0
+  },
+  "epaule3095_bras_bas": {
+   "fermée": true,
+   "blocs": 1,
+   "encombrement (mm)": [
+    131.5,
+    33.0,
+    36.5
+   ],
+   "masse environ (g)": 48,
+   "surface sur le plateau (mm²)": 3344,
+   "plafonds en pont (mm²)": 622
+  },
+  "epaule3095_bras_haut": {
+   "fermée": true,
+   "blocs": 1,
+   "encombrement (mm)": [
+    164.0,
+    60.0,
+    37.5
+   ],
+   "masse environ (g)": 72,
+   "surface sur le plateau (mm²)": 6549,
+   "plafonds en pont (mm²)": 726
+  }
+ },
+ "controles": {
+  "servo dans le berceau": "descend par le haut sans rien toucher ; tenu en bas, devant, derrière et des deux côtés par le berceau, en haut par la bride",
+  "prises SVG": "les deux restent libres (dessus à l'air, dessous par l'échancrure du fond) ; face OPPOSÉE au logo vers l'extérieur",
+  "bras de −30° à +90°": {
+   "disques du servo / berceau": "1.5 mm à -30°",
+   "bras bas / berceau": "2.0 mm à -30°",
+   "bras haut / berceau": "3.0 mm à -30°",
+   "bras bas / boîtier du servo": "6.8 mm à 90°",
+   "bras haut / boîtier du servo": "6.8 mm à -30°",
+   "bras bas / bâti": "7.0 mm à 80°",
+   "bras bas / bride": "8.5 mm à 90°",
+   "bras haut / bride": "8.5 mm à 90°"
+  },
+  "avant-bras et pince ouverte": "épaule −30…90°, coude −90…90° : aucun contact avec le bâti, le berceau ni le haut du bras",
+  "visserie": {
+   "vis M3 × 30 des entretoises : puits de la tête (mm de profondeur)": 12.9,
+   "vis M3 × 30 : prise dans la moitié basse (mm ; insert de 3,8)": 5.0,
+   "vis Ø 2,6 × 9 des disques : plastique sous la tête (mm)": 4.0,
+   "pointe sous le disque (mm ; 3 de vide)": 1.2,
+   "vis M3 × 10 du berceau, par-derrière le mur (6 mm) : prise dans l'insert (mm)": 4.0,
+   "vis M3 × 10 de la bride (6 mm) : prise dans l'insert (mm)": 4.0
+  }
+ },
+ "cotes": {
+  "axe au-dessus du pied": 95.0,
+  "entre les disques": 61.4,
+  "milieu du servo (y)": 43.7,
+  "face extérieure du bras (y)": 81.4,
+  "milieu de l'avant-bras (y)": 111.0,
+  "axe du socle (x, y)": [
+   -31.0,
+   49.5
+  ],
+  "DECALAGE_BRAS à mettre dans bras/geometrie.py (mm)": -61.5,
+  "ancien DECALAGE_BRAS": -53.5,
+  "trous du mur (x, z)": [
+   [
+    -53.0,
+    -25.0
+   ],
+   [
+    -53.0,
+    18.0
+   ],
+   [
+    -5.0,
+    -25.0
+   ],
+   [
+    -24.0,
+    18.0
+   ]
+  ],
+  "trous du pied (x, y)": [
+   [
+    -84.0,
+    3.0
+   ],
+   [
+    -84.0,
+    96.0
+   ],
+   [
+    22.0,
+    3.0
+   ],
+   [
+    22.0,
+    96.0
+   ]
+  ]
+ }
+}
