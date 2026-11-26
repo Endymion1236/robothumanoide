@@ -484,7 +484,15 @@ class Trieur(Poste):
             for nom, b in self.bacs.items():
                 w, d = b['largeur'] / 2, b['profondeur'] / 2
                 pts = np.array([T.vers_image(self.h, b['X'] + sx * w, b['Y'] + sy * d) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))], np.int32)
-                cv2.polylines(image, [pts], True, (255, 160, 0), 2); V.ecrire(image, f'bac des {PLURIEL[nom]}', T.vers_image(self.h, b['X'] - w, b['Y'] + d + 15), (255, 200, 80), 0.6)
+                cv2.polylines(image, [pts], True, (255, 160, 0), 2)
+                # un bac hors du champ de la caméra (Nicolas, 26/11/2026 : « on ne voit pas les bacs ») : flèche au bord de l'image
+                H, W_ = image.shape[:2]; u, v = T.vers_image(self.h, b['X'], b['Y'])
+                texte = f'bac des {PLURIEL[nom]} (bord {b["bord"]:.0f} mm)'
+                if 0 <= u < W_ and 0 <= v < H: V.ecrire(image, texte, (max(5, min(u - 80, W_ - 260)), v), (255, 200, 80), 0.6)
+                else:
+                    bu, bv = min(max(u, 30), W_ - 30), min(max(v, 60), H - 60)
+                    cv2.arrowedLine(image, (int(bu - (u - bu) * 0.0 - (60 if u >= W_ else -60 if u < 0 else 0)), int(bv - (60 if v >= H else -60 if v < 0 else 0))), (int(bu), int(bv)), (255, 160, 0), 4, tipLength=0.4)
+                    V.ecrire(image, texte, (max(5, min(int(bu) - 120, W_ - 300)), int(bv) + 30), (255, 200, 80), 0.6)
             for nom, a in ZONES.items():
                 if nom in self.bacs: continue
                 for b in (a - SECTEUR, a + SECTEUR):
