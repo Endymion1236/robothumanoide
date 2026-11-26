@@ -572,8 +572,11 @@ Pendant qu'il parle, le micro est ignoré (indicateur « Calin parle ») : sinon
   connues, l'ancien chemin (photo + Sonnet) sert de secours ;
 - **Câlin parle dès que sa phrase est écrite**, sans attendre la fin de la réponse ; et l'écoute passe par ElevenLabs quand la
   clé est là (`--ecoute whisper` pour revenir à Whisper sur le PC).
-Le temps de chaque étape s'affiche (« phrase transcrite en … s », « Câlin (… s) »). Une reconnaissance de formes est demandée
-à chaque fois que la table change : quelques centimes par séance.
+Le temps de chaque étape s'affiche (« phrase transcrite en … s », « Câlin (… s) »).
+**Formes reconnues seulement quand Nicolas parle (son choix, le même jour, pour limiter les appels payants)** : l'analyse part
+au moment où il COMMENCE sa phrase et se fait pendant qu'il la finit. Une seule analyse par disposition de la table, et aucune
+s'il ne dit rien. `trier_voix.bat --formes avance` remet l'analyse dès que la table change (un peu plus rapide, plus d'appels).
+Coût estimé (tarifs de novembre 2026, non mesuré) : environ 0,7 centime par analyse de formes, 0,02 centime par ordre.
 
 **Pourquoi passer par Claude pour les formes** : le calcul seul a été essayé sur les vraies photos du 26/11/2026, en mesurant la largeur de l'objet dans toutes les directions, sur tout le contour puis sur la face du dessus. Les ronds ressortaient en « barres », à cause du penché et des reflets sur la table. Seuls le petit rond et le carré étaient bien reconnus, jamais l'hexagone.
 

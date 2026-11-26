@@ -141,6 +141,7 @@ class Trieur(Poste):
         self.demande, self.reponse = threading.Event(), threading.Event()
         self.au_repos, self.tries, self.rates = True, {'petit': 0, 'gros': 0}, []
         self.plan_vocal, self.claude, self.modele_ia = None, None, 'claude-sonnet-5-5'
+        self.reco = None                                                # fil de la reconnaissance des formes en cours
         self.formes, self.modele_rapide = [], 'claude-haiku-5-5'      # formes reconnues à l'avance ; modèle des ordres (court, sans image)
         self.deposes = {z: [] for z in ZONES}; self.tenu = None; self.objets_tri, self.objet_pris = [], None; self.rap = None
         self.bacs = charger_bacs()
@@ -292,6 +293,24 @@ class Trieur(Poste):
         par_n = {e['n']: e for e in reconnus}
         self.formes = [dict(X=o['X'], Y=o['Y'], forme=par_n[n]['forme'], description=par_n[n]['description']) for n, o in enumerate(objets, 1) if n in par_n]
 
+    def formes_maintenant(self):
+        """Lance la reconnaissance des formes tout de suite, dans un fil à part, si des objets n'ont pas encore de forme connue.
+        Appelé quand Nicolas COMMENCE à parler (choix du 26/11/2026, pour ne payer une analyse que s'il donne un ordre) : elle se
+        fait pendant qu'il finit sa phrase et qu'elle est transcrite. Sans effet si une reconnaissance est déjà en cours."""
+        if self.reco and self.reco.is_alive(): return
+        if self.occupe or not self.au_repos or self.fond is None or self.h is None or self.image is None: return
+        objets = list(self.objets)
+        if not objets or all(self.forme_connue(o) for o in objets): return
+        image = self.image.copy()
+        def travail():
+            try:
+                if self.claude is None: self.claude = CV.client_claude()
+                t0 = time.time(); reconnus = CV.reconnaitre(self.claude, CV.planche(image, self.cadres(objets)), len(objets), self.modele_ia)
+                self.retenir_formes(objets, reconnus)
+                self.dire(f'Formes reconnues en {time.time() - t0:.1f} s : ' + ', '.join(f'{e["n"]} {CV.NOMS.get(e["forme"], e["forme"])}' for e in reconnus))
+            except Exception as err: self.dire(f'(formes pas reconnues : {type(err).__name__} : {err})')
+        self.reco = threading.Thread(target=travail, daemon=True); self.reco.start()
+
     def prevoir_formes(self):
         """Fil de fond : dès que les objets sont posés et ne bougent plus (bras au repos), Claude reconnaît leurs formes sur les
         gros plans. Quand l'ordre arrivera, il n'y aura plus de photo à lire : la réponse est bien plus rapide."""
@@ -323,7 +342,9 @@ class Trieur(Poste):
         if self.fond is None or self.h is None or not self.au_repos: self.dire('Il me faut d\'abord la photo du fond (F), bras au repos.'); return
         objets, image = list(self.objets), self.image.copy()
         if not objets: self.dire('Je ne vois aucun objet sur la table.'); return
-        t0 = time.time(); formes = [self.forme_connue(o) for o in objets]
+        t0 = time.time()
+        if self.reco and self.reco.is_alive(): self.reco.join(timeout=20)       # la reconnaissance lancée au début de la phrase se termine
+        formes = [self.forme_connue(o) for o in objets]
         try:
             if self.claude is None: self.claude = CV.client_claude()
             if all(formes):                      # formes déjà reconnues à l'avance : appel court, sans photo, et Câlin parle dès que sa phrase est écrite
@@ -742,7 +763,9 @@ def ecouter_consignes(t, a):
                 t.micro.update(etat='Calin parle', parle=False); oreille.vider(); continue
             if t.micro['etat'] == 'Calin parle': t.micro['etat'] = 'ecoute'
             t.micro['volume'] = max(float(np.sqrt(np.mean(bloc ** 2))), t.micro['volume'] * 0.85)      # retombe doucement, lisible
+            avant = oreille.decoupeur.en_cours
             son = oreille.decoupeur.ajouter(bloc); t.micro['parle'] = oreille.decoupeur.en_cours
+            if oreille.decoupeur.en_cours and not avant and a.formes == 'parole': t.formes_maintenant()   # il commence à parler : on regarde les formes
             if son is None: continue
             t.micro['etat'] = 'je transcris'; t1 = time.time(); texte = E.comprendre(oreille.modele, son); t.micro['etat'] = 'ecoute'
             print(f'   (phrase transcrite en {time.time() - t1:.1f} s)')
@@ -759,6 +782,8 @@ def main():
     ap.add_argument('--micro', type=int, default=None); ap.add_argument('--modele', default='small', help='modèle Whisper')
     ap.add_argument('--seuil', type=float, default=None, help='volume à partir duquel une phrase commence (affiché à l\'écran)')
     ap.add_argument('--ecoute', default='auto', choices=['auto', 'whisper'], help='auto = ElevenLabs si la clé est là (rapide), sinon Whisper')
+    ap.add_argument('--formes', default='parole', choices=['parole', 'avance'],
+                    help='parole = les formes sont reconnues quand tu commences à parler (défaut, moins d\'appels) ; avance = dès que la table change (plus rapide, plus d\'appels)')
     ap.add_argument('--muet', action='store_true', help='Câlin répond à l\'écran seulement, sans voix')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs')
     ap.add_argument('--ia', default='sonnet', choices=['sonnet', 'opus']); a = ap.parse_args()
@@ -776,7 +801,7 @@ def main():
     if (a.voix or a.clavier) and not a.muet: t.parole = CV.Parole(a.voix_pc)
     if a.voix or a.clavier:
         threading.Thread(target=ecouter_consignes, args=(t, a), daemon=True).start()
-        threading.Thread(target=t.prevoir_formes, daemon=True).start()
+        if a.formes == 'avance': threading.Thread(target=t.prevoir_formes, daemon=True).start()
     cv2.namedWindow('Calin trie')
     cv2.setMouseCallback('Calin trie', lambda evt, x, y, *_: t.clic(x, y) if evt == cv2.EVENT_LBUTTONDOWN else None)
     t.dire('Bras au repos (R), table VIDE : F. Puis pose les objets et T.' if t.fond is None else 'Pose les objets, puis T (ou 1 pour un seul).')
