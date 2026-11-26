@@ -114,6 +114,10 @@ class Trieur(Poste):
         if self.p.c.arret.is_set(): raise ErreurServo('arrêt demandé')
         if not ok: raise ErreurServo(f'{quoi} n\'a pas pu se faire')
 
+    def _atteignable(self, o):
+        try: G.choisir_inclinaison(o['X'], o['Y'], self.p.c.hauteur); return True
+        except G.HorsDePortee: return False
+
     def lacher_dans_bac(self, z, incl, largeur):
         p, c = self.p, self.p.c
         pose = pose_dans_bac(self.bacs[z], incl, c.hauteur)
@@ -165,7 +169,13 @@ class Trieur(Poste):
         visee = C.corriger(o['X'], o['Y'], self.corrections)
         self.dire(f'Je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} (vu {o["largeur"]:.0f} mm de large).')
         plan = p.preparer(*visee)
-        if not plan: self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX; self.dire('   Hors de portée : je le laisse.'); return True
+        if not plan:
+            self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX
+            if math.hypot(visee[0] - o['X'], visee[1] - o['Y']) > 20 and self._atteignable(o):
+                self.dire(f'   C\'est la CORRECTION de visée apprise qui l\'envoie hors de portée (elle vise {C.en_clair((o["X"], o["Y"]), visee)}). '
+                          'Si tu as remonté des pièces depuis, refais la correction dans viser_camera (E deux fois, puis flèches + C, près ET loin).')
+            else: self.dire('   Hors de portée : je le laisse.')
+            return True
         self.au_repos = False
         c._pince('o'); p.vider()
         p.aller(*plan); self.etape(p.prise is plan[0], 'l\'approche')
