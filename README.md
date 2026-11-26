@@ -84,6 +84,12 @@ Puis bouger (2 servos).
 bras s'y place ; la visée se règle aux flèches et s'apprend (`bras/correction.py`). Objets d'essai à imprimer pour la
 reconnaissance et le tri : dossier `objets/`. Reste à écrire : trouver les objets sans clic, zones de dépôt, enchaînement.
 
+**26/11/2026 : tri par la taille réussi** (prise, pince étalonnée, seuil petit / gros à 37 mm, rotation du poignet pour la barre,
+objets hors de portée signalés avant le tri). **Prochaines étapes voulues par Nicolas** :
+1. **Bacs** à gauche et à droite (`bras/regler_bac.bat` existe déjà) ;
+2. **Reconnaissance des formes** sur la photo : rond, carré, hexagone, barre ;
+3. **La voix** : « Câlin, range les ronds dans le bac de gauche » (`tete/ecouter.py` déjà validé).
+
 ## Étape avant le buste : deux bras côte à côte sur la table (25/11/2026)
 
 Idée de Nicolas. Le 2e bras se monte d'abord SUR LA TABLE, à côté du premier, à **35 cm** (l'écart des épaules retenu pour le
