@@ -572,6 +572,13 @@ class Trieur(Poste):
             for X, Y, _ in O.trouver.lumiere:
                 if self.h is not None: V.ecrire(image, '?', T.vers_image(self.h, X, Y), (80, 80, 255), 1.0)
         V.ecrire(image, AIDE, (10, haut - 14), (255, 255, 255), 0.55)
+        m = getattr(self, 'micro', None)
+        if m:                                                                 # niveau du micro : une barre, et le trait du seuil
+            x0, y0, L = image.shape[1] - 330, 30, 300; plein = 0.3
+            cv2.rectangle(image, (x0, y0), (x0 + L, y0 + 16), (60, 60, 60), -1)
+            cv2.rectangle(image, (x0, y0), (x0 + int(L * min(m['volume'] / plein, 1.0)), y0 + 16), (80, 220, 80) if m['parle'] else (200, 200, 200), -1)
+            xs = x0 + int(L * min(m['seuil'] / plein, 1.0)); cv2.line(image, (xs, y0 - 5), (xs, y0 + 21), (0, 0, 255), 2)
+            V.ecrire(image, 'micro : ' + ('JE T ENTENDS' if m['parle'] else m['etat']), (x0, y0 + 45), (80, 220, 80) if m['parle'] else (220, 220, 220), 0.55)
         for n, m in enumerate(reversed(self.messages[-3:])):
             V.ecrire(image, sans_accents(m)[:110], (10, haut - 14 - (n + 1) * pas), (0, 230, 255) if n == 0 else (190, 190, 190), 0.55)
 
@@ -592,9 +599,23 @@ def ecouter_consignes(t, a):
         if a.clavier:
             while True: t.consigne(input('Consigne (ex. « range les ronds à gauche et le reste à droite », « stop ») : ').strip())
         sys.path.insert(0, str(CV.TETE)); import ecouter as E
-        oreille = E.Oreille(E.charger_modele(a.modele), a.micro)
+        oreille = E.Oreille(E.charger_modele(a.modele), a.micro, a.seuil)
+        # Nicolas, 26/11/2026 : bruit de fond 0,048 → seuil 0,145 (3 fois le bruit) : sa voix ne le dépassait jamais, rien n'était
+        # entendu. Quand le micro est bruyant, on se contente de 1,6 fois le bruit ; et le niveau du micro s'affiche à l'écran.
+        if a.seuil is None and oreille.seuil > 0.05:
+            oreille.seuil = max(oreille.seuil / 3 * 1.6, 0.02); oreille.decoupeur = E.Decoupeur(oreille.seuil)
+            print(f'Micro bruyant : seuil ramené à {oreille.seuil:.3f} (réglable : trier_voix.bat --seuil 0.06 ; autre micro : --micro N)')
+        t.micro = {'volume': 0.0, 'seuil': oreille.seuil, 'parle': False, 'etat': 'ecoute'}
         t.dire('Je t\'écoute : dis par exemple « range les ronds à gauche et le reste à droite », ou « stop ».')
-        while True: t.consigne(oreille.phrase())
+        while True:
+            bloc = oreille.file.get()
+            t.micro['volume'] = max(float(np.sqrt(np.mean(bloc ** 2))), t.micro['volume'] * 0.85)      # retombe doucement, lisible
+            son = oreille.decoupeur.ajouter(bloc); t.micro['parle'] = oreille.decoupeur.en_cours
+            if son is None: continue
+            t.micro['etat'] = 'je transcris'; texte = E.comprendre(oreille.modele, son); t.micro['etat'] = 'ecoute'
+            if not E.phrase_valable(texte): t.dire('(j\'ai entendu un bruit, pas une phrase)'); continue
+            t.micro['etat'] = 'je reflechis'; t.consigne(texte); t.micro['etat'] = 'ecoute'
+            oreille.vider()                                               # ce qui s'est dit pendant que je réfléchissais est oublié
     except Exception as err: t.dire(f'L\'écoute s\'est arrêtée ({type(err).__name__} : {err}). Les touches marchent toujours.')
 
 def main():
@@ -603,6 +624,7 @@ def main():
     ap.add_argument('--voix', action='store_true', help='écouter le micro : « range les ronds à gauche », « stop »')
     ap.add_argument('--clavier', action='store_true', help='taper les consignes dans cette fenêtre noire au lieu de les dire')
     ap.add_argument('--micro', type=int, default=None); ap.add_argument('--modele', default='small', help='modèle Whisper')
+    ap.add_argument('--seuil', type=float, default=None, help='volume à partir duquel une phrase commence (affiché à l\'écran)')
     ap.add_argument('--ia', default='sonnet', choices=['sonnet', 'opus']); a = ap.parse_args()
     reglage = T.charger()
     if not reglage: print('Réglage de la table introuvable : lance d\'abord camera\\regler_table.bat'); return 1
