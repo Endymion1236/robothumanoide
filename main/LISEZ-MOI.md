@@ -24,6 +24,15 @@ Doigt de 73 mm, 14 × 14 mm de section, 23 g. Les phalanges s'impriment couchée
   dans le puits vertical, et revient par le canal du dessus) ;
 - 2 vis pour fixer la base sur une planchette.
 
+## Plan de montage du doigt (26/11/2026)
+
+`sortie/plan_montage_phalanges.pdf` (`plan_montage_phalanges.py`), 7 étapes illustrées : reconnaître les 4 pièces, le sens de
+chacune (languette vers la base, pont de la fourche côté DOS, le doigt plie vers la PAUME), emboîter et vérifier une
+articulation sans axe, poser les axes en filament (17 mm, une tête écrasée au fer de chaque côté), passer les fils.
+**Les fils : deux brins de 30 cm**, un par canal, entrés par l'arrière de la base ; ils ressortent par le puits de la phalange 3,
+côté paume, où on les noue ensemble ; le nœud rentre dans le puits et y est collé (une goutte de cyano). Sans colle, le nœud
+aurait 7 mm de jeu dans le puits. Fil du dessous = ferme, fil du dessus = ouvre. Prototype : jamais monté.
+
 ## Ce que le calcul a vérifié (`generer_doigt.py`)
 
 - chaque charnière bute doigt tendu (à −2° près) et plie jusqu'à 90° ;
