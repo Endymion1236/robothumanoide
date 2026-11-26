@@ -21,7 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'camera'))
 import cv2, numpy as np
 import table as T, voir_table as V, objets as O
-import rapport_tri as RT
+import rapport_tri as RT, largeur_pince as LP
 import aller_point as A, correction as C, geometrie as G, test_pince as PI, obstacles as OB, test_epaule as EP
 from servos import ErreurServo
 from viser_camera import Poste, sans_accents, FLECHES
@@ -125,9 +125,15 @@ class Trieur(Poste):
         self.dire('Fond enregistré, zones vidées. Pose maintenant les objets sur la table.')
 
     def regarder(self, delai=8.0):
-        """Attend une image prise bras au repos et renvoie les objets trouvés (copie)."""
+        """Ramène le socle droit devant (bras au repos, levé : le bras tourné de côté cachait un marqueur à la caméra, essai de
+        Nicolas du 26/11/2026), attend une image et renvoie les objets trouvés (copie)."""
+        c = self.p.c
+        try:
+            if abs(A.degres(c.bus.etat(c.socle)['position'] - A.MILIEU)) > 3 and self.p.angles()[0] > 55:
+                c._bouger([(c.socle, A.MILIEU)], 'Socle droit devant'); self.p.vider()
+        except ErreurServo: pass
         self.au_repos = True; time.sleep(0.6); self.reponse.clear(); self.demande.set()
-        if not self.reponse.wait(delai): raise ErreurServo('je ne vois plus les 4 marqueurs, bras au repos : la caméra a-t-elle bougé ?')
+        if not self.reponse.wait(delai): raise ErreurServo('je ne vois plus les 4 marqueurs, bras au repos : un marqueur est-il caché (bras, main, objet) ou la caméra a-t-elle bougé ?')
         return list(self.objets)
 
     def etape(self, ok, quoi):
@@ -183,7 +189,7 @@ class Trieur(Poste):
     def serrer(self):
         c = self.p.c; r = c.reglages; c.bus.tenir(c.pince)
         texte, pos, tenu = c.bus.serrer(c.pince, c.ferme, r['serrage_doux'], maintien=min(r['maintien'], r['serrage_doux']))
-        largeur = PI.ecart_mm(pos, c.ouvert); self.dire(f'Serrer : {texte}' + (f' · largeur ≈ {largeur:.0f} mm' if tenu else ''))
+        largeur = LP.ecart(pos, c.ouvert); self.dire(f'Serrer : {texte}' + (f' · largeur ≈ {largeur:.0f} mm' if tenu else ''))
         return tenu, largeur
 
     def obstacles(self, objets, sauf=None):
@@ -286,10 +292,9 @@ class Trieur(Poste):
 
     def ouvrir_a(self, mm):
         """Ouvre la pince à `mm` d'écart seulement (pas grande ouverte : elle toucherait les voisins)."""
-        c = self.p.c; lo, hi = sorted(PI.BUTEES_PINCE)
-        pos = min(range(lo, hi + 1, 4), key=lambda q: abs(PI.ecart_mm(q, c.ouvert) - mm) if (q - c.ferme) * (c.ouvert - c.ferme) >= 0 else 1e9)
+        c = self.p.c; pos = LP.position_pour(mm, c.ouvert, c.ferme)
         c.bus.limiter_force(c.pince, PI.FORCE_MOUVEMENT); c.bus.tenir(c.pince)
-        self.dire(f'   Pince ouverte à {PI.ecart_mm(pos, c.ouvert):.0f} mm : ' + c.bus.aller(c.pince, pos, charge_max=PI.CHARGE_BLOCAGE))
+        self.dire(f'   Pince ouverte à {LP.ecart(pos, c.ouvert):.0f} mm : ' + c.bus.aller(c.pince, pos, charge_max=PI.CHARGE_BLOCAGE))
 
     def transport_libre(self, haut, prise):
         """Le trajet objet en main, de la remontée jusqu'à la pose, ne heurte rien ? Renvoie l'obstacle touché ou None."""

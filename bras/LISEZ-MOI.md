@@ -513,3 +513,13 @@ tableur), et les photos : `00_debut`, `objet_NN_avant` (objet choisi en rouge), 
 (avec ce que le programme a reconnu). Essayé en simulation.
 Remarque du calcul : un objet à moins de 20 cm du socle, dans l'axe, est compté comme gênant pour un objet pris à plat derrière lui
 (avant-bras modélisé large de 56 mm, prudent).
+
+### Premier tri réel avec rapport (26/11/2026, 15 h 15)
+
+Objet vu en X −9, Y 305 (56 mm de large), visé en X 0, Y 256 (8 corrections apprises), pris pince à 75°, **serré à « 11 mm »**, posé à
+gauche pince à 75° : **trié**. Puis arrêt : « je ne vois plus les 4 marqueurs », bras au repos mais **socle resté tourné à −24°**,
+du côté de la caméra (calculée en X −184), devant un marqueur. Corrigé : avant de regarder, le socle revient droit devant (bras levé).
+**Largeur « 11 mm » deux fois pour des objets de 28 et 40 mm** : le calcul de la largeur vient du dessin et ne colle pas à la pince
+réelle (ou `version_pince.json` absent sur le PC : le calcul de la V3 est alors utilisé). Nouveau : `etalonner_largeur.bat` (gros
+rond puis petit rond tenus entre les mâchoires, la pince serre, on lit sa position) → `largeur_pince.json` ; le tri s'en sert pour
+mesurer et pour ouvrir juste ce qu'il faut. Essayé sur un servo simulé.
