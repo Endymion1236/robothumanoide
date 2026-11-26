@@ -20,6 +20,8 @@ HAUTEUR_OBJETS = 60.0                     # mm
 MARGE = 40.0                              # mm : on regarde aussi un peu autour du rectangle des marqueurs
 SEUIL_COULEUR, SEUIL_CLAIR = 18.0, 28.0
 SEUIL_FONCE, SEUIL_JAUNE, SEUIL_NOIR = 12.0, 0.06, 45.0  # objet gris : 12 plus foncé, et nettement moins jaune pour sa luminosité   # différences avec le fond (échelle Lab d'OpenCV) au-delà desquelles c'est un objet
+DEMI_MARQUEUR = 38.0                      # mm : carré ignoré autour du centre de chaque marqueur (papier et scotch compris). Nicolas,
+                                          # 26/11/2026 : un faux objet de 57 mm sur le marqueur n° 3 (lumière changée depuis la photo du fond)
 AIRE_MIN = 250.0                          # mm² : en dessous, c'est une poussière ou un reflet
 F_PAR_DEFAUT = 1537.0                     # points, pour une image de 1280 de large : C270 (55° en diagonale, fiche du fabricant)
 
@@ -79,6 +81,9 @@ def trouver(image, fond, h, reglage, hauteur=HAUTEUR_OBJETS, exclure=()):
     allonge (longueur / largeur), contour (mm, pour dessiner)."""
     vue, vfond = redresser(image, h, reglage), redresser(fond, h, reglage)
     m = masque(vue, vfond)
+    x0, y0, x1, y1 = cadre(reglage)
+    for X, Y in T.coins_table(reglage).values():                                # les marqueurs eux-mêmes ne sont jamais des objets
+        cv2.rectangle(m, (int(X - x0 - DEMI_MARQUEUR), int(y1 - Y - DEMI_MARQUEUR)), (int(X - x0 + DEMI_MARQUEUR), int(y1 - Y + DEMI_MARQUEUR)), 0, -1)
     for X, Y, r in exclure:
         x0, y0, x1, y1 = cadre(reglage); cv2.circle(m, (int(X - x0), int(y1 - Y)), int(r), 0, -1)
     cX, cY, cZ, _ = camera(h, (image.shape[1], image.shape[0]))
