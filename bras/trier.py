@@ -141,6 +141,7 @@ class Trieur(Poste):
         self.demande, self.reponse = threading.Event(), threading.Event()
         self.au_repos, self.tries, self.rates = True, {'petit': 0, 'gros': 0}, []
         self.plan_vocal, self.claude, self.modele_ia = None, None, 'claude-sonnet-5-5'
+        self.formes, self.modele_rapide = [], 'claude-haiku-5-5'      # formes reconnues à l'avance ; modèle des ordres (court, sans image)
         self.deposes = {z: [] for z in ZONES}; self.tenu = None; self.objets_tri, self.objet_pris = [], None; self.rap = None
         self.bacs = charger_bacs()
         for z, b in self.bacs.items(): self.dire(f'Les {PLURIEL[z]} vont dans le bac (X {b["X"]:+.0f}, Y {b["Y"]:.0f}, bord à {b["bord"]:.0f} mm).')
@@ -189,7 +190,7 @@ class Trieur(Poste):
     def photo_fond(self):
         if self.occupe or not self.au_repos: self.dire('Bras au repos d\'abord (R), table vide.'); return
         if self.image is None or not self.vus: self.dire('Il faut voir les 4 marqueurs pour prendre le fond.'); return
-        self.fond = self.image.copy(); cv2.imwrite(str(FICHIER_FOND), self.fond); self.objets = []
+        self.fond = self.image.copy(); cv2.imwrite(str(FICHIER_FOND), self.fond); self.objets = []; self.formes = []
         self.deposes = {z: [] for z in ZONES}                                     # table vide : plus rien de posé dans les zones
         self.dire('Fond enregistré, zones vidées. Pose maintenant les objets sur la table.')
 
@@ -275,6 +276,43 @@ class Trieur(Poste):
         """Dit la phrase à voix haute si la parole est branchée (trier_voix.bat ; --muet pour la couper)."""
         if getattr(self, 'parole', None): self.parole.dire(texte)
 
+    def cadres(self, objets):
+        """Le rectangle de chaque objet dans la photo (pour les gros plans envoyés à Claude)."""
+        out = []
+        for o in objets:
+            px = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']]); out.append((*px.min(axis=0), *px.max(axis=0)))
+        return out
+
+    def forme_connue(self, o):
+        """La forme déjà reconnue pour l'objet posé là (à 25 mm près), ou None."""
+        f = min(self.formes, key=lambda q: math.hypot(q['X'] - o['X'], q['Y'] - o['Y']), default=None)
+        return f if f and math.hypot(f['X'] - o['X'], f['Y'] - o['Y']) < 25 else None
+
+    def retenir_formes(self, objets, reconnus):
+        par_n = {e['n']: e for e in reconnus}
+        self.formes = [dict(X=o['X'], Y=o['Y'], forme=par_n[n]['forme'], description=par_n[n]['description']) for n, o in enumerate(objets, 1) if n in par_n]
+
+    def prevoir_formes(self):
+        """Fil de fond : dès que les objets sont posés et ne bougent plus (bras au repos), Claude reconnaît leurs formes sur les
+        gros plans. Quand l'ordre arrivera, il n'y aura plus de photo à lire : la réponse est bien plus rapide."""
+        vu, depuis = None, 0.0
+        while True:
+            time.sleep(0.5)
+            try:
+                if self.occupe or not self.au_repos or self.fond is None or self.h is None or not self.vus or self.image is None: vu = None; continue
+                objets = [o for o in self.objets]
+                if not objets or all(self.forme_connue(o) for o in objets): continue
+                signature = sorted((round(o['X'] / 10), round(o['Y'] / 10)) for o in objets)
+                if signature != vu: vu, depuis = signature, time.time(); continue
+                if time.time() - depuis < 1.5: continue                              # on attend que la main soit sortie du champ
+                if self.claude is None: self.claude = CV.client_claude()
+                t0 = time.time(); image = self.image.copy()
+                reconnus = CV.reconnaitre(self.claude, CV.planche(image, self.cadres(objets)), len(objets), self.modele_ia)
+                self.retenir_formes(objets, reconnus)
+                self.dire(f'Formes reconnues en {time.time() - t0:.1f} s : ' + ', '.join(f'{e["n"]} {CV.NOMS.get(e["forme"], e["forme"])}' for e in reconnus))
+            except Exception as err:
+                self.dire(f'(formes pas reconnues à l\'avance : {type(err).__name__} : {err})'); time.sleep(10)
+
     def consigne(self, texte):
         """Une phrase entendue (ou tapée). « Stop » arrête tout de suite ; le reste est confié à Claude avec la photo de la table."""
         self.dire(f'Entendu : « {texte} »')
@@ -285,16 +323,20 @@ class Trieur(Poste):
         if self.fond is None or self.h is None or not self.au_repos: self.dire('Il me faut d\'abord la photo du fond (F), bras au repos.'); return
         objets, image = list(self.objets), self.image.copy()
         if not objets: self.dire('Je ne vois aucun objet sur la table.'); return
-        self.dire('Je regarde la table et je réfléchis...')
+        t0 = time.time(); formes = [self.forme_connue(o) for o in objets]
         try:
             if self.claude is None: self.claude = CV.client_claude()
-            cadres = []
-            for o in objets:
-                px = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']]); cadres.append((*px.min(axis=0), *px.max(axis=0)))
-            rep = CV.interpreter(self.claude, self.annoter(image), texte, objets, self.modele_ia, CV.planche(image, cadres))
+            if all(formes):                      # formes déjà reconnues à l'avance : appel court, sans photo, et Câlin parle dès que sa phrase est écrite
+                def tout_de_suite(phrase):
+                    self.dire(f'Câlin ({time.time() - t0:.1f} s) : {phrase}'); self.parler(phrase)
+                rep = CV.decider(self.claude, texte, objets, formes, self.modele_rapide, tout_de_suite)
+            else:
+                self.dire('Je regarde la table et je réfléchis...')
+                rep = CV.interpreter(self.claude, self.annoter(image), texte, objets, self.modele_ia, CV.planche(image, self.cadres(objets)))
+                self.retenir_formes(objets, rep['objets'])
         except Exception as err: self.dire(f'Je n\'ai pas pu demander à Claude ({type(err).__name__} : {err}).'); return
         for e in rep['objets']: self.dire(f'   {e["n"]} : {CV.NOMS.get(e["forme"], e["forme"])} ({e["description"]})')
-        self.dire(f'Câlin : {rep["reponse"]}'); self.parler(rep['reponse'])
+        if not rep.get('deja_dit'): self.dire(f'Câlin ({time.time() - t0:.1f} s) : {rep["reponse"]}'); self.parler(rep['reponse'])
         if rep['action'] == 'rien': return
         apres = rep.get('apres', '')
         self.rates = []
@@ -639,7 +681,8 @@ class Trieur(Poste):
                 coul = (0, 140, 255) if hp else (0, 255, 255)
                 cv2.polylines(image, [pts], True, coul, 2)
                 pt = T.vers_image(self.h, o['X'], o['Y']); cv2.circle(image, pt, 6, (0, 0, 255), -1)
-                V.ecrire(image, f'{n} : {o["largeur"]:.0f} mm' + (f' - {hp}' if hp else ''), (pt[0] + 10, pt[1] - 10), coul, 0.6)
+                fc = self.forme_connue(o) if self.formes else None
+                V.ecrire(image, f'{n} : ' + (sans_accents(CV.NOMS.get(fc['forme'], fc['forme'])) + ', ' if fc else '') + f'{o["largeur"]:.0f} mm' + (f' - {hp}' if hp else ''), (pt[0] + 10, pt[1] - 10), coul, 0.6)
         haut = image.shape[0]; pas = int(30 * haut / 720)
         etat = ('Le bras trie... ESPACE = ARRET' if self.occupe else 'Photo du fond manquante : table VIDE, bras au repos, touche F' if self.fond is None
                 else f'{len(self.objets)} objet(s) vu(s)' + (f', dont {sum(1 for o in self.objets if o.get("portee"))} HORS DE PORTEE (en orange)' if any(o.get('portee') for o in self.objets) else '') + '. T = trier' if self.vus else 'Marqueurs caches : dernier reperage garde')
@@ -676,7 +719,14 @@ def ecouter_consignes(t, a):
         if a.clavier:
             while True: t.consigne(input('Consigne (ex. « range les ronds à gauche et le reste à droite », « stop ») : ').strip())
         sys.path.insert(0, str(CV.TETE)); import ecouter as E
-        oreille = E.Oreille(E.charger_modele(a.modele), a.micro, a.seuil)
+        modele = None
+        if a.ecoute != 'whisper':                                             # transcription dans le nuage : 2 à 3 fois plus rapide que Whisper sur le PC
+            try:
+                import parler
+                cle = parler.lire_cles()[0].get('ELEVENLABS_API_KEY')
+                if cle: modele = E.ScribeElevenLabs(cle); print('Écoute : ElevenLabs (rapide). Pour Whisper sur le PC : --ecoute whisper')
+            except Exception as err: print(f'Écoute ElevenLabs indisponible ({err}) : Whisper sur le PC.')
+        oreille = E.Oreille(modele or E.charger_modele(a.modele), a.micro, a.seuil)
         # Nicolas, 26/11/2026 : bruit de fond 0,048 → seuil 0,145 (3 fois le bruit) : sa voix ne le dépassait jamais, rien n'était
         # entendu. Quand le micro est bruyant, on se contente de 1,6 fois le bruit ; et le niveau du micro s'affiche à l'écran.
         if a.seuil is None and oreille.seuil > 0.05:
@@ -694,7 +744,8 @@ def ecouter_consignes(t, a):
             t.micro['volume'] = max(float(np.sqrt(np.mean(bloc ** 2))), t.micro['volume'] * 0.85)      # retombe doucement, lisible
             son = oreille.decoupeur.ajouter(bloc); t.micro['parle'] = oreille.decoupeur.en_cours
             if son is None: continue
-            t.micro['etat'] = 'je transcris'; texte = E.comprendre(oreille.modele, son); t.micro['etat'] = 'ecoute'
+            t.micro['etat'] = 'je transcris'; t1 = time.time(); texte = E.comprendre(oreille.modele, son); t.micro['etat'] = 'ecoute'
+            print(f'   (phrase transcrite en {time.time() - t1:.1f} s)')
             if not E.phrase_valable(texte): t.dire('(j\'ai entendu un bruit, pas une phrase)'); continue
             t.micro['etat'] = 'je reflechis'; t.consigne(texte); t.micro['etat'] = 'ecoute'
             oreille.vider()                                               # ce qui s'est dit pendant que je réfléchissais est oublié
@@ -707,6 +758,7 @@ def main():
     ap.add_argument('--clavier', action='store_true', help='taper les consignes dans cette fenêtre noire au lieu de les dire')
     ap.add_argument('--micro', type=int, default=None); ap.add_argument('--modele', default='small', help='modèle Whisper')
     ap.add_argument('--seuil', type=float, default=None, help='volume à partir duquel une phrase commence (affiché à l\'écran)')
+    ap.add_argument('--ecoute', default='auto', choices=['auto', 'whisper'], help='auto = ElevenLabs si la clé est là (rapide), sinon Whisper')
     ap.add_argument('--muet', action='store_true', help='Câlin répond à l\'écran seulement, sans voix')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs')
     ap.add_argument('--ia', default='sonnet', choices=['sonnet', 'opus']); a = ap.parse_args()
@@ -722,7 +774,9 @@ def main():
     t = Trieur(p, reglage, a.hauteur); ech = {'v': 1.0}
     t.modele_ia = {'sonnet': 'claude-sonnet-5-5', 'opus': 'claude-opus-5-5'}[a.ia]
     if (a.voix or a.clavier) and not a.muet: t.parole = CV.Parole(a.voix_pc)
-    if a.voix or a.clavier: threading.Thread(target=ecouter_consignes, args=(t, a), daemon=True).start()
+    if a.voix or a.clavier:
+        threading.Thread(target=ecouter_consignes, args=(t, a), daemon=True).start()
+        threading.Thread(target=t.prevoir_formes, daemon=True).start()
     cv2.namedWindow('Calin trie')
     cv2.setMouseCallback('Calin trie', lambda evt, x, y, *_: t.clic(x, y) if evt == cv2.EVENT_LBUTTONDOWN else None)
     t.dire('Bras au repos (R), table VIDE : F. Puis pose les objets et T.' if t.fond is None else 'Pose les objets, puis T (ou 1 pour un seul).')

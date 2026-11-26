@@ -565,6 +565,16 @@ Windows ; `--voix-pc` pour forcer celle-ci, `--muet` pour le faire taire). Son c
 l'utile d'abord, puis une touche d'humour gentille (autodérision de robot débutant, clins d'œil aux poneys), jamais moqueuse.
 Pendant qu'il parle, le micro est ignoré (indicateur « Calin parle ») : sinon il prendrait sa propre phrase pour une consigne.
 
+**Plus rapide (26/11/2026, Nicolas : « c'est lent entre l'ordre, l'analyse et la réponse »).** Trois changements :
+- **les formes sont reconnues à l'avance** : dès que les objets sont posés et ne bougent plus (1,5 s), Claude lit les gros plans
+  en fond. La forme s'affiche à côté de chaque objet (« 2 : rond, 31 mm ») : quand elle est là, Câlin est prêt ;
+- **l'ordre est compris par un appel court, sans photo**, sur le modèle rapide (Haiku) ; si les formes ne sont pas encore
+  connues, l'ancien chemin (photo + Sonnet) sert de secours ;
+- **Câlin parle dès que sa phrase est écrite**, sans attendre la fin de la réponse ; et l'écoute passe par ElevenLabs quand la
+  clé est là (`--ecoute whisper` pour revenir à Whisper sur le PC).
+Le temps de chaque étape s'affiche (« phrase transcrite en … s », « Câlin (… s) »). Une reconnaissance de formes est demandée
+à chaque fois que la table change : quelques centimes par séance.
+
 **Pourquoi passer par Claude pour les formes** : le calcul seul a été essayé sur les vraies photos du 26/11/2026, en mesurant la largeur de l'objet dans toutes les directions, sur tout le contour puis sur la face du dessus. Les ronds ressortaient en « barres », à cause du penché et des reflets sur la table. Seuls le petit rond et le carré étaient bien reconnus, jamais l'hexagone.
 
 ## Le bras apprend sa visée tout seul — touche A de `trier` (26/11/2026, essayé en simulation seulement)

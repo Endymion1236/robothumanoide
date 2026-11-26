@@ -100,6 +100,69 @@ def planche(image, cadres, cote=260, par_ligne=4):
         r = cases[i:i + par_ligne]; r += [np.full_like(cases[0], 255)] * (par_ligne - len(r)); lignes.append(np.hstack(r))
     return np.vstack(lignes) if lignes else np.full((cote, cote, 3), 255, np.uint8)
 
+# ---- Pour aller vite (Nicolas, 26/11/2026 : « c'est lent entre l'ordre, l'analyse et la réponse ») ----------------------------
+# 1. les formes sont reconnues À L'AVANCE, dès que les objets sont posés (reconnaitre) : quand l'ordre arrive, plus de photo à lire ;
+# 2. l'ordre est alors compris par un appel court, sans image, sur un modèle rapide (decider) ;
+# 3. la réponse de Câlin est écrite en premier et dite dès qu'elle est complète, pendant que le reste s'écrit.
+SCHEMA_FORMES = {'type': 'object', 'properties': {'objets': SCHEMA['properties']['objets']}, 'required': ['objets'], 'additionalProperties': False}
+SCHEMA_DECISION = {'type': 'object',
+                   'properties': {k: SCHEMA['properties'][k] for k in ('reponse', 'action', 'gauche', 'droite', 'apres')},
+                   'required': ['reponse', 'action', 'gauche', 'droite', 'apres'], 'additionalProperties': False}
+CONSIGNES_FORMES = """Une caméra au-dessus d'une table montre des objets à trier. Sur l'image, chaque objet est découpé et agrandi,
+son numéro écrit au-dessus (« objet 3 »). Les objets sont hauts de 6 cm et vus un peu de biais : on voit leur face du DESSUS
+(plus claire) et un ou deux flancs (plus sombres). Pour chaque numéro, donne la forme vue d'en haut, c'est-à-dire le contour de
+la face du dessus : cercle = rond (même petit), 4 côtés égaux = carre, 6 côtés = hexagone, rectangle allongé = barre ; sinon
+gobelet ou autre. Ajoute une description de 2 à 5 mots. N'invente pas de numéro."""
+CONSIGNES_DECISION = CONSIGNES.split('Pour chaque numéro')[0] + """Les formes des objets ont déjà été reconnues : elles sont
+dans la liste. Écris « reponse » EN PREMIER.
+
+""" + CONSIGNES.split('Puis lis la phrase de Nicolas :')[1].join(['Lis la phrase de Nicolas :', ''])
+
+def _image(im):
+    import base64
+    ok, j = cv2.imencode('.jpg', im, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    if not ok: raise RuntimeError('photo illisible')
+    return {'type': 'image', 'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': base64.standard_b64encode(j.tobytes()).decode()}}
+
+def reconnaitre(client, gros_plans, nb, modele='claude-sonnet-5-5'):
+    """Les formes des `nb` objets de la planche de gros plans : liste de {'n', 'forme', 'description'}. Fait à l'avance, en fond."""
+    r = client.messages.create(model=modele, max_tokens=16000, system=CONSIGNES_FORMES,
+                               output_config={'effort': 'medium', 'format': {'type': 'json_schema', 'schema': SCHEMA_FORMES}},
+                               messages=[{'role': 'user', 'content': [_image(gros_plans), {'type': 'text', 'text': f'Il y a {nb} objets, numérotés de 1 à {nb}.'}]}])
+    if r.stop_reason == 'refusal': raise RuntimeError('Claude a refusé la demande')
+    objs = json.loads(next((b.text for b in r.content if b.type == 'text'), '{}')).get('objets', [])
+    return [o for o in objs if 1 <= o.get('n', 0) <= nb]
+
+def reponse_dans(texte_partiel):
+    """La valeur de « reponse » dès qu'elle est complète dans un JSON en cours d'écriture, sinon None."""
+    import re
+    m = re.search(r'"reponse"\s*:\s*"((?:[^"\\]|\\.)*)"', texte_partiel)
+    if not m: return None
+    try: return json.loads('"' + m.group(1) + '"')
+    except ValueError: return None
+
+def decider(client, phrase, objets, formes, modele='claude-haiku-5-5', sur_reponse=None):
+    """L'ordre de Nicolas, les formes étant déjà connues : appel court, sans image, lu au fil de l'eau. `formes` : pour chaque
+    objet (dans l'ordre des numéros), {'forme', 'description'}. sur_reponse(texte) est appelé dès que la phrase de Câlin est
+    écrite, AVANT la fin de la réponse : il peut commencer à parler tout de suite. Renvoie le même dict qu'interpreter()."""
+    liste = '\n'.join(f'{n} : {NOMS.get(f["forme"], f["forme"])} ({f["description"]}), {o["largeur"]:.0f} mm de large, en X {o["X"]:+.0f}, Y {o["Y"]:.0f}'
+                      for n, (o, f) in enumerate(zip(objets, formes), 1))
+    texte, dit = '', False
+    with client.messages.stream(model=modele, max_tokens=16000, system=CONSIGNES_DECISION,
+                                output_config={'effort': 'low', 'format': {'type': 'json_schema', 'schema': SCHEMA_DECISION}},
+                                messages=[{'role': 'user', 'content': f'Objets sur la table :\n{liste}\n\nNicolas dit : « {phrase} »'}]) as flux:
+        for morceau in flux.text_stream:
+            texte += morceau
+            if sur_reponse and not dit:
+                rp = reponse_dans(texte)
+                if rp is not None: dit = True; sur_reponse(rp)
+        fin = flux.get_final_message()
+    if fin.stop_reason == 'refusal': raise RuntimeError('Claude a refusé la demande')
+    rep = json.loads(texte)
+    rep['objets'] = [{'n': n, 'forme': f['forme'], 'description': f['description']} for n, f in enumerate(formes, 1)]
+    rep['deja_dit'] = dit
+    return verifier(rep, len(objets))
+
 def interpreter(client, image_annotee, phrase, objets, modele='claude-sonnet-5-5', gros_plans=None):
     """Envoie la photo numérotée et la phrase à Claude. Renvoie le dict du SCHEMA. objets : la liste dans l'ordre des numéros.
     gros_plans : la planche des objets agrandis (planche()), envoyée en plus : c'est elle qui sert à reconnaître les formes.
