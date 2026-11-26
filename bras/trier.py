@@ -29,7 +29,10 @@ from viser_camera import Poste, sans_accents, FLECHES
 # Les zones de dépôt sont des DIRECTIONS (angle du socle, + = à droite vu de derrière) : un objet pris pince inclinée doit être
 # reposé avec la MÊME inclinaison, sinon il penche et tombe (Nicolas, 26/11/2026). Chaque inclinaison n'est possible que dans une
 # bande de distances (environ 5 à 8 cm de large) : on pose donc dans la direction de la zone, à la distance qui va avec la prise.
-ZONES = {'petit': -40.0, 'gros': 40.0}
+# ±65° et pas ±40° : à ±40°, pince inclinée de 60 à 90°, la place de pose tombait SUR les marqueurs de devant (±46°, à 27 cm du
+# socle). Essai de Nicolas du 26/11/2026 : objet posé à 28 mm du centre du marqueur n° 0, qui a disparu de la vue → arrêt.
+ZONES = {'petit': -65.0, 'gros': 65.0}
+LOIN_DES_MARQUEURS = 75.0                                         # mm : jamais de pose plus près du centre d'un marqueur
 PLURIEL = {'petit': 'petits', 'gros': 'gros'}
 SECTEUR = 16.0                                                    # degrés de part et d'autre : on n'y cherche pas d'objets à trier
 ECART_DEPOT = 50.0                                                # mm entre deux objets posés dans une zone
@@ -176,6 +179,7 @@ class Trieur(Poste):
         for R in sorted(range(int(bd[0]) + 5, int(bd[1]) - 4, 5), key=lambda r: abs(r - milieu)):
             for da in (0.0, -10.0, 10.0):
                 pt = G.point_dans_direction(a + da, R)
+                if any(math.hypot(pt[0] - x, pt[1] - y) < LOIN_DES_MARQUEURS for x, y in T.coins_table(self.reglage).values()): continue
                 if all(math.hypot(pt[0] - x, pt[1] - y) >= ECART_DEPOT for x, y in self.deposes[zone]):
                     # on vérifie le point que le bras visera vraiment, correction de visée comprise (Nicolas, 26/11/2026 : place
                     # trouvée à 245 mm, corrigée à 235, hors de portée pour la pince à 75° : bras arrêté objet en main)
@@ -274,12 +278,15 @@ class Trieur(Poste):
         pres = lambda x, y, r: min(tous, key=lambda o: math.hypot(o['X'] - x, o['Y'] - y), default=None) if any(math.hypot(o['X'] - x, o['Y'] - y) < r for o in tous) else None
         if e.get('résultat') == 'trié' and 'posé en X' in e and 'lâché dans le bac' not in str(e.get('remarque', '')):
             o = pres(e['posé en X'], e['posé en Y'], 35)
-            if o is None: verdict = 'introuvable à l\'endroit de la pose (tombé ? roulé ?)'
+            x0, y0, x1, y1 = O.cadre(self.reglage); u, v = T.vers_image(self.h, e['posé en X'], e['posé en Y'])
+            visible = x0 + 25 < e['posé en X'] < x1 - 25 and y0 + 25 < e['posé en Y'] < y1 - 25 and 20 < u < self.image.shape[1] - 20 and 20 < v < self.image.shape[0] - 20
+            if o is None and not visible: verdict = 'posé hors de la vue de la caméra : à vérifier à l\'œil'
+            elif o is None: verdict = 'introuvable à l\'endroit de la pose (tombé ? roulé ?)'
             else:
                 avant = sorted((e['largeur vue'], e.get('longueur vue', e['largeur vue']))); apres = sorted((o['largeur'], o['longueur']))
                 ecart = math.hypot(o['X'] - e['posé en X'], o['Y'] - e['posé en Y'])
                 debout = apres[1] <= avant[1] * 1.35 + 12 and apres[0] <= avant[0] * 1.35 + 12
-                verdict = (f'debout, à {ecart:.0f} mm du point visé' if debout else f'forme différente ({apres[0]:.0f} × {apres[1]:.0f} mm au lieu de {avant[0]:.0f} × {avant[1]:.0f}) : couché ou renversé ?')
+                verdict = ((f'debout, à {ecart:.0f} mm du point visé' if ecart <= 25 else f'à {ecart:.0f} mm du point visé : glissé, roulé ou mal vu ?') if debout else f'forme différente ({apres[0]:.0f} × {apres[1]:.0f} mm au lieu de {avant[0]:.0f} × {avant[1]:.0f}) : couché ou renversé ?')
             if pres(e['X vu'], e['Y vu'], 25): verdict += ' ; un objet est encore à l\'endroit de la prise'
         elif e.get('résultat', '').startswith('raté') or e.get('résultat') == 'reposé où il a été pris':
             o = pres(e['X vu'], e['Y vu'], 40)

@@ -523,3 +523,9 @@ du côté de la caméra (calculée en X −184), devant un marqueur. Corrigé : 
 réelle (ou `version_pince.json` absent sur le PC : le calcul de la V3 est alors utilisé). Nouveau : `etalonner_largeur.bat` (gros
 rond puis petit rond tenus entre les mâchoires, la pince serre, on lit sa position) → `largeur_pince.json` ; le tri s'en sert pour
 mesurer et pour ouvrir juste ce qu'il faut. Essayé sur un servo simulé.
+
+**Tri de 15 h 18 (2 objets, ancienne version)** : objets posés à gauche en (−190, 226) puis (−226, 190), c'est-à-dire **sur le
+marqueur n° 0** (centre en −198, 190) : le marqueur a disparu de la vue → arrêt, et le contrôle ne trouvait pas l'objet (la zone d'un
+marqueur est ignorée par la détection). Cause : zones à ±40°, et pince à 60-90° la bande de pose passait sur les marqueurs de devant
+(±46°, 27 cm). **Zones déplacées à ±65°**, et aucune pose à moins de 75 mm du centre d'un marqueur. Une pose hors de la vue de la
+caméra est signalée « à vérifier à l'œil » ; un objet retrouvé à plus de 25 mm du point visé, « glissé, roulé ou mal vu ? ».
