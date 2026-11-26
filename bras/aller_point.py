@@ -62,10 +62,12 @@ class Pointeur:
         if abs(c._roulis()) > 15 and not getattr(self, 'roulis_permis', False): self.dire('   La pince est tournée : remets-la droite d\'abord (fenêtre de contrôle, ou tester_poignet).'); return
         return prise, haut
 
-    def aller(self, prise, haut):
-        """Fait le geste préparé : relève le bras s'il faut tourner, tourne le socle, place la pince au-dessus du point."""
+    def aller(self, prise, haut, relever=False):
+        """Fait le geste préparé : relève le bras s'il faut tourner, tourne le socle, place la pince au-dessus du point.
+        relever : passer TOUJOURS par le bras relevé avant de tourner. Pour un bac : sans cela, la pince partait d'une position
+        basse et montait en biais vers le bac, en frôlant son bord (Nicolas, 26/11/2026 : « encore un peu de frottement »)."""
         c = self.c; ae, ac, _ = self.angles()
-        if ae < 55 and abs(degres(c.bus.etat(c.socle)['position'] - MILIEU) - prise['socle']) > 3:
+        if (relever or ae < 55) and abs(degres(c.bus.etat(c.socle)['position'] - MILIEU) - prise['socle']) > 3:
             if not self.poser_bras({'epaule': E.REPOS, 'coude': 0, 'flexion': 0}, 'Bras relevé avant de tourner'): return     # on ne tourne pas bras baissé : il balaierait la table
         if not c._bouger([(c.socle, MILIEU + pas(prise['socle']))], f"Socle à {prise['socle']:+.0f}°"): self.vider(); return
         self.vider()

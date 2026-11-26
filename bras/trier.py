@@ -220,7 +220,7 @@ class Trieur(Poste):
         self.dire(f'   {self.quoi(z, largeur)}, je le lâche dans son bac (pince à {abs(i):.0f}°, {leve:.0f} mm au-dessus de la hauteur de prise).')
         plan = p.preparer(*C.corriger(*pt, self.corrections), i, leve)
         if not plan: raise ErreurServo('Pose dans le bac impossible.')
-        p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
+        p.aller(*plan, relever=True); self.etape(p.prise is plan[0], 'le transport')     # bras relevé d'abord : voir aller()
         self.etape(p.descendre(), 'l\'arrivée au-dessus du bac'); self.ouvrir_a(largeur + 25); time.sleep(0.3); self.tenu = None      # pas grande ouverte : les mâchoires toucheraient la paroi
         self.etape(p.monter(), 'la remontée'); self.redresser(); p.repos(); self.tries[z] += 1
         return True
@@ -282,7 +282,10 @@ class Trieur(Poste):
         self.dire('Je regarde la table et je réfléchis...')
         try:
             if self.claude is None: self.claude = CV.client_claude()
-            rep = CV.interpreter(self.claude, self.annoter(image), texte, objets, self.modele_ia)
+            cadres = []
+            for o in objets:
+                px = np.array([T.vers_image(self.h, x, y) for x, y in o['contour']]); cadres.append((*px.min(axis=0), *px.max(axis=0)))
+            rep = CV.interpreter(self.claude, self.annoter(image), texte, objets, self.modele_ia, CV.planche(image, cadres))
         except Exception as err: self.dire(f'Je n\'ai pas pu demander à Claude ({type(err).__name__} : {err}).'); return
         for e in rep['objets']: self.dire(f'   {e["n"]} : {CV.NOMS.get(e["forme"], e["forme"])} ({e["description"]})')
         self.dire(f'Câlin : {rep["reponse"]}')

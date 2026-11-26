@@ -44,7 +44,10 @@ noir et blanc aux coins sont des repères, pas des objets. Le bac de GAUCHE et l
 depuis derrière le bras (le bras est en bas de la photo : la GAUCHE de la photo est la gauche du bras).
 
 Pour chaque numéro, donne sa forme vue d'en haut (rond = cylindre posé debout, carre = cube ou pavé à base carrée, hexagone,
-barre = pavé nettement plus long que large, gobelet, autre) et une description de 2 à 5 mots.
+barre = pavé nettement plus long que large, gobelet, autre) et une description de 2 à 5 mots. Les objets sont hauts de 6 cm
+et vus un peu de biais : tu vois leur face du DESSUS (plus claire) et un ou deux flancs (plus sombres). La forme, c'est le
+contour de la face du dessus : un cercle = rond, 4 côtés égaux = carre, 6 côtés = hexagone, rectangle allongé = barre.
+Un petit cylindre reste un rond.
 
 Puis lis la phrase de Nicolas :
 - s'il demande de ranger, trier ou prendre des objets, action = "trier" : mets dans « gauche » et « droite » les numéros à poser
@@ -67,20 +70,47 @@ def client_claude():
     if 'ANTHROPIC_API_KEY' not in cles: raise RuntimeError('pas de clé Anthropic : voir tete/cles_exemple.txt')
     return anthropic.Anthropic(api_key=cles['ANTHROPIC_API_KEY'])
 
-def interpreter(client, image_annotee, phrase, objets, modele='claude-sonnet-5-5'):
+def planche(image, cadres, cote=260, par_ligne=4):
+    """Une image où chaque objet est découpé dans la photo BRUTE, agrandi, son numéro écrit au-dessus (rien n'est dessiné sur
+    l'objet). cadres : pour chaque objet, son rectangle (x0, y0, x1, y1) dans la photo. Premier tri à la voix de Nicolas
+    (26/11/2026) : sur la photo annotée, les étiquettes recouvraient les objets et ils ne faisaient que 70 points de large ;
+    l'hexagone était pris pour une barre, la barre pour un carré, le petit rond pour « autre »."""
+    import numpy as np
+    H, W = image.shape[:2]; cases = []
+    for n, (x0, y0, x1, y1) in enumerate(cadres, 1):
+        c = max(x1 - x0, y1 - y0) / 2 + 25; cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        a, b_, d, e = int(max(cx - c, 0)), int(max(cy - c, 0)), int(min(cx + c, W)), int(min(cy + c, H))
+        bout = image[b_:e, a:d]
+        if bout.size == 0: bout = np.zeros((10, 10, 3), np.uint8)
+        k = cote / max(bout.shape[:2]); bout = cv2.resize(bout, None, fx=k, fy=k, interpolation=cv2.INTER_CUBIC)
+        case = np.full((cote + 44, cote, 3), 255, np.uint8); case[44:44 + bout.shape[0], :bout.shape[1]] = bout
+        cv2.putText(case, f'objet {n}', (8, 32), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0), 2, cv2.LINE_AA)
+        cv2.rectangle(case, (0, 0), (cote - 1, cote + 43), (0, 0, 0), 1); cases.append(case)
+    lignes = []
+    for i in range(0, len(cases), par_ligne):
+        r = cases[i:i + par_ligne]; r += [np.full_like(cases[0], 255)] * (par_ligne - len(r)); lignes.append(np.hstack(r))
+    return np.vstack(lignes) if lignes else np.full((cote, cote, 3), 255, np.uint8)
+
+def interpreter(client, image_annotee, phrase, objets, modele='claude-sonnet-5-5', gros_plans=None):
     """Envoie la photo numérotée et la phrase à Claude. Renvoie le dict du SCHEMA. objets : la liste dans l'ordre des numéros.
-    Sonnet par défaut : c'est le choix de Nicolas pour la tête (rapide) ; effort bas, la tâche est simple."""
-    ok, jpeg = cv2.imencode('.jpg', image_annotee, [cv2.IMWRITE_JPEG_QUALITY, 85])
-    if not ok: raise RuntimeError('photo illisible')
+    gros_plans : la planche des objets agrandis (planche()), envoyée en plus : c'est elle qui sert à reconnaître les formes.
+    Sonnet par défaut : c'est le choix de Nicolas pour la tête (rapide)."""
     import base64
+    def jpg(im):
+        ok, j = cv2.imencode('.jpg', im, [cv2.IMWRITE_JPEG_QUALITY, 90])
+        if not ok: raise RuntimeError('photo illisible')
+        return {'type': 'image', 'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': base64.standard_b64encode(j.tobytes()).decode()}}
+    images = [jpg(image_annotee)] + ([jpg(gros_plans)] if gros_plans is not None else [])
     liste = '\n'.join(f'{n} : vu {o["largeur"]:.0f} mm de large, en X {o["X"]:+.0f}, Y {o["Y"]:.0f}' for n, o in enumerate(objets, 1))
     demande = dict(
         model=modele, max_tokens=16000,
-        output_config={'effort': 'low', 'format': {'type': 'json_schema', 'schema': SCHEMA}},
+        output_config={'effort': 'medium', 'format': {'type': 'json_schema', 'schema': SCHEMA}},
         system=CONSIGNES,
-        messages=[{'role': 'user', 'content': [
-            {'type': 'image', 'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': base64.standard_b64encode(jpeg.tobytes()).decode()}},
-            {'type': 'text', 'text': f'Objets numérotés sur la photo :\n{liste}\n\nNicolas dit : « {phrase} »'}]}])
+        messages=[{'role': 'user', 'content': images + [
+            {'type': 'text', 'text': ('Première image : la table entière, objets entourés et numérotés. Deuxième image : chaque objet '
+                                      'découpé et agrandi, son numéro écrit au-dessus (« objet 3 ») : sers-toi de celle-ci pour les formes.\n'
+                                      if gros_plans is not None else '')
+                                     + f'Objets numérotés :\n{liste}\n\nNicolas dit : « {phrase} »'}]}])
     try:   # si la demande est refusée par sécurité, un autre modèle la reprend (paramètre « fallbacks »)
         r = client.beta.messages.create(betas=['server-side-fallback-2026-07-01'], fallbacks='default', **demande)
     except TypeError:
