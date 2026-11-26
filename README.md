@@ -89,6 +89,8 @@ objets hors de portée signalés avant le tri). **Prochaines étapes voulues par
 1. **Bacs** à gauche et à droite (`bras/regler_bac.bat` existe déjà) ;
 2. **Reconnaissance des formes** sur la photo : rond, carré, hexagone, barre ;
 3. **La voix** : « Câlin, range les ronds dans le bac de gauche » (`tete/ecouter.py` déjà validé).
+   → **26/11/2026 : bacs validés (4 objets lâchés dans les bacs) ; voix et formes écrites** (`bras/trier_voix.bat` : Whisper entend,
+   Claude regarde la photo et dit quel objet va dans quel bac), essayées en simulation seulement.
 
 ## Étape avant le buste : deux bras côte à côte sur la table (25/11/2026)
 

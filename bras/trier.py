@@ -21,7 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'camera'))
 import cv2, numpy as np
 import table as T, voir_table as V, objets as O
-import rapport_tri as RT, largeur_pince as LP
+import rapport_tri as RT, largeur_pince as LP, consigne_vocale as CV
 import aller_point as A, correction as C, geometrie as G, test_pince as PI, obstacles as OB, test_epaule as EP
 from servos import ErreurServo
 from viser_camera import Poste, sans_accents, FLECHES
@@ -83,7 +83,7 @@ def points_du_bac(bac, pas=15.0):
     return sorted(pts, key=lambda q: math.hypot(*q))
 
 FICHIER_FOND = Path(__file__).resolve().parent.parent / 'camera' / 'fond_table.png'
-AIDE = 'F = fond (table VIDE) | T = TRIER | 1 = un seul objet | O ouvrir | R repos | ESPACE = ARRET | P photo | Q quitter'
+AIDE = 'F = fond (table VIDE) | T = TRIER (taille) | 1 = un seul objet | O ouvrir | R repos | ESPACE = ARRET | P photo | Q quitter'
 
 def choisir(objets, rates):
     """L'objet à prendre maintenant : le plus isolé, parmi ceux qui n'ont pas déjà raté ESSAIS_MAX fois au même endroit."""
@@ -138,6 +138,7 @@ class Trieur(Poste):
         self.hauteur, self.fond, self.objets, self.image = hauteur, None, [], None
         self.demande, self.reponse = threading.Event(), threading.Event()
         self.au_repos, self.tries, self.rates = True, {'petit': 0, 'gros': 0}, []
+        self.plan_vocal, self.claude, self.modele_ia = None, None, 'claude-sonnet-5-5'
         self.deposes = {z: [] for z in ZONES}; self.tenu = None; self.objets_tri, self.objet_pris = [], None; self.rap = None
         self.bacs = charger_bacs()
         for z, b in self.bacs.items(): self.dire(f'Les {PLURIEL[z]} vont dans le bac (X {b["X"]:+.0f}, Y {b["Y"]:.0f}, bord à {b["bord"]:.0f} mm).')
@@ -216,7 +217,7 @@ class Trieur(Poste):
         if not pose: raise ErreurServo(f'Le bac des {PLURIEL[z]} est hors de portée pour cette prise.')
         pt, i, leve = pose
         self.note(posé_en_X=pt[0], posé_en_Y=pt[1], remarque='lâché dans le bac', **{'pince_à_la_pose_(°)': abs(i), 'lâché_plus_haut_(mm)': leve})
-        self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le lâche dans son bac (pince à {abs(i):.0f}°, {leve:.0f} mm au-dessus de la hauteur de prise).')
+        self.dire(f'   {self.quoi(z, largeur)}, je le lâche dans son bac (pince à {abs(i):.0f}°, {leve:.0f} mm au-dessus de la hauteur de prise).')
         plan = p.preparer(*C.corriger(*pt, self.corrections), i, leve)
         if not plan: raise ErreurServo('Pose dans le bac impossible.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
@@ -255,6 +256,45 @@ class Trieur(Poste):
                     except G.HorsDePortee: pass
         return None
 
+    def quoi(self, z, largeur):
+        """Pourquoi cet objet va là : la consigne dictée, ou sa taille."""
+        if self.plan_vocal is not None: return f'{largeur:.0f} mm, rangé selon la consigne'
+        return f'{largeur:.0f} mm : c\'est un {z.upper()}'
+
+    def zone_prevue(self, o):
+        """Le bac prévu par la consigne dictée pour cet objet (retrouvé par sa place, à 35 mm près), ou None."""
+        e = min(self.plan_vocal or [], key=lambda q: math.hypot(q['X'] - o['X'], q['Y'] - o['Y']), default=None)
+        return e['zone'] if e and math.hypot(e['X'] - o['X'], e['Y'] - o['Y']) < 35 else None
+    def forme_prevue(self, o):
+        e = min(self.plan_vocal or [], key=lambda q: math.hypot(q['X'] - o['X'], q['Y'] - o['Y']), default=None)
+        return CV.NOMS.get(e['forme'], e['forme']) if e else '?'
+
+    def consigne(self, texte):
+        """Une phrase entendue (ou tapée). « Stop » arrête tout de suite ; le reste est confié à Claude avec la photo de la table."""
+        self.dire(f'Entendu : « {texte} »')
+        if CV.est_stop(texte):
+            if self.occupe: self.p.c.arret.set(); self.dire('ARRÊT demandé à la voix : le bras reste tenu.')
+            return
+        if self.occupe: self.dire('Je suis occupé : dis « stop » d\'abord, ou attends la fin.'); return
+        if self.fond is None or self.h is None or not self.au_repos: self.dire('Il me faut d\'abord la photo du fond (F), bras au repos.'); return
+        objets, image = list(self.objets), self.image.copy()
+        if not objets: self.dire('Je ne vois aucun objet sur la table.'); return
+        self.dire('Je regarde la table et je réfléchis...')
+        try:
+            if self.claude is None: self.claude = CV.client_claude()
+            rep = CV.interpreter(self.claude, self.annoter(image), texte, objets, self.modele_ia)
+        except Exception as err: self.dire(f'Je n\'ai pas pu demander à Claude ({type(err).__name__} : {err}).'); return
+        for e in rep['objets']: self.dire(f'   {e["n"]} : {CV.NOMS.get(e["forme"], e["forme"])} ({e["description"]})')
+        self.dire(f'Câlin : {rep["reponse"]}')
+        if rep['action'] == 'rien': return
+        self.rates = []
+        if rep['action'] == 'taille': self.plan_vocal = None
+        else: self.plan_vocal = CV.plan_de(rep, objets)
+        def geste():
+            try: self.trier(None)
+            finally: self.au_repos = True; self.plan_vocal = None
+        self._lancer('tri à la voix', geste)
+
     def tourner(self, angle):
         """Tourne la pince sur elle-même (bras en l'air, au repos ou au-dessus du point). La pose se fera pince tournée aussi."""
         c = self.p.c; c._poignet(angle); self.p.vider(); self.p.roulis_permis = abs(angle) > 15
@@ -291,7 +331,9 @@ class Trieur(Poste):
         """L'objet à prendre : le plus isolé parmi ceux qu'on peut prendre SANS heurter un autre objet (demande de Nicolas)."""
         _, premier = choisir(objets, self.rates)
         if premier is None: return None
-        restants = [o for o in objets if sum(1 for x, y in self.rates if math.hypot(o['X'] - x, o['Y'] - y) < 25) < ESSAIS_MAX]
+        restants = [o for o in objets if sum(1 for x, y in self.rates if math.hypot(o['X'] - x, o['Y'] - y) < 25) < ESSAIS_MAX
+                    and (self.plan_vocal is None or self.zone_prevue(o))]               # consigne dictée : seulement les objets nommés
+        if not restants: return None
         genes = []
         for o in sorted(restants, key=lambda o: -min([math.hypot(o['X'] - a['X'], o['Y'] - a['Y']) for a in objets if a is not o] or [999.0])):
             gene, plan = self.libre_pour_prendre(o, objets)
@@ -349,6 +391,9 @@ class Trieur(Poste):
             return True
         self.suite_ratee = 0
         z = zone_de(largeur); incl = p.incl; self.plan_prise = plan
+        prevu = self.zone_prevue(o) if self.plan_vocal is not None else None
+        if prevu:
+            z = prevu; self.dire(f'   Consigne : {self.forme_prevue(o)} → bac de {"gauche" if z == "petit" else "droite"} (largeur lue {largeur:.0f} mm).')
         self.note(catégorie=z)
         try:
             r = self.poser(z, incl, largeur); self.note(résultat='trié'); return r
@@ -414,8 +459,8 @@ class Trieur(Poste):
         spot, incl_pose, leve = place if place else (None, None, None)
         if spot is None: raise ErreurServo(f'Plus de place dans la zone des {PLURIEL[z]} à la bonne distance.')
         cote = "gauche" if ZONES[z] < 0 else "droite"
-        if leve and incl_pose != incl: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince à {abs(incl_pose):.0f}° (prise à {abs(incl):.0f}°) : lâché {leve:.0f} mm plus haut, il se redresse seul.')
-        else: self.dire(f'   {largeur:.0f} mm : c\'est un {z.upper()}, je le pose à {cote}, pince inclinée comme à la prise ({abs(incl):.0f}°).')
+        if leve and incl_pose != incl: self.dire(f'   {self.quoi(z, largeur)}, je le pose à {cote}, pince à {abs(incl_pose):.0f}° (prise à {abs(incl):.0f}°) : lâché {leve:.0f} mm plus haut, il se redresse seul.')
+        else: self.dire(f'   {self.quoi(z, largeur)}, je le pose à {cote}, pince inclinée comme à la prise ({abs(incl):.0f}°).')
         self.note(posé_en_X=spot[0], posé_en_Y=spot[1], **{'pince_à_la_pose_(°)': abs(incl_pose), 'lâché_plus_haut_(mm)': leve})
         plan = p.preparer(*C.corriger(*spot, self.corrections), incl_pose, leve)
         if not plan: raise ErreurServo('Pose impossible à cet endroit.')
@@ -541,9 +586,24 @@ def verifier_zones(hauteur_epaule=179.0):
         for incl in G.INCLINAISONS:
             if not G.bande(incl, hauteur_epaule, a): raise G.HorsDePortee(f'zone des {PLURIEL[nom]} ({a:+.0f}°) : impossible de poser pince inclinée de {abs(incl)}°')
 
+def ecouter_consignes(t, a):
+    """Fil d'écoute : chaque phrase entendue (ou tapée) est passée au trieur. Le micro est ouvert en continu."""
+    try:
+        if a.clavier:
+            while True: t.consigne(input('Consigne (ex. « range les ronds à gauche et le reste à droite », « stop ») : ').strip())
+        sys.path.insert(0, str(CV.TETE)); import ecouter as E
+        oreille = E.Oreille(E.charger_modele(a.modele), a.micro)
+        t.dire('Je t\'écoute : dis par exemple « range les ronds à gauche et le reste à droite », ou « stop ».')
+        while True: t.consigne(oreille.phrase())
+    except Exception as err: t.dire(f'L\'écoute s\'est arrêtée ({type(err).__name__} : {err}). Les touches marchent toujours.')
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
-    ap.add_argument('--fenetre', type=int, default=700); a = ap.parse_args()
+    ap.add_argument('--fenetre', type=int, default=700)
+    ap.add_argument('--voix', action='store_true', help='écouter le micro : « range les ronds à gauche », « stop »')
+    ap.add_argument('--clavier', action='store_true', help='taper les consignes dans cette fenêtre noire au lieu de les dire')
+    ap.add_argument('--micro', type=int, default=None); ap.add_argument('--modele', default='small', help='modèle Whisper')
+    ap.add_argument('--ia', default='sonnet', choices=['sonnet', 'opus']); a = ap.parse_args()
     reglage = T.charger()
     if not reglage: print('Réglage de la table introuvable : lance d\'abord camera\\regler_table.bat'); return 1
     cam = cv2.VideoCapture(a.camera, cv2.CAP_DSHOW) if sys.platform == 'win32' else cv2.VideoCapture(a.camera)
@@ -554,6 +614,8 @@ def main():
     try: verifier_zones(p.c.hauteur)
     except G.HorsDePortee as e: print('Une zone de dépôt est hors de portée :', e); cam.release(); return A.terminer(p)
     t = Trieur(p, reglage, a.hauteur); ech = {'v': 1.0}
+    t.modele_ia = {'sonnet': 'claude-sonnet-5-5', 'opus': 'claude-opus-5-5'}[a.ia]
+    if a.voix or a.clavier: threading.Thread(target=ecouter_consignes, args=(t, a), daemon=True).start()
     cv2.namedWindow('Calin trie')
     cv2.setMouseCallback('Calin trie', lambda evt, x, y, *_: t.clic(x, y) if evt == cv2.EVENT_LBUTTONDOWN else None)
     t.dire('Bras au repos (R), table VIDE : F. Puis pose les objets et T.' if t.fond is None else 'Pose les objets, puis T (ou 1 pour un seul).')

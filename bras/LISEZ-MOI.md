@@ -540,3 +540,23 @@ caméra est signalée « à vérifier à l'œil » ; un objet retrouvé à plus 
 - **Quand la pince tourne** : si l'objet est au moins 1,5 fois plus long que large, et si la pince est penchée d'au moins 45°, elle tourne sur elle-même (servo n° 5) pour serrer en travers (`roulis_pour` dans `trier.py`).
 - **Les étapes** : elle tourne bras levé, avant d'aller au-dessus de l'objet, et saisit un peu plus haut, car une mâchoire descend plus bas que l'autre. Elle pose avec la même inclinaison et la même rotation (sinon l'objet pencherait), puis se redresse, pince vide, avant le repos. Au début de chaque tri, la pince est remise droite.
 - **À vérifier au premier essai réel** : les mâchoires doivent arriver de part et d'autre des GRANDS côtés de la barre. Si elles arrivent sur les petits bouts, le sens est inversé : mettre `SENS_ROULIS = -1` dans `trier.py`.
+
+## Trier à la voix — `trier_voix.bat` (26/11/2026, essayé en simulation seulement)
+
+Nicolas dit par exemple « range les ronds dans le bac de gauche et le reste à droite » :
+
+1. **L'oreille entend la phrase.** C'est celle de la tête (`tete/ecouter.py`, Whisper, sur le PC).
+2. **Claude regarde la table.** Le programme lui envoie la photo, avec les objets numérotés comme à l'écran, et la phrase. Claude reconnaît la forme de chaque objet (rond, carré, hexagone, barre, gobelet…) et répond quels numéros vont dans quel bac (`consigne_vocale.py`).
+3. **Le bras exécute.** Il ne prend que ces objets, et les pose là où Claude l'a dit, au lieu de les ranger d'après leur taille. « Trie par taille » garde l'ancien tri.
+
+**« Stop »** ou **« arrête »** est compris sans Claude, tout de suite : le bras s'arrête et reste tenu, comme avec ESPACE.
+
+**Ce qu'il faut savoir :**
+- `trier_voix.bat` utilise l'installation de la tête (`tete\installer.bat`) et sa clé Anthropic (voir `tete/cles_exemple.txt`).
+- Pour essayer sans micro : `trier_voix.bat --clavier`, puis taper la phrase dans la fenêtre noire.
+- Si le message « bibliothèque anthropic trop ancienne » apparaît, lancer :
+  `..\tete\.venv\Scripts\python -m pip install -U anthropic`
+- **La photo de la table part chez Anthropic** pour être analysée : ne laisser dans le champ de la caméra que les objets à trier (pas de visage, pas de papier).
+- Les objets qu'on ne demande pas de ranger restent sur la table et comptent comme obstacles : écarte-les du passage.
+
+**Pourquoi passer par Claude pour les formes** : le calcul seul a été essayé sur les vraies photos du 26/11/2026, en mesurant la largeur de l'objet dans toutes les directions, sur tout le contour puis sur la face du dessus. Les ronds ressortaient en « barres », à cause du penché et des reflets sur la table. Seuls le petit rond et le carré étaient bien reconnus, jamais l'hexagone.
