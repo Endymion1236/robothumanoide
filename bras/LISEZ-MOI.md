@@ -559,6 +559,12 @@ Nicolas dit par exemple « range les ronds dans le bac de gauche et le reste à 
 - **La photo de la table part chez Anthropic** pour être analysée : ne laisser dans le champ de la caméra que les objets à trier (pas de visage, pas de papier).
 - Les objets qu'on ne demande pas de ranger restent sur la table et comptent comme obstacles : écarte-les du passage.
 
+**Câlin parle et a de l'humour (26/11/2026, demande de Nicolas).** Avec `trier_voix.bat`, il dit sa réponse à voix haute avant de
+commencer, et une petite phrase quand il a fini, avec la voix de la tête (ElevenLabs si la clé est là, sinon la voix de
+Windows ; `--voix-pc` pour forcer celle-ci, `--muet` pour le faire taire). Son caractère est écrit dans `consigne_vocale.py` :
+l'utile d'abord, puis une touche d'humour gentille (autodérision de robot débutant, clins d'œil aux poneys), jamais moqueuse.
+Pendant qu'il parle, le micro est ignoré (indicateur « Calin parle ») : sinon il prendrait sa propre phrase pour une consigne.
+
 **Pourquoi passer par Claude pour les formes** : le calcul seul a été essayé sur les vraies photos du 26/11/2026, en mesurant la largeur de l'objet dans toutes les directions, sur tout le contour puis sur la face du dessus. Les ronds ressortaient en « barres », à cause du penché et des reflets sur la table. Seuls le petit rond et le carré étaient bien reconnus, jamais l'hexagone.
 
 ## Le bras apprend sa visée tout seul — touche A de `trier` (26/11/2026, essayé en simulation seulement)

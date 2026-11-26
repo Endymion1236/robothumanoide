@@ -33,8 +33,9 @@ SCHEMA = {
         'gauche': {'type': 'array', 'items': {'type': 'integer'}},
         'droite': {'type': 'array', 'items': {'type': 'integer'}},
         'reponse': {'type': 'string'},
+        'apres': {'type': 'string'},
     },
-    'required': ['objets', 'action', 'gauche', 'droite', 'reponse'],
+    'required': ['objets', 'action', 'gauche', 'droite', 'reponse', 'apres'],
     'additionalProperties': False,
 }
 
@@ -54,7 +55,15 @@ Puis lis la phrase de Nicolas :
   dans chaque bac ; ceux dont il ne parle pas, ne les mets nulle part (on les laisse), sauf s'il dit « le reste » ou « tout » ;
 - s'il demande de trier par TAILLE (petits / gros) sans parler de formes, action = "taille" (la pince mesure elle-même) ;
 - sinon (question, bavardage, phrase mal entendue), action = "rien".
-« reponse » : une phrase courte, en français, que Câlin dit à Nicolas (ce qu'il va faire, ou ce qu'il n'a pas compris).
+« reponse » : ce que Câlin dit À VOIX HAUTE à Nicolas avant de commencer : une ou deux phrases courtes (25 mots au plus), en
+français, sans liste ni emoji. D'abord l'utile (ce qu'il va faire, ou ce qu'il n'a pas compris), puis, si ça vient
+naturellement, une petite touche d'humour.
+« apres » : la phrase (15 mots au plus) que Câlin dira quand il aura fini de ranger ; vide si action = "rien".
+Le caractère de Câlin (demande de Nicolas, 26/11/2026 : « s'il avait un peu d'humour, ce serait sympa ») : chaleureux, malicieux,
+un brin d'autodérision de robot débutant (son bras tout neuf, sa pince qui rate parfois, ses servos), passionné de poneys et de
+Pony Games, auxquels il peut faire un clin d'œil. Il tutoie Nicolas. Son humour est gentil et léger : jamais moqueur envers
+quelqu'un, jamais lourd, pas de blague à chaque phrase, et jamais deux fois la même. Si la consigne est sérieuse ou si quelque
+chose ne va pas, il reste simple et clair.
 N'invente pas de numéro qui n'est pas sur la photo."""
 
 def est_stop(texte):
@@ -119,6 +128,30 @@ def interpreter(client, image_annotee, phrase, objets, modele='claude-sonnet-5-5
     if r.stop_reason == 'refusal': raise RuntimeError('Claude a refusé la demande')
     texte = next((b.text for b in r.content if b.type == 'text'), '')
     return verifier(json.loads(texte), len(objets))
+
+class Parole:
+    """Câlin dit ses phrases à voix haute, l'une après l'autre, dans son propre fil (voix de la tête : ElevenLabs si la clé est là,
+    sinon la voix de Windows). `en_cours` est vrai tant qu'il parle : l'écoute doit alors se boucher les oreilles, sinon il
+    s'entendrait lui-même et prendrait sa blague pour une consigne."""
+    def __init__(self, voix_pc=False):
+        import queue, threading
+        self.file, self.en_cours, self.vient_de_parler, self.voix_pc = queue.Queue(), False, False, voix_pc
+        threading.Thread(target=self._fil, daemon=True).start()
+    def dire(self, texte):
+        if texte and texte.strip(): self.en_cours = True; self.file.put(texte.strip())
+    def _fil(self):
+        import types
+        voix = None
+        while True:
+            texte = self.file.get()
+            try:
+                if voix is None:
+                    sys.path.insert(0, str(TETE)); import parler
+                    cles, _ = parler.lire_cles()
+                    voix = parler.creer_voix(types.SimpleNamespace(muet=False, voix_pc=self.voix_pc, voix_rapide=True), cles)
+                voix.dire(texte)
+            except Exception as err: print(f'   (voix indisponible : {type(err).__name__} : {err})')
+            if self.file.empty(): self.vient_de_parler = True; self.en_cours = False
 
 def verifier(rep, nb):
     """Garde-fous sur la réponse : numéros existants, un objet dans un seul bac."""

@@ -271,6 +271,10 @@ class Trieur(Poste):
         e = min(self.plan_vocal or [], key=lambda q: math.hypot(q['X'] - o['X'], q['Y'] - o['Y']), default=None)
         return CV.NOMS.get(e['forme'], e['forme']) if e else '?'
 
+    def parler(self, texte):
+        """Dit la phrase à voix haute si la parole est branchée (trier_voix.bat ; --muet pour la couper)."""
+        if getattr(self, 'parole', None): self.parole.dire(texte)
+
     def consigne(self, texte):
         """Une phrase entendue (ou tapée). « Stop » arrête tout de suite ; le reste est confié à Claude avec la photo de la table."""
         self.dire(f'Entendu : « {texte} »')
@@ -290,14 +294,17 @@ class Trieur(Poste):
             rep = CV.interpreter(self.claude, self.annoter(image), texte, objets, self.modele_ia, CV.planche(image, cadres))
         except Exception as err: self.dire(f'Je n\'ai pas pu demander à Claude ({type(err).__name__} : {err}).'); return
         for e in rep['objets']: self.dire(f'   {e["n"]} : {CV.NOMS.get(e["forme"], e["forme"])} ({e["description"]})')
-        self.dire(f'Câlin : {rep["reponse"]}')
+        self.dire(f'Câlin : {rep["reponse"]}'); self.parler(rep['reponse'])
         if rep['action'] == 'rien': return
+        apres = rep.get('apres', '')
         self.rates = []
         if rep['action'] == 'taille': self.plan_vocal = None
         else: self.plan_vocal = CV.plan_de(rep, objets)
         def geste():
-            try: self.trier(None)
+            fini = False
+            try: self.trier(None); fini = not self.p.c.arret.is_set()
             finally: self.au_repos = True; self.plan_vocal = None
+            if fini and apres: self.dire(f'Câlin : {apres}'); self.parler(apres)
         self._lancer('tri à la voix', geste)
 
     def apprendre_visee(self):
@@ -679,6 +686,11 @@ def ecouter_consignes(t, a):
         t.dire('Je t\'écoute : dis par exemple « range les ronds à gauche et le reste à droite », ou « stop ».')
         while True:
             bloc = oreille.file.get()
+            par = getattr(t, 'parole', None)
+            if par and (par.en_cours or par.vient_de_parler):               # Câlin parle : il ne doit pas s'écouter lui-même
+                if not par.en_cours: par.vient_de_parler = False
+                t.micro.update(etat='Calin parle', parle=False); oreille.vider(); continue
+            if t.micro['etat'] == 'Calin parle': t.micro['etat'] = 'ecoute'
             t.micro['volume'] = max(float(np.sqrt(np.mean(bloc ** 2))), t.micro['volume'] * 0.85)      # retombe doucement, lisible
             son = oreille.decoupeur.ajouter(bloc); t.micro['parle'] = oreille.decoupeur.en_cours
             if son is None: continue
@@ -695,6 +707,8 @@ def main():
     ap.add_argument('--clavier', action='store_true', help='taper les consignes dans cette fenêtre noire au lieu de les dire')
     ap.add_argument('--micro', type=int, default=None); ap.add_argument('--modele', default='small', help='modèle Whisper')
     ap.add_argument('--seuil', type=float, default=None, help='volume à partir duquel une phrase commence (affiché à l\'écran)')
+    ap.add_argument('--muet', action='store_true', help='Câlin répond à l\'écran seulement, sans voix')
+    ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs')
     ap.add_argument('--ia', default='sonnet', choices=['sonnet', 'opus']); a = ap.parse_args()
     reglage = T.charger()
     if not reglage: print('Réglage de la table introuvable : lance d\'abord camera\\regler_table.bat'); return 1
@@ -707,6 +721,7 @@ def main():
     except G.HorsDePortee as e: print('Une zone de dépôt est hors de portée :', e); cam.release(); return A.terminer(p)
     t = Trieur(p, reglage, a.hauteur); ech = {'v': 1.0}
     t.modele_ia = {'sonnet': 'claude-sonnet-5-5', 'opus': 'claude-opus-5-5'}[a.ia]
+    if (a.voix or a.clavier) and not a.muet: t.parole = CV.Parole(a.voix_pc)
     if a.voix or a.clavier: threading.Thread(target=ecouter_consignes, args=(t, a), daemon=True).start()
     cv2.namedWindow('Calin trie')
     cv2.setMouseCallback('Calin trie', lambda evt, x, y, *_: t.clic(x, y) if evt == cv2.EVENT_LBUTTONDOWN else None)
