@@ -61,3 +61,13 @@ d'après le champ annoncé de 60°, non mesuré), donc compter 80 cm à 1 m au-d
 ## Fichiers
 
 `table.py` (calculs), `generer_marqueurs.py`, `regler_table.py`, `voir_table.py`. `table.json` (tes mesures) reste sur ton PC.
+
+## Trouver les objets tout seul (26/11/2026)
+
+`objets.py` (calcul seul, utilisé par `bras/trier.bat`) : on prend une photo de la table VIDE (le fond), bras au repos ; ensuite
+tout ce qui a changé est un objet. Les images sont redressées en vue de dessus (1 point = 1 mm). Les ombres (bois seulement plus
+foncé) sont écartées. La position de la caméra est calculée à partir des 4 marqueurs, ce qui permet de corriger le « penché » des
+objets hauts : on vise leur pied, pas leur milieu apparent (hauteur des objets : 60 mm par défaut).
+**Essayé sur des images fabriquées seulement** (caméra placée à deux endroits, 4 objets, ombres) : objets retrouvés à 2 mm près,
+hauteur de la caméra retrouvée à 3 mm près. Limites : objet couleur bois ou noir mal vu ; deux objets qui se touchent = un seul ;
+la forme (rond, carré, hexagone) se lit mal, la taille se mesure avec la pince.

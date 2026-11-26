@@ -449,3 +449,16 @@ Essayé sur servos simulés. `aller_point.bat` (clavier seul) n'applique pas cet
 Piste pour la cause du « trop loin » : la longueur axe de flexion → milieu des mâchoires (200,7 mm au programme) n'a jamais été
 mesurée avec la pince V4. **Mesurée par Nicolas le 25/11/2026 : 201 mm, c'est juste.** La cause du « trop loin » est donc ailleurs
 (longueurs 120 et 161 non mesurées, ou zéro d'un angle) ; la correction apprise l'absorbe.
+
+## Câlin trie les objets — `trier.bat` (26/11/2026)
+
+**Essayé sur 6 servos simulés et des images fabriquées, pas en vrai.**
+1. Bras au repos (R), table VIDE : **F** (photo du fond, gardée dans `camera/fond_table.png` sur le PC).
+2. Pose les objets d'essai. Ils sont entourés et numérotés, avec la largeur vue.
+3. **1** pour n'en trier qu'un (premiers essais), **T** pour tout trier. **ESPACE** arrête, le bras reste tenu.
+Pour chaque objet (le plus isolé d'abord) : visée corrigée (corrections apprises dans viser_camera), pince ouverte, approche,
+descente, serrage doux ; la pince mesure la largeur : **moins de 32 mm = PETIT, posé à gauche (X −235, Y 330)**, sinon **GROS, à
+droite (X +235, Y 330)**. Il regarde de nouveau, bras au repos, après chaque objet.
+Sécurités : objet hors de portée laissé et signalé ; 2 essais ratés au même endroit → objet abandonné ; **3 ratés de suite → arrêt**
+(visée décalée : refaire la correction aux flèches). Un voisin à moins de 55 mm est signalé.
+En simulation : rond 28 → 27 mm, barre 26 → 25, carré 36 → 35, rond 40 → 39 ; objet à 176 mm du socle laissé (trop près).
