@@ -41,6 +41,8 @@ ECART_DEPOT = 50.0                                                # mm entre deu
 # retombe droit tout seul (il ne bascule qu'au-delà de 23° pour la barre, 25° pour le petit rond, par le calcul).
 ECART_INCL = 15.0
 LEVE_PENCHE = 13.0                                                # mm : 32 (demi-longueur de la barre) × sin 15° + 5 de marge
+# Points où le bras pose l'objet pour apprendre sa visée (touche A) : devant le socle, entre les marqueurs.
+POINTS_VISEE = [(float(x), float(y)) for y in (250, 290, 330, 370, 410, 445) for x in (-110, 0, 110)]
 PRES_DU_SOCLE = 150.0                                             # mm : plus près, c'est le robot lui-même (socle, câbles), jamais un objet
 SEUIL_TAILLE = 37.0                                               # mm, largeur mesurée par la pince : en dessous, « petit »
 # Tri de Nicolas du 26/11/2026 : la pince lit environ 5 mm de trop (petit rond 28 → 33, hexagone 38 → 41, carré 36 → 43) ;
@@ -83,7 +85,7 @@ def points_du_bac(bac, pas=15.0):
     return sorted(pts, key=lambda q: math.hypot(*q))
 
 FICHIER_FOND = Path(__file__).resolve().parent.parent / 'camera' / 'fond_table.png'
-AIDE = 'F = fond (table VIDE) | T = TRIER (taille) | 1 = un seul objet | O ouvrir | R repos | ESPACE = ARRET | P photo | Q quitter'
+AIDE = 'F = fond (table VIDE) | A = apprendre la visee (1 objet) | T = TRIER (taille) | 1 = un seul objet | O ouvrir | R repos | ESPACE = ARRET | P photo | Q quitter'
 
 def choisir(objets, rates):
     """L'objet à prendre maintenant : le plus isolé, parmi ceux qui n'ont pas déjà raté ESSAIS_MAX fois au même endroit."""
@@ -297,6 +299,65 @@ class Trieur(Poste):
             try: self.trier(None)
             finally: self.au_repos = True; self.plan_vocal = None
         self._lancer('tri à la voix', geste)
+
+    def apprendre_visee(self):
+        """Le bras apprend SEUL où il arrive vraiment (demande de Nicolas, 26/11/2026 : « quand il rate, il n'apprend pas »).
+        Il prend l'unique objet de la table, le pose sur un point choisi, recule, et la caméra regarde où l'objet est vraiment :
+        l'écart entre le point visé et l'endroit où l'objet se retrouve est la correction de visée de cet endroit. Puis il le
+        reprend là où il est et recommence plus loin. Les points sont visités de proche en proche, pour que la pince garde
+        (à 15° près) l'inclinaison de la prise. À la fin, les corrections apprises remplacent les anciennes (gardées à côté)."""
+        p, c = self.p, self.p.c; h = c.hauteur
+        p.repos(); self.redresser()
+        def seul():
+            objs = self.regarder()
+            if len(objs) != 1: raise ErreurServo(f'pour apprendre la visée, il faut UN SEUL objet sur la table (un rond de préférence), j\'en vois {len(objs)}')
+            return objs[0]
+        o = seul(); nouvelles, erreurs, rates, k = [], [], 0, 0
+        reste = [pt for pt in POINTS_VISEE if not dans_un_bac(*pt, self.bacs, 70.0)
+                 and all(math.hypot(pt[0] - x, pt[1] - y) >= LOIN_DES_MARQUEURS for x, y in T.coins_table(self.reglage).values())]
+        self.dire(f'J\'apprends la visée sur {len(reste)} points, avec cet objet. ESPACE pour arrêter.')
+        while reste:
+            visee = C.corriger(o['X'], o['Y'], self.corrections)
+            try: incl_o = G.choisir_inclinaison(*visee, h)[0]
+            except G.HorsDePortee: raise ErreurServo('l\'objet est hors de portée : mets-le vers le milieu de la table, puis A')
+            cands = []
+            for pt in reste:                                  # où le poser : même inclinaison si possible, sinon 15° d'écart, au plus près
+                q = C.corriger(*pt, self.corrections)
+                try:
+                    ip = G.choisir_inclinaison(*q, h)[0]
+                    if abs(ip - incl_o) > ECART_INCL:           # trop d'écart : on le pose là-bas avec l'inclinaison de la prise, si elle y passe
+                        G.prise_et_approche(*q, h, incl_o, 0.0); ip = incl_o; rang = 2
+                    else:
+                        rang = int(ip != incl_o); G.prise_et_approche(*q, h, ip, 0.0 if ip == incl_o else LEVE_PENCHE)
+                    cands.append((rang, abs(math.hypot(*pt) - math.hypot(o['X'], o['Y'])), pt, q, ip))
+                except G.HorsDePortee: continue
+            if not cands: self.dire(f'   Les {len(reste)} points restants ne sont pas atteignables d\'ici : je m\'arrête là.'); break
+            _, _, pt, q, ip = min(cands); reste.remove(pt); k += 1
+            self.dire(f'Point {k} : je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} pour le poser en X {pt[0]:+.0f}, Y {pt[1]:.0f}.')
+            plan = p.preparer(*visee)
+            if not plan: raise ErreurServo('prise impossible')
+            self.au_repos = False; incl_prise = p.incl
+            self.ouvrir_a(ouverture_prise(o)); p.aller(*plan); self.etape(p.prise is plan[0], 'l\'approche'); self.etape(p.descendre(), 'la descente')
+            tenu, largeur = self.serrer(); self.etape(p.monter(), 'la remontée')
+            if not tenu:
+                self.ouvrir_a(ouverture_prise(o)); p.repos(); rates += 1; reste.append(pt)
+                if rates >= 3: raise ErreurServo('3 prises ratées : la correction actuelle est trop fausse pour démarrer. Fais UN point à la main dans viser_camera (flèches puis C) près de l\'objet, puis reviens faire A.')
+                self.dire('   Prise ratée : je regarde à nouveau.'); o = seul(); continue
+            plan2 = p.preparer(*q, ip, 0.0 if ip == incl_prise else LEVE_PENCHE)
+            if not plan2: raise ErreurServo('pose impossible (objet en main : O pour ouvrir, bras tenu)')
+            p.aller(*plan2); self.etape(p.prise is plan2[0], 'le transport'); self.etape(p.descendre(), 'la pose')
+            self.ouvrir_a(max(largeur, 20.0) + 20); self.etape(p.monter(), 'la remontée'); p.repos()
+            o = seul(); arrive = (o['X'], o['Y']); e = math.hypot(arrive[0] - pt[0], arrive[1] - pt[1])
+            if e > 90: raise ErreurServo(f'l\'objet est à {e:.0f} mm du point visé : il a roulé ou il est tombé. Rien n\'est enregistré pour ce point ; remets-le debout puis A.')
+            nouvelles = C.apprendre(nouvelles, arrive, q); erreurs.append(e)
+            self.dire(f'   Visé X {pt[0]:+.0f}, Y {pt[1]:.0f} → arrivé en X {arrive[0]:+.0f}, Y {arrive[1]:.0f} : {e:.0f} mm d\'écart ({C.en_clair(pt, arrive)}).')
+        if len(nouvelles) < 4: self.dire(f'Seulement {len(nouvelles)} point(s) appris : il en faut 4. Les corrections ne changent pas.'); return
+        C.FICHIER.with_name('correction_point_avant.json').write_text(__import__('json').dumps(self.corrections, indent=1), encoding='utf-8')
+        # 8 points mesurés ou plus : ils remplacent tout. Moins : on garde aussi les anciens points qui sont loin des nouveaux.
+        gardes = [] if len(nouvelles) >= 8 else [a for a in self.corrections if all(math.hypot(a['X'] - n['X'], a['Y'] - n['Y']) > 60 for n in nouvelles)]
+        self.corrections = nouvelles + gardes; C.enregistrer(self.corrections)
+        self.dire(f'Visée apprise sur {len(nouvelles)} points{f" ({len(gardes)} anciens gardés)" if gardes else ""}. Avec les corrections qu\'il avait AU DÉPART, l\'écart était de {sum(erreurs) / len(erreurs):.0f} mm en moyenne '
+                  f'(pire : {max(erreurs):.0f} mm). Refais A : l\'écart mesuré sera celui des nouvelles corrections.')
 
     def tourner(self, angle):
         """Tourne la pince sur elle-même (bras en l'air, au repos ou au-dessus du point). La pose se fera pince tournée aussi."""
@@ -528,6 +589,12 @@ class Trieur(Poste):
                 try: self.trier(None if kk == 't' else 1)
                 finally: self.au_repos = True
             self._lancer('tri en cours', geste); return True
+        if kk == 'a':
+            if self.fond is None: self.dire('Il faut d\'abord la photo du fond : table VIDE, bras au repos, touche F.'); return True
+            def geste():
+                try: self.apprendre_visee()
+                finally: self.au_repos = True
+            self.rates = []; self._lancer('apprentissage de la visée', geste); return True
         if kk == 'r':
             def repos():
                 self.p.repos(); self.redresser(); self.au_repos = True

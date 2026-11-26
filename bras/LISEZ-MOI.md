@@ -560,3 +560,23 @@ Nicolas dit par exemple « range les ronds dans le bac de gauche et le reste à 
 - Les objets qu'on ne demande pas de ranger restent sur la table et comptent comme obstacles : écarte-les du passage.
 
 **Pourquoi passer par Claude pour les formes** : le calcul seul a été essayé sur les vraies photos du 26/11/2026, en mesurant la largeur de l'objet dans toutes les directions, sur tout le contour puis sur la face du dessus. Les ronds ressortaient en « barres », à cause du penché et des reflets sur la table. Seuls le petit rond et le carré étaient bien reconnus, jamais l'hexagone.
+
+## Le bras apprend sa visée tout seul — touche A de `trier` (26/11/2026, essayé en simulation seulement)
+
+Avant, les corrections de visée se réglaient à la main dans `viser_camera` (flèches puis C), et un raté n'apprenait rien au bras.
+Avec **A** (« poser et regarder », choix de Nicolas : un repère collé sur la pince n'aurait pas été vu quand elle pointe vers le bas) :
+
+1. il faut la photo du fond (F), puis **un seul objet** sur la table, un rond de préférence, vers le milieu ;
+2. le bras le prend, le pose sur un point choisi, revient au repos, et la caméra regarde où l'objet est vraiment ;
+3. l'écart entre le point visé et l'endroit où l'objet se retrouve devient la correction de visée de cet endroit ;
+4. il le reprend là où il est et recommence, de proche en proche, sur une quinzaine de points entre les marqueurs.
+
+À la fin, il dit l'écart moyen qu'il avait. Avec 8 points mesurés ou plus, les nouvelles corrections remplacent les anciennes
+(sauvées dans `correction_point_avant.json`) ; avec moins, les anciens points éloignés sont gardés. **Refaire A une deuxième
+fois** mesure ce qu'il reste. À refaire après chaque démontage du bras ou déplacement de la caméra.
+
+Simulation : un bras qui va 50 mm trop loin et 2° trop à droite, avec un seul point réglé à la main (faux de 15 mm). Première
+passe : 12 points appris, écart moyen 17 mm. Deuxième passe : 1 mm. Corrections retrouvées : −49 mm et −2°.
+
+Limites : il faut que les corrections de départ permettent au moins de SAISIR l'objet (sinon : un point à la main dans
+`viser_camera`) ; un objet qui roule ou tombe fausse la mesure (au-delà de 9 cm d'écart, le point est refusé).
