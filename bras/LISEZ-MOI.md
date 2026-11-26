@@ -487,3 +487,15 @@ centre du bac (X, Y lus dans `camera\voir_table`), sa taille intérieure et la h
 bras peut y lâcher un objet quelle que soit sa prise. Calcul, bac 150 × 120 : bord de 4 à 12 cm accepté entre environ 30 et 43 cm
 du socle ; trop loin (50 cm) ou trop près avec un bord haut, refusé. **Le bac doit être en place AVANT la photo du fond (F).**
 Les objets vus dans un bac sont ignorés.
+
+### Ne pas renverser les voisins (26/11/2026, question de Nicolas)
+
+Calcul (`obstacles.py`) : pour un objet pris pince à plat vers 42 cm, l'avant-bras et le poignet passent à moins de 7 cm de la table
+de 21 à 39 cm du socle ; un objet posé entre le socle et la cible serait renversé. Le tri vérifie maintenant, point par point le
+long du bras et des mâchoires (et de l'objet tenu, qui tourne avec la pince) :
+- la prise : depuis le repos jusqu'à l'objet ; un objet gêné attend que ses voisins soient partis ; si tous sont gênés, arrêt avec
+  le nom de l'objet qui gêne ;
+- le transport et la pose : une place n'est retenue que si le trajet objet en main ne touche rien (objets restants, objets posés) ;
+- la pince ne s'ouvre plus en grand : largeur vue + 30 mm à la prise, largeur mesurée + 16 mm à la pose.
+Simulation : rond à 42 cm caché derrière un petit rond à 30 cm → le bras prend d'abord le petit, puis le grand. Rien d'essayé en vrai.
+Bras modélisé avec 28 mm de demi-largeur et 8 mm de marge (le bac n'est pas encore compté comme obstacle).

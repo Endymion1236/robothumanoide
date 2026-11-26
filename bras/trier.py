@@ -21,7 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'camera'))
 import cv2, numpy as np
 import table as T, voir_table as V, objets as O
-import aller_point as A, correction as C, geometrie as G, test_pince as PI
+import aller_point as A, correction as C, geometrie as G, test_pince as PI, obstacles as OB, test_epaule as EP
 from servos import ErreurServo
 from viser_camera import Poste, sans_accents, FLECHES
 
@@ -76,6 +76,8 @@ def choisir(objets, rates):
         candidats.append((voisin, o))
     return max(candidats, key=lambda c: c[0]) if candidats else (None, None)
 
+REPOS = {'epaule': EP.REPOS, 'coude': 0.0, 'flexion': 0.0}
+def ouverture_prise(o): return min(100.0, max(o['largeur'], 30.0) + 30.0)      # mm : juste ce qu'il faut, pour ne pas toucher les voisins
 def zone_de(largeur): return 'petit' if largeur < SEUIL_TAILLE else 'gros'
 
 class Trieur(Poste):
@@ -84,7 +86,7 @@ class Trieur(Poste):
         self.hauteur, self.fond, self.objets, self.image = hauteur, None, [], None
         self.demande, self.reponse = threading.Event(), threading.Event()
         self.au_repos, self.tries, self.rates = True, {'petit': 0, 'gros': 0}, []
-        self.deposes = {z: [] for z in ZONES}
+        self.deposes = {z: [] for z in ZONES}; self.tenu = None; self.objets_tri, self.objet_pris = [], None
         self.bacs = charger_bacs()
         for z, b in self.bacs.items(): self.dire(f'Les {PLURIEL[z]} vont dans le bac (X {b["X"]:+.0f}, Y {b["Y"]:.0f}, bord à {b["bord"]:.0f} mm).')
         if FICHIER_FOND.exists(): self.fond = cv2.imread(str(FICHIER_FOND)); self.dire('Photo du fond reprise du dernier essai (F pour la refaire si la caméra a bougé).')
@@ -128,7 +130,7 @@ class Trieur(Poste):
         plan = p.preparer(*C.corriger(*pt, self.corrections), i, leve)
         if not plan: raise ErreurServo('Pose dans le bac impossible.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
-        self.etape(p.descendre(), 'l\'arrivée au-dessus du bac'); c._pince('o'); p.vider(); time.sleep(0.3)
+        self.etape(p.descendre(), 'l\'arrivée au-dessus du bac'); c._pince('o'); p.vider(); time.sleep(0.3); self.tenu = None
         self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1
         return True
 
@@ -153,7 +155,10 @@ class Trieur(Poste):
                 if all(math.hypot(pt[0] - x, pt[1] - y) >= ECART_DEPOT for x, y in self.deposes[zone]):
                     # on vérifie le point que le bras visera vraiment, correction de visée comprise (Nicolas, 26/11/2026 : place
                     # trouvée à 245 mm, corrigée à 235, hors de portée pour la pince à 75° : bras arrêté objet en main)
-                    try: G.prise_et_approche(*C.corriger(*pt, self.corrections), self.p.c.hauteur, incl, leve); return pt
+                    try:
+                        v = C.corriger(*pt, self.corrections); pr, ht = G.prise_et_approche(*v, self.p.c.hauteur, incl, leve)
+                        pr = dict(pr, socle=G.angles_pour(*v, None, self.p.c.hauteur, incl)['socle']); ht = dict(ht, socle=pr['socle'])
+                        if getattr(self, 'tenu', None) is None or self.transport_libre(ht, pr) is None: return pt
                     except G.HorsDePortee: pass
         return None
 
@@ -163,11 +168,41 @@ class Trieur(Poste):
         largeur = PI.ecart_mm(pos, c.ouvert); self.dire(f'Serrer : {texte}' + (f' · largeur ≈ {largeur:.0f} mm' if tenu else ''))
         return tenu, largeur
 
+    def obstacles(self, objets, sauf=None):
+        """Les objets que le bras ne doit pas heurter : ceux de la table (sauf celui qu'il prend) et ceux déjà posés."""
+        obs = [{'X': o['X'], 'Y': o['Y'], 'rayon': min(max(o['largeur'], o['longueur']), 70.0) / 2, 'hauteur': self.hauteur,
+                'nom': f'X {o["X"]:+.0f} Y {o["Y"]:.0f}'} for o in objets if o is not sauf]
+        obs += [{'X': x, 'Y': y, 'rayon': 22.0, 'hauteur': self.hauteur, 'nom': f'posé en X {x:+.0f} Y {y:.0f}'} for z in self.deposes for x, y in self.deposes[z]]
+        return obs
+
+    def libre_pour_prendre(self, o, objets):
+        """(None, plan) si le geste de prise ne heurte rien ; (obstacle, None) sinon ; (None, None) si hors de portée."""
+        visee = C.corriger(o['X'], o['Y'], self.corrections)
+        try: incl, prise, haut = G.choisir_inclinaison(*visee, self.p.c.hauteur)
+        except G.HorsDePortee: return None, None
+        gene = OB.geste_libre(prise['socle'], [REPOS, haut, prise], self.obstacles(objets, o), self.p.c.hauteur, ouverture_prise(o))
+        return gene, (None if gene else (incl, prise, haut))
+
+    def choisir(self, objets):
+        """L'objet à prendre : le plus isolé parmi ceux qu'on peut prendre SANS heurter un autre objet (demande de Nicolas)."""
+        _, premier = choisir(objets, self.rates)
+        if premier is None: return None
+        restants = [o for o in objets if sum(1 for x, y in self.rates if math.hypot(o['X'] - x, o['Y'] - y) < 25) < ESSAIS_MAX]
+        genes = []
+        for o in sorted(restants, key=lambda o: -min([math.hypot(o['X'] - a['X'], o['Y'] - a['Y']) for a in objets if a is not o] or [999.0])):
+            gene, plan = self.libre_pour_prendre(o, objets)
+            if gene is None: return o                                                # libre, ou hors de portée (le message suivra)
+            genes.append((o, gene))
+        for o, g in genes: self.dire(f'   L\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} est gêné : le bras toucherait l\'objet {g["nom"]}.')
+        raise ErreurServo('tous les objets restants sont gênés par un voisin : écarte-les (6 cm au moins, et rien entre le socle et un objet), puis T.')
+
     def un_objet(self, objets):
         """Prend l'objet le plus isolé et le pose dans sa zone. Renvoie True si un objet a été trié, False s'il n'y en a plus."""
         p, c = self.p, self.p.c
-        voisin, o = choisir(objets, self.rates)
+        o = self.choisir(objets)
         if o is None: return False
+        voisin = min([math.hypot(o['X'] - a['X'], o['Y'] - a['Y']) for a in objets if a is not o] or [999.0])
+        self.objets_tri, self.objet_pris = objets, o
         if voisin < ECART_MIN: self.dire(f'Attention : l\'objet en X {o["X"]:+.0f} Y {o["Y"]:.0f} a un voisin à {voisin:.0f} mm, la pince pourrait le toucher.')
         visee = C.corriger(o['X'], o['Y'], self.corrections)
         self.dire(f'Je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} (vu {o["largeur"]:.0f} mm de large).')
@@ -180,13 +215,13 @@ class Trieur(Poste):
             else: self.dire('   Hors de portée : je le laisse.')
             return True
         self.au_repos = False
-        c._pince('o'); p.vider()
+        self.ouvrir_a(ouverture_prise(o))
         p.aller(*plan); self.etape(p.prise is plan[0], 'l\'approche')
         self.etape(p.descendre(), 'la descente')
-        tenu, largeur = self.serrer()
+        tenu, largeur = self.serrer(); self.tenu = (p.incl, G.hauteur_prise(p.incl), self.hauteur, max(largeur, 20.0) / 2 + 2)
         self.etape(p.monter(), 'la remontée')
         if not tenu:
-            self.rates.append((o['X'], o['Y'])); self.suite_ratee += 1; c._pince('o'); p.vider()
+            self.rates.append((o['X'], o['Y'])); self.suite_ratee += 1; self.ouvrir_a(ouverture_prise(o))
             self.dire('   Raté : rien entre les doigts. Je regarde à nouveau.'); p.repos()
             if self.suite_ratee >= 3: raise ErreurServo('3 prises ratées de suite : la visée est sans doute décalée. Refais la correction aux flèches dans viser_camera, puis reviens.')
             return True
@@ -198,12 +233,27 @@ class Trieur(Poste):
             self.dire(f'   {err} Je le repose là où je l\'ai pris.'); self.rates += [(o['X'], o['Y'])] * ESSAIS_MAX
             self.reposer_ou_pris(); return True
 
+    def ouvrir_a(self, mm):
+        """Ouvre la pince à `mm` d'écart seulement (pas grande ouverte : elle toucherait les voisins)."""
+        c = self.p.c; lo, hi = sorted(PI.BUTEES_PINCE)
+        pos = min(range(lo, hi + 1, 4), key=lambda q: abs(PI.ecart_mm(q, c.ouvert) - mm) if (q - c.ferme) * (c.ouvert - c.ferme) >= 0 else 1e9)
+        c.bus.limiter_force(c.pince, PI.FORCE_MOUVEMENT); c.bus.tenir(c.pince)
+        self.dire(f'   Pince ouverte à {PI.ecart_mm(pos, c.ouvert):.0f} mm : ' + c.bus.aller(c.pince, pos, charge_max=PI.CHARGE_BLOCAGE))
+
+    def transport_libre(self, haut, prise):
+        """Le trajet objet en main, de la remontée jusqu'à la pose, ne heurte rien ? Renvoie l'obstacle touché ou None."""
+        p = self.p; depart = p.haut or haut
+        obs = self.obstacles(self.objets_tri, self.objet_pris)
+        socle0 = getattr(p, 'prise', None)['socle'] if getattr(p, 'prise', None) else prise['socle']
+        g = OB.geste_libre(socle0, [depart, REPOS], obs, p.c.hauteur, 0.0, self.tenu)
+        return g or OB.geste_libre(prise['socle'], [REPOS, haut, prise], obs, p.c.hauteur, 0.0, self.tenu)
+
     def reposer_ou_pris(self):
         """Le bras tient un objet qu'il ne peut pas poser dans sa zone : il le remet exactement où il l'a pris (même point, même
         inclinaison : c'est toujours possible, il venait de là), ouvre, remonte, revient au repos."""
         p, c = self.p, self.p.c
         p.aller(*self.plan_prise); self.etape(p.prise is self.plan_prise[0], 'le retour au point de prise')
-        self.etape(p.descendre(), 'la descente'); c._pince('o'); p.vider()
+        self.etape(p.descendre(), 'la descente'); self.ouvrir_a(2 * self.tenu[3] + 16); self.tenu = None
         self.etape(p.monter(), 'la remontée'); p.repos()
 
     def poser(self, z, incl, largeur):
@@ -218,8 +268,8 @@ class Trieur(Poste):
         plan = p.preparer(*C.corriger(*spot, self.corrections), incl_pose, leve)
         if not plan: raise ErreurServo('Pose impossible à cet endroit.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
-        self.etape(p.descendre(), 'la pose'); c._pince('o'); p.vider()
-        self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1; self.deposes[z].append(spot)
+        self.etape(p.descendre(), 'la pose'); self.ouvrir_a(2 * self.tenu[3] + 16)
+        self.etape(p.monter(), 'la remontée'); p.repos(); self.tries[z] += 1; self.deposes[z].append(spot); self.tenu = None
         return True
 
     def trier(self, combien=None):
