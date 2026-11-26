@@ -8,8 +8,8 @@ caméra. Son milieu apparent n'est donc pas son pied. Le programme calcule où e
 ce décalage pour des objets de hauteur connue (HAUTEUR_OBJETS, 60 mm pour les objets d'essai).
 
 Limites connues :
-  - un objet de la couleur du bois, ou noir, se voit mal ; une ombre forte peut créer un faux objet (les ombres, qui ne font que
-    foncer le bois, sont écartées) ;
+  - un objet de la couleur du bois se voit mal ; les objets gris ou noirs sont reconnus parce qu'ils n'ont pas la couleur du bois ;
+    les ombres, qui foncent le bois sans lui ôter sa couleur, sont écartées ;
   - deux objets qui se touchent sont vus comme un seul ;
   - la forme (rond, carré, hexagone) se lit mal sur un objet qui penche : on se sert surtout de la TAILLE, mesurée par la pince."""
 import math
@@ -18,7 +18,8 @@ import table as T
 
 HAUTEUR_OBJETS = 60.0                     # mm
 MARGE = 40.0                              # mm : on regarde aussi un peu autour du rectangle des marqueurs
-SEUIL_COULEUR, SEUIL_CLAIR = 18.0, 28.0   # différences avec le fond (échelle Lab d'OpenCV) au-delà desquelles c'est un objet
+SEUIL_COULEUR, SEUIL_CLAIR = 18.0, 28.0
+SEUIL_FONCE, RAPPORT_GRIS = 15.0, 0.4      # objet gris : au moins 15 plus foncé que le bois, et moins de 40 % de sa saturation   # différences avec le fond (échelle Lab d'OpenCV) au-delà desquelles c'est un objet
 AIRE_MIN = 250.0                          # mm² : en dessous, c'est une poussière ou un reflet
 F_PAR_DEFAUT = 1537.0                     # points, pour une image de 1280 de large : C270 (55° en diagonale, fiche du fabricant)
 
@@ -59,7 +60,11 @@ def masque(vue, fond):
     a = cv2.cvtColor(cv2.GaussianBlur(vue, (5, 5), 0), cv2.COLOR_BGR2LAB).astype(np.float32)
     b = cv2.cvtColor(cv2.GaussianBlur(fond, (5, 5), 0), cv2.COLOR_BGR2LAB).astype(np.float32)
     teinte = np.hypot(a[..., 1] - b[..., 1], a[..., 2] - b[..., 2]); clair = a[..., 0] - b[..., 0]
-    m = ((teinte > SEUIL_COULEUR) | (clair > SEUIL_CLAIR)).astype(np.uint8) * 255
+    # objets GRIS ou NOIRS (ceux de Nicolas, 26/11/2026) : plus foncés que le bois ET sans sa couleur. Une ombre fonce le bois mais
+    # lui laisse une partie de sa couleur (au moins 50 % de sa saturation, même forte) : elle n'est pas prise.
+    sat_a, sat_b = np.hypot(a[..., 1] - 128, a[..., 2] - 128), np.hypot(b[..., 1] - 128, b[..., 2] - 128)
+    gris = (clair < -SEUIL_FONCE) & (sat_a < RAPPORT_GRIS * sat_b) & (sat_b > 12)
+    m = ((teinte > SEUIL_COULEUR) | (clair > SEUIL_CLAIR) | gris).astype(np.uint8) * 255
     m[(vue.sum(axis=2) == 0) | (fond.sum(axis=2) == 0)] = 0                      # hors de l'image de la caméra
     m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
     return cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
