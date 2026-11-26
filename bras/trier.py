@@ -41,7 +41,9 @@ ECART_DEPOT = 50.0                                                # mm entre deu
 # retombe droit tout seul (il ne bascule qu'au-delà de 23° pour la barre, 25° pour le petit rond, par le calcul).
 ECART_INCL = 15.0
 LEVE_PENCHE = 13.0                                                # mm : 32 (demi-longueur de la barre) × sin 15° + 5 de marge
-SEUIL_TAILLE = 32.0                                               # mm, largeur mesurée par la pince : en dessous, « petit »
+SEUIL_TAILLE = 37.0                                               # mm, largeur mesurée par la pince : en dessous, « petit »
+# Tri de Nicolas du 26/11/2026 : la pince lit environ 5 mm de trop (petit rond 28 → 33, hexagone 38 → 41, carré 36 → 43) ;
+# avec 32, le petit rond partait chez les gros. 37 passe au milieu de l'écart entre 33 et 41.
 ECART_MIN = 55.0                                                  # mm entre deux objets : plus près, la pince ouverte risque de toucher le voisin
 ESSAIS_MAX = 2                                                    # tentatives au même endroit avant d'abandonner l'objet
 # Option BAC (demande de Nicolas, 26/11/2026) : une zone peut être un bac posé sur la table (réglé par regler_bac.bat, gardé
@@ -363,7 +365,7 @@ class Trieur(Poste):
             self.dire(f'Rapport enregistré : bras\\rapports\\{d.name}')
 
     def _trier(self, combien=None):
-        n = 0; self.suite_ratee = 0
+        n = 0; self.suite_ratee = 0; avant = dict(self.tries)       # les compteurs courent depuis le lancement : on ne compte que CE tri
         self.p.repos()
         objets = self.regarder(); self.rap.photo('00_debut', self.image, self.annoter(self.image))
         while combien is None or n < combien:
@@ -376,7 +378,7 @@ class Trieur(Poste):
                 self.controle_photo(self.rap.essai)
             n += 1
         reste = [o for o in self.regarder()]
-        txt = (f'Fini : {self.tries["petit"]} petit(s) à gauche, {self.tries["gros"]} gros à droite.' + (f' {len(reste)} objet(s) laissé(s) (hors de portée ou ratés).' if reste and combien is None else ''))
+        txt = (f'Fini : {self.tries["petit"] - avant["petit"]} petit(s) à gauche, {self.tries["gros"] - avant["gros"]} gros à droite.' + (f' {len(reste)} objet(s) laissé(s) (hors de portée ou ratés).' if reste and combien is None else ''))
         self.dire(txt); return txt
 
     def touche(self, k):
