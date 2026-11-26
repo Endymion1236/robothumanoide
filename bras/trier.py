@@ -105,7 +105,8 @@ class Trieur(Poste):
         if self.occupe or not self.au_repos: self.dire('Bras au repos d\'abord (R), table vide.'); return
         if self.image is None or not self.vus: self.dire('Il faut voir les 4 marqueurs pour prendre le fond.'); return
         self.fond = self.image.copy(); cv2.imwrite(str(FICHIER_FOND), self.fond); self.objets = []
-        self.dire('Fond enregistré. Pose maintenant les objets sur la table.')
+        self.deposes = {z: [] for z in ZONES}                                     # table vide : plus rien de posé dans les zones
+        self.dire('Fond enregistré, zones vidées. Pose maintenant les objets sur la table.')
 
     def regarder(self, delai=8.0):
         """Attend une image prise bras au repos et renvoie les objets trouvés (copie)."""
@@ -327,6 +328,10 @@ class Trieur(Poste):
         etat = ('Le bras trie... ESPACE = ARRET' if self.occupe else 'Photo du fond manquante : table VIDE, bras au repos, touche F' if self.fond is None
                 else f'{len(self.objets)} objet(s) vu(s). T = trier' if self.vus else 'Marqueurs caches : dernier reperage garde')
         V.ecrire(image, sans_accents(etat), (10, 40), (0, 200, 255) if self.occupe or self.fond is None else (120, 255, 120))
+        if self.fond is not None and getattr(O.trouver, 'lumiere', None):
+            V.ecrire(image, 'La lumiere a change depuis la photo du fond : retire les objets, puis F', (10, 80), (80, 80, 255))
+            for X, Y, _ in O.trouver.lumiere:
+                if self.h is not None: V.ecrire(image, '?', T.vers_image(self.h, X, Y), (80, 80, 255), 1.0)
         V.ecrire(image, AIDE, (10, haut - 14), (255, 255, 255), 0.55)
         for n, m in enumerate(reversed(self.messages[-3:])):
             V.ecrire(image, sans_accents(m)[:110], (10, haut - 14 - (n + 1) * pas), (0, 230, 255) if n == 0 else (190, 190, 190), 0.55)

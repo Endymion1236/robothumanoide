@@ -20,8 +20,10 @@ HAUTEUR_OBJETS = 60.0                     # mm
 MARGE = 40.0                              # mm : on regarde aussi un peu autour du rectangle des marqueurs
 SEUIL_COULEUR, SEUIL_CLAIR = 18.0, 28.0
 SEUIL_FONCE, SEUIL_JAUNE, SEUIL_NOIR = 12.0, 0.06, 45.0  # objet gris : 12 plus foncé, et nettement moins jaune pour sa luminosité   # différences avec le fond (échelle Lab d'OpenCV) au-delà desquelles c'est un objet
-DEMI_MARQUEUR = 38.0                      # mm : carré ignoré autour du centre de chaque marqueur (papier et scotch compris). Nicolas,
+DEMI_MARQUEUR = 45.0                      # mm : carré ignoré autour du centre de chaque marqueur (papier et scotch compris). Nicolas,
                                           # 26/11/2026 : un faux objet de 57 mm sur le marqueur n° 3 (lumière changée depuis la photo du fond)
+TEXTE_MARQUEUR = 22.0                     # mm de plus côté socle : le texte imprimé sous chaque marqueur (capture du 26/11/2026)
+TAILLE_MAX = 90.0                         # mm : plus large que ça, ce n'est pas un objet d'essai mais un changement de lumière (soleil)
 AIRE_MIN = 250.0                          # mm² : en dessous, c'est une poussière ou un reflet
 F_PAR_DEFAUT = 1537.0                     # points, pour une image de 1280 de large : C270 (55° en diagonale, fiche du fabricant)
 
@@ -83,12 +85,12 @@ def trouver(image, fond, h, reglage, hauteur=HAUTEUR_OBJETS, exclure=()):
     m = masque(vue, vfond)
     x0, y0, x1, y1 = cadre(reglage)
     for X, Y in T.coins_table(reglage).values():                                # les marqueurs eux-mêmes ne sont jamais des objets
-        cv2.rectangle(m, (int(X - x0 - DEMI_MARQUEUR), int(y1 - Y - DEMI_MARQUEUR)), (int(X - x0 + DEMI_MARQUEUR), int(y1 - Y + DEMI_MARQUEUR)), 0, -1)
+        cv2.rectangle(m, (int(X - x0 - DEMI_MARQUEUR), int(y1 - Y - DEMI_MARQUEUR)), (int(X - x0 + DEMI_MARQUEUR), int(y1 - Y + DEMI_MARQUEUR + TEXTE_MARQUEUR)), 0, -1)
     for X, Y, r in exclure:
         x0, y0, x1, y1 = cadre(reglage); cv2.circle(m, (int(X - x0), int(y1 - Y)), int(r), 0, -1)
     cX, cY, cZ, _ = camera(h, (image.shape[1], image.shape[0]))
     k = cZ / max(cZ - hauteur, 1.0)                                              # le sommet est vu « agrandi » de k depuis la caméra
-    objets = []
+    objets, lumiere = [], []
     for c in cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]:
         if cv2.contourArea(c) < AIRE_MIN: continue
         c = cv2.convexHull(c)                                                    # les objets d'essai sont convexes : on bouche les creux du contour
@@ -101,6 +103,9 @@ def trouver(image, fond, h, reglage, hauteur=HAUTEUR_OBJETS, exclure=()):
         larg = float(np.ptp(pts @ n)) / ((1 + k) / 2)                             # en travers du « penché » : la vraie largeur
         long_ = float(np.ptp(pts @ d)) - (k - 1) * math.hypot(X - cX, Y - cY)     # le long : on retire l'allongement dû à la hauteur
         (_, _), (a1, a2), _ = cv2.minAreaRect(pts.astype(np.float32))
+        if larg > TAILLE_MAX or long_ > TAILLE_MAX * 1.4:
+            lumiere.append((X, Y, larg)); continue                               # tache de soleil, ombre portée d'une personne…
         objets.append({'X': X, 'Y': Y, 'largeur': larg, 'longueur': max(long_, 1.0), 'aire': cv2.contourArea(c),
                        'allonge': max(long_, larg) / max(min(long_, larg), 1.0), 'contour': pts})
+    trouver.lumiere = lumiere                                                   # ce qui a été écarté : le programme prévient
     return sorted(objets, key=lambda o: -o['Y'])
