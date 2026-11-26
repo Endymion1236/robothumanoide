@@ -599,3 +599,38 @@ passe : 12 points appris, écart moyen 17 mm. Deuxième passe : 1 mm. Correction
 
 Limites : il faut que les corrections de départ permettent au moins de SAISIR l'objet (sinon : un point à la main dans
 `viser_camera`) ; un objet qui roule ou tombe fausse la mesure (au-delà de 9 cm d'écart, le point est refusé).
+
+## Câlin joue au morpion — `jouer_morpion.bat` (26/11/2026, essayé en simulation seulement)
+
+La caméra lit le plateau, un petit programme qui connaît les règles choisit le coup (`morpion.py` : gratuit et immédiat, pas
+d'appel à l'IA), le bras prend un de ses pions et le pose dans la case. Câlin commente la partie à voix haute.
+
+**Le matériel**
+- **Pions de Câlin : des PETITS ronds** (`objets/sortie/objet_rond_petit.stl`, Ø 28). Il en faut 5 pour une partie ; 2 suffisent
+  pour commencer, à condition de les lui redonner.
+- **Pions de Nicolas : des GROS** (`objet_carre.stl` ou `objet_rond_grand.stl`), 5. La caméra distingue les deux par la largeur
+  vue d'en haut (limite à 37 mm) : tout peut être imprimé dans la même couleur.
+- **Pas de plateau en papier** : sur du papier blanc, la caméra verrait mal les pions gris. La grille (9 cases de 70 mm, centre
+  à 35 cm devant le socle) se marque avec **4 bandes de ruban de masquage**, collées en suivant les traits bleus de l'écran.
+
+**Une partie**
+1. Bras au repos, table VIDE (rubans collés, aucun pion) : **F**, la photo du fond.
+2. Un petit rond sur chacun des **deux ronds bleus** de l'écran : c'est la réserve de Câlin, de part et d'autre du plateau.
+   Le programme calcule ces emplacements pour qu'un pion pris là puisse aller dans les 9 cases.
+3. **N** : nouvelle partie, tu commences (**C** : Câlin commence). Pose un gros pion dans une case (à moins de 3 cm de son
+   centre) et retire ta main : Câlin voit ton coup au bout d'une seconde, annonce le sien et le joue.
+4. Quand il a pris un pion, remets-en un sur le rond bleu vide. S'il n'en a plus, il le demande ; puis **J**.
+5. Niveaux : **1** facile, **2** normal (on peut le battre), **3** imbattable. **ESPACE** arrête le bras (il reste tenu).
+
+**Ce qu'il vérifie** : un seul nouveau pion à la fois, aucun pion déplacé ou retiré, pas de pion de Câlin posé par toi ; sinon
+il le dit et attend. Après son coup, il regarde si son pion est bien dans la case et demande un coup de main sinon.
+
+**Pourquoi seulement deux emplacements de réserve** : un pion doit être posé avec l'inclinaison de pince de sa prise (à 15°
+près), et la pince ouverte ne passe pas entre deux pions serrés. Deux emplacements isolés, à la bonne distance, règlent les deux.
+
+**Vérifié** : les règles (en « imbattable », Câlin ne perd aucune des parties possibles ; en facile et normal, on peut gagner),
+la lecture du plateau, et une partie complète sur le bras simulé. **Pas encore joué sur le vrai bras.**
+
+**Correction qui profite aussi au tri (même jour)** : le contrôle « un voisin gêne-t-il ? » comparait les gestes du bras, calculés
+aux points corrigés par la visée apprise, à des voisins laissés à leur position vue : avec 5 cm de correction, le calcul se
+trompait de 5 cm sur leur distance. Les voisins sont maintenant corrigés comme le reste (`Trieur.obstacles`).

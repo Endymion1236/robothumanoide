@@ -113,6 +113,8 @@ Idée de Nicolas. Un jeu oblige le robot à voir, décider, saisir et poser : c'
 
 - **Premier jeu : le morpion**, dès que le bras va à un point de la table de façon fiable (`bras/aller_point.py` essayé en vrai)
   et que la caméra de table est réglée.
+- **26/11/2026 : morpion écrit** (`bras/jouer_morpion.bat`, `bras/morpion.py`), essayé en simulation seulement : pions = objets d'essai
+  (petits ronds pour Câlin, gros pour Nicolas), grille au ruban de masquage, réserve de Câlin sur deux emplacements.
 - **Le jeu est fabriqué pour le robot** : pions imprimés (cylindres de 3 à 4 cm de diamètre, 4 cm de haut, deux couleurs que la
   caméra distingue), plateau imprimé sur papier avec des cases de 5 à 6 cm. Plateau de 24 × 24 cm au plus : c'est la profondeur
   de table que le bras atteint d'après le calcul (à mesurer en vrai).

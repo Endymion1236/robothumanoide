@@ -447,9 +447,18 @@ class Trieur(Poste):
 
     def obstacles(self, objets, sauf=None):
         """Les objets que le bras ne doit pas heurter : ceux de la table (sauf celui qu'il prend) et ceux déjà posés."""
-        obs = [{'X': o['X'], 'Y': o['Y'], 'rayon': min(max(o['largeur'], o['longueur']), 70.0) / 2, 'hauteur': self.hauteur,
-                'nom': f'X {o["X"]:+.0f} Y {o["Y"]:.0f}'} for o in objets if o is not sauf]
-        obs += [{'X': x, 'Y': y, 'rayon': 22.0, 'hauteur': self.hauteur, 'nom': f'posé en X {x:+.0f} Y {y:.0f}'} for z in self.deposes for x, y in self.deposes[z]]
+        # Les gestes du bras sont calculés aux points CORRIGÉS (correction de visée apprise) : les obstacles doivent l'être aussi.
+        # Sinon, avec une correction de 5 cm, le calcul croit le bras 5 cm plus court que les voisins vus par la caméra : faux
+        # « gêné », ou contact non vu (trouvé en préparant le morpion, 26/11/2026). Le nom garde la position vue.
+        vise = lambda x, y: C.corriger(x, y, self.corrections)
+        obs = []
+        for o in objets:
+            if o is sauf: continue
+            x, y = vise(o['X'], o['Y'])
+            obs.append({'X': x, 'Y': y, 'rayon': min(max(o['largeur'], o['longueur']), 70.0) / 2, 'hauteur': self.hauteur, 'nom': f'X {o["X"]:+.0f} Y {o["Y"]:.0f}'})
+        for z in self.deposes:
+            for x0, y0 in self.deposes[z]:
+                x, y = vise(x0, y0); obs.append({'X': x, 'Y': y, 'rayon': 22.0, 'hauteur': self.hauteur, 'nom': f'posé en X {x0:+.0f} Y {y0:.0f}'})
         return obs
 
     def libre_pour_prendre(self, o, objets):
