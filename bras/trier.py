@@ -81,7 +81,11 @@ def choisir(objets, rates):
     return max(candidats, key=lambda c: c[0]) if candidats else (None, None)
 
 REPOS = {'epaule': EP.REPOS, 'coude': 0.0, 'flexion': 0.0}
-def ouverture_prise(o): return min(100.0, max(o['largeur'], 30.0) + 30.0)      # mm : juste ce qu'il faut, pour ne pas toucher les voisins
+# Ouverture à la prise : la largeur vue de l'objet + MARGE_OUVERTURE, pas plus de OUVERTURE_MAX (pour ne pas toucher les voisins ;
+# le contrôle des obstacles en tient compte). Nicolas, 26/11/2026 : avec + 30 mm, une mâchoire tombait sur le gros rond (il ne
+# restait que 15 à 20 mm de chaque côté pour l'erreur de visée) ; sa pince s'ouvre à 133 mm.
+MARGE_OUVERTURE, OUVERTURE_MAX = 55.0, 115.0
+def ouverture_prise(o): return min(OUVERTURE_MAX, max(o['largeur'], 30.0) + MARGE_OUVERTURE)
 def zone_de(largeur): return 'petit' if largeur < SEUIL_TAILLE else 'gros'
 
 class Trieur(Poste):
