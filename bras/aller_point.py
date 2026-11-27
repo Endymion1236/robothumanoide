@@ -11,7 +11,7 @@ Commandes :
   m       remonter au-dessus      o / s   ouvrir / serrer la pince
   r       repos                   i       où est la pince        q   quitter
 Chaque geste est vérifié avant d'être fait (butées, table) ; un geste arrêté RETIENT le bras."""
-import math, queue, sys
+import math, queue, sys, time
 from servos import Bus, ErreurServo, degres, pas
 import test_epaule as E, test_pince as P, piloter_bras as B, geometrie as G
 from controle_bras import Controleur, MILIEU
@@ -76,6 +76,35 @@ class Pointeur:
     def viser(self, X, Y, imposee=None):
         plan = self.preparer(X, Y, imposee)
         if plan and self.demander('   J\'y vais ? (o/n) ').strip().lower().startswith('o'): self.aller(*plan)
+
+    def descendre_au_contact(self, X, Y, pas_mm=3.0, remonte=3.0, plancher=-6.0):
+        """Pour les objets BAS (1 à 2 cm, demande de Nicolas du 27/11/2026) : depuis la position de prise, où le bas de la pince est
+        à 22 mm de la table par le calcul, la pince continue de descendre À LA VERTICALE du point (X, Y), par marches de 3 mm,
+        en surveillant l'effort de l'épaule, du coude et du poignet. Dès que l'effort change d'un coup (les mâchoires touchent
+        la table ou l'objet), elle remonte d'une marche et s'arrête : les mâchoires sont au ras de la table, quelle que soit la
+        flexion du bras, sans forcer. Sans contact senti, elle s'arrête quand les servos se lisent à 3 mm de la table, ou au plus
+        tard quand le calcul la place `plancher` mm sous la table.
+        Renvoie (contact senti ?, hauteur calculée du bas de la pince à l'arrêt)."""
+        c = self.c; incl = self.incl; z0 = G.hauteur_prise(incl); garde = z0 - (B.MARGE_TABLE + 2.0)      # du milieu des mâchoires à leur point le plus bas
+        poser = lambda a, nom: c._bouger([(c.epaule, E.position(a['epaule'], c.haut)), (c.coude, MILIEU + c.sc * pas(a['coude'])), (c.flexion, MILIEU + c.sf * pas(a['flexion']))], nom)
+        effort = lambda: [sum(c.bus.etat(i)['charge'] for _ in range(3)) / 3 for i in (c.epaule, c.coude, c.flexion)]
+        time.sleep(0.2); avant = effort(); z, prec, contact = z0, dict(self.prise), False
+        while z - pas_mm - garde >= plancher:
+            if c.arret.is_set(): break
+            try: a = G.angles_pour(X, Y, z - pas_mm, c.hauteur, incl)
+            except G.HorsDePortee: break
+            if not poser(a, f'Descente au contact : bas de la pince à {z - pas_mm - garde:.0f} mm par le calcul'): break
+            z -= pas_mm; time.sleep(0.2); apres = effort()
+            if max(abs(x - y) for x, y in zip(apres, avant)) >= B.SEUIL_CONTACT:
+                contact = True; poser(prec, f'Contact senti : je remonte de {remonte:.0f} mm'); z += pas_mm; break
+            avant, prec = apres, a
+            # deuxième sécurité : la hauteur LUE sur les servos (ils s'arrêtent 1 à 2° sous la consigne : le bras est plus bas que
+            # le calcul ne le dit). À 3 mm de la table d'après eux, on s'arrête même si aucun effort n'a été senti.
+            lu = B.bas_de_pince(c.hauteur, *self.angles(), roulis=0.0)
+            if lu <= 3.0: self.dire(f'   Les servos se lisent à {lu:.0f} mm de la table : je m\'arrête là.'); break
+        self.prise = dict(prec, socle=self.prise['socle']); self.vider()
+        self.dire(f'   {"Table sentie" if contact else "Pas de contact senti"} : bas de la pince à {z - garde:.0f} mm de la table par le calcul.')
+        return contact, z - garde
 
     def descendre(self):
         if not self.prise: self.dire('   Vise d\'abord un point : v X Y'); return False

@@ -43,6 +43,7 @@ ECART_INCL = 15.0
 LEVE_PENCHE = 13.0                                                # mm : 32 (demi-longueur de la barre) × sin 15° + 5 de marge
 # Points où le bras pose l'objet pour apprendre sa visée (touche A) : devant le socle, entre les marqueurs.
 POINTS_VISEE = [(float(x), float(y)) for y in (250, 290, 330, 370, 410, 445) for x in (-110, 0, 110)]
+OBJET_BAS = 40.0                                                  # mm : sous cette hauteur (trier --hauteur 15), prise par le dessus avec descente au contact
 PRES_DU_SOCLE = 150.0                                             # mm : plus près, c'est le robot lui-même (socle, câbles), jamais un objet
 SEUIL_TAILLE = 37.0                                               # mm, largeur mesurée par la pince : en dessous, « petit »
 # Tri de Nicolas du 26/11/2026 : la pince lit environ 5 mm de trop (petit rond 28 → 33, hexagone 38 → 41, carré 36 → 43) ;
@@ -497,7 +498,13 @@ class Trieur(Poste):
         if voisin < ECART_MIN: self.dire(f'Attention : l\'objet en X {o["X"]:+.0f} Y {o["Y"]:.0f} a un voisin à {voisin:.0f} mm, la pince pourrait le toucher.')
         visee = C.corriger(o['X'], o['Y'], self.corrections)
         self.dire(f'Je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} (vu {o["largeur"]:.0f} mm de large).')
-        plan = p.preparer(*visee); rl, self.leve_prise = 0.0, 0.0
+        bas = self.hauteur < OBJET_BAS; raide = None
+        if bas:                                   # objet bas : pince la plus raide possible (−90°, sinon −75°, sinon −60°), puis descente au contact
+            for i in (-90.0, -75.0, -60.0):
+                try: G.choisir_inclinaison(*visee, c.hauteur, i); raide = i; break
+                except G.HorsDePortee: pass
+        plan = p.preparer(*visee, raide) if raide is not None else p.preparer(*visee); rl, self.leve_prise = 0.0, 0.0
+        if bas and plan and raide is None: self.dire('   Objet bas trop loin pour une prise par le dessus : j\'essaie à plat, sans garantie.')
         if plan and c.poignet:
             rl = roulis_pour(o, p.incl, plan[0]['socle'])
             if rl:
@@ -523,6 +530,7 @@ class Trieur(Poste):
         self.ouvrir_a(ouverture_prise(o, rl))
         p.aller(*plan); self.etape(p.prise is plan[0], 'l\'approche')
         self.etape(p.descendre(), 'la descente')
+        if bas and raide is not None: p.descendre_au_contact(*visee)
         tenu, largeur = self.serrer(); self.tenu = (p.incl, G.hauteur_prise(p.incl), self.hauteur, max(largeur, 20.0) / 2 + 2)
         self.etape(p.monter(), 'la remontée')
         self.note(**{'largeur_mesurée_(mm)': largeur if tenu else 0.0})

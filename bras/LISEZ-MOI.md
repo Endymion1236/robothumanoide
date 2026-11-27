@@ -634,3 +634,20 @@ la lecture du plateau, et une partie complète sur le bras simulé. **Pas encore
 **Correction qui profite aussi au tri (même jour)** : le contrôle « un voisin gêne-t-il ? » comparait les gestes du bras, calculés
 aux points corrigés par la visée apprise, à des voisins laissés à leur position vue : avec 5 cm de correction, le calcul se
 trompait de 5 cm sur leur distance. Les voisins sont maintenant corrigés comme le reste (`Trieur.obstacles`).
+
+## Objets bas (1 à 2 cm, « taille bouchon ») : prise au contact (27/11/2026, essayée sur servos simulés seulement)
+
+Nicolas voulait prendre des objets plus bas et que les mâchoires ne tapent pas la table (il pensait retourner la pince :
+les mâchoires seraient montées, pas descendues). Le frein était la garde de 2 cm que le programme laisse au-dessus de la
+table, parce que le bras fléchit. Pour les objets bas, on fait autrement :
+
+1. lancer le tri en donnant la hauteur des objets : `trier.bat --hauteur 15` (ou `trier_voix.bat --hauteur 15`) ;
+   sous 40 mm, le programme passe en « objets bas » ;
+2. la pince se met la plus raide possible au-dessus de l'objet (pointée vers le bas, sinon penchée de 75° ou 60°) ;
+3. elle descend à la verticale par marches de 3 mm en surveillant l'effort de l'épaule, du coude et du poignet ;
+4. dès que l'effort change d'un coup (les mâchoires touchent la table), elle remonte de 3 mm et serre.
+   Deuxième sécurité : si aucun effort n'est senti, elle s'arrête quand les servos se lisent à 3 mm de la table.
+
+Les objets bas doivent être entre 21 et 37 cm du socle environ (là où la pince peut se mettre raide). Tous les objets d'un
+même tri doivent avoir à peu près la même hauteur. Un objet plat (carte, pièce) ne se pince pas : il faudra un autre outil.
+Réglage si besoin : `SEUIL_CONTACT` (10 points de charge, `piloter_bras.py`) : plus bas = plus sensible.
