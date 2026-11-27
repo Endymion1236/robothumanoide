@@ -121,23 +121,36 @@ class Pointeur:
     def monter(self):
         if not self.haut: self.dire('   Vise d\'abord un point : v X Y'); return False
         return self.poser_bras(self.haut, 'Remontée')
-    def monter_droit(self, hauteur=40.0, marche=20.0):
+    def monter_droit(self, hauteur=40.0, marche=20.0, decale=0.0):
         """Après avoir lâché un objet : la pince monte À LA VERTICALE de `hauteur` mm, sans changer d'inclinaison, avant la remontée
         habituelle. Celle-ci n'est pas verticale (épaule, coude et poignet tournent chacun vers leur angle d'arrivée, et quand le
         bras a fléchi l'épaule se relève d'abord SEULE de 15° : la pince avance alors de 3 cm en penchant) : une mâchoire
         accrochait le petit cylindre qu'elle venait de poser et le couchait (Nicolas, 27/11/2026 : « quand le bras remonte »).
+        decale : avant de monter, la pince ouverte se décale de `decale` mm vers SA droite (vu de derrière le bras ; négatif = vers
+        la gauche), pour écarter du pion la mâchoire qui le touche encore : son tapis antidérapant le soulève en montant (idée
+        de Nicolas, 27/11/2026 : « ça accroche encore à droite »). Rien si la pince est tournée (les mâchoires ne sont plus de côté).
         On part de la position de prise calculée, on monte vers le haut : pas de contrôle de garde de table à faire."""
         c = self.c
-        if not self.prise or getattr(self, 'incl', None) is None: return False
+        if not self.prise: return False
         x, y, z, incl = G.ou_est_la_pince(**{k: self.prise[k] for k in ('socle', 'epaule', 'coude', 'flexion')}, hauteur_epaule=c.hauteur)
-        fait, dz = False, marche
+        def poser(a, nom, avec_socle=False):
+            try: c._verifier(a['epaule'], a['coude'], a['flexion'])
+            except ErreurServo: return False
+            ordres = [(c.epaule, E.position(a['epaule'], c.haut)), (c.coude, MILIEU + c.sc * pas(a['coude'])), (c.flexion, MILIEU + c.sf * pas(a['flexion']))]
+            return c._bouger(([(c.socle, MILIEU + pas(a['socle']))] if avec_socle else []) + ordres, nom)
+        fait, socle = False, self.prise['socle']
+        if abs(decale) >= 0.5 and abs(c._roulis()) <= 15:
+            R = math.hypot(x, y); xd, yd = x + decale * y / R, y - decale * x / R        # vers la droite de la pince, vue de derrière
+            try:
+                a = G.angles_pour(xd, yd, z + 2.0, c.hauteur, incl)
+                if abs(a['socle'] - socle) <= 4.0 and poser(a, f'Pince décalée de {abs(decale):.0f} mm vers la {"droite" if decale > 0 else "gauche"}', True): x, y, socle, fait = xd, yd, a['socle'], True
+            except G.HorsDePortee: pass
+        dz = marche
         while dz <= hauteur + 0.1 and not c.arret.is_set():
             try: a = G.angles_pour(x, y, z + dz, c.hauteur, incl)
             except G.HorsDePortee: break
-            if abs(a['socle'] - self.prise['socle']) > 1.0: break                       # pas la même solution : on laisse la remontée habituelle
-            try: c._verifier(a['epaule'], a['coude'], a['flexion'])
-            except ErreurServo: break
-            if not c._bouger([(c.epaule, E.position(a['epaule'], c.haut)), (c.coude, MILIEU + c.sc * pas(a['coude'])), (c.flexion, MILIEU + c.sf * pas(a['flexion']))], f'Montée droite de {dz:.0f} mm'): break
+            if abs(a['socle'] - socle) > 1.0: break                                   # pas la même solution : on laisse la remontée habituelle
+            if not poser(a, f'Montée droite de {dz:.0f} mm'): break
             fait = True; dz += marche
         self.vider(); return fait
     def glisser(self, X, Y, en_bas):

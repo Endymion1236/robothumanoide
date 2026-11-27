@@ -250,6 +250,7 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--fenetre', type=int, default=700)
     ap.add_argument('--niveau', default='normal', choices=list(NIVEAUX.values()))
     ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS, help='hauteur des pions en mm (60 pour les objets d\'essai ; à donner si tu les as raccourcis)')
+    ap.add_argument('--decale', type=float, default=TR.DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)')
     ap.add_argument('--muet', action='store_true', help='Câlin écrit ses phrases sans les dire')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs'); a = ap.parse_args()
     reglage = T.charger()
@@ -260,6 +261,7 @@ def main():
     try: p = A.Pointeur()
     except ErreurServo as err: print('Impossible de commencer :', err); cam.release(); return 1
     t = Joueur(p, reglage, a.hauteur, niveau=a.niveau)
+    t.decale_lacher = a.decale
     servies = [len(cases_servies(sp, p.c.hauteur, t.corrections, a.hauteur)) for sp in t.spots()]
     t.dire(f'Pions de {a.hauteur:.0f} mm de haut' + (' (prise au contact, pince raide)' if a.hauteur < TR.OBJET_BAS else '') + f' ; depuis mes deux emplacements, j\'atteins {servies[0]} et {servies[1]} cases sur 9.')
     if not a.muet: t.parole = CV.Parole(a.voix_pc)

@@ -40,6 +40,7 @@ ECART_DEPOT = 50.0                                                # mm entre deu
 # MOINS qu'à la prise. L'objet arrive penché de 15° : ses coins descendraient sous la pince, on le lâche donc 13 mm plus haut ; il
 # retombe droit tout seul (il ne bascule qu'au-delà de 23° pour la barre, 25° pour le petit rond, par le calcul).
 ECART_INCL = 15.0
+DECALE_LACHER = 6.0                                               # mm : après un lâcher, la pince se décale vers sa droite avant de monter (--decale ; 0 = non)
 VITESSE_LACHER = 90                                               # pas/s : ouverture lente pour lâcher (300 d'habitude)
 LEVE_PENCHE = 13.0                                                # mm : 32 (demi-longueur de la barre) × sin 15° + 5 de marge
 # Points où le bras pose l'objet pour apprendre sa visée (touche A) : devant le socle, entre les marqueurs.
@@ -603,7 +604,7 @@ class Trieur(Poste):
         s'ouvre, toujours lentement, à la largeur voulue."""
         self.ouvrir_a(largeur + 6, VITESSE_LACHER); time.sleep(0.4)
         self.ouvrir_a(largeur + marge, VITESSE_LACHER)
-        time.sleep(0.2); self.p.monter_droit()                    # puis tout droit vers le haut, avant la remontée habituelle (qui part en biais)
+        time.sleep(0.2); self.p.monter_droit(decale=getattr(self, 'decale_lacher', DECALE_LACHER))                    # puis tout droit vers le haut, avant la remontée habituelle (qui part en biais)
 
     def transport_libre(self, haut, prise):
         """Le trajet objet en main, de la remontée jusqu'à la pose, ne heurte rien ? Renvoie l'obstacle touché ou None."""
@@ -811,7 +812,7 @@ def ecouter_consignes(t, a):
     except Exception as err: t.dire(f'L\'écoute s\'est arrêtée ({type(err).__name__} : {err}). Les touches marchent toujours.')
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
+    ap = argparse.ArgumentParser(); ap.add_argument('--decale', type=float, default=DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)'); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
     ap.add_argument('--fenetre', type=int, default=700)
     ap.add_argument('--voix', action='store_true', help='écouter le micro : « range les ronds à gauche », « stop »')
     ap.add_argument('--clavier', action='store_true', help='taper les consignes dans cette fenêtre noire au lieu de les dire')
@@ -832,7 +833,7 @@ def main():
     except ErreurServo as err: print('Impossible de commencer :', err); cam.release(); return 1
     try: verifier_zones(p.c.hauteur)
     except G.HorsDePortee as e: print('Une zone de dépôt est hors de portée :', e); cam.release(); return A.terminer(p)
-    t = Trieur(p, reglage, a.hauteur); ech = {'v': 1.0}
+    t = Trieur(p, reglage, a.hauteur); t.decale_lacher = a.decale; ech = {'v': 1.0}
     t.modele_ia = {'sonnet': 'claude-sonnet-5-5', 'opus': 'claude-opus-5-5'}[a.ia]
     if (a.voix or a.clavier) and not a.muet: t.parole = CV.Parole(a.voix_pc)
     if a.voix or a.clavier:
