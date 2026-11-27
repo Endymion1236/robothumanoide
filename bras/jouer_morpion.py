@@ -120,7 +120,10 @@ class Joueur(TR.Trieur):
         pose = p.preparer(*q, iq, leve)
         if not pose: raise ErreurServo('pose impossible (pion en main : le bras reste tenu)')
         p.aller(*pose); self.etape(p.prise is pose[0], 'le transport'); self.etape(p.descendre(), 'la pose')
-        self.ouvrir_a(max(largeur, 20.0) + 20); self.tenu = None
+        # Lâcher : pince ouverte le plus large possible sans toucher les pions voisins (à 10 mm de chaque côté, une mâchoire
+        # accrochait le pion en remontant et le couchait : Nicolas, 27/11/2026).
+        larg = max(largeur, 20.0)
+        self.lacher_doucement(larg, self.marge_de_lacher(pose[0]['socle'], pose[0], self.obstacles(objets, o), larg)); self.tenu = None; time.sleep(0.3)
         self.etape(p.monter(), 'la remontée'); p.repos()
         # contrôle : mon pion est-il bien dans sa case ?
         vu, _ = M.lire_plateau(self.regarder()); attendu = self.grille[:]; attendu[case] = M.CALIN

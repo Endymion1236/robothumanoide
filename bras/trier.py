@@ -40,6 +40,7 @@ ECART_DEPOT = 50.0                                                # mm entre deu
 # MOINS qu'à la prise. L'objet arrive penché de 15° : ses coins descendraient sous la pince, on le lâche donc 13 mm plus haut ; il
 # retombe droit tout seul (il ne bascule qu'au-delà de 23° pour la barre, 25° pour le petit rond, par le calcul).
 ECART_INCL = 15.0
+VITESSE_LACHER = 90                                               # pas/s : ouverture lente pour lâcher (300 d'habitude)
 LEVE_PENCHE = 13.0                                                # mm : 32 (demi-longueur de la barre) × sin 15° + 5 de marge
 # Points où le bras pose l'objet pour apprendre sa visée (touche A) : devant le socle, entre les marqueurs.
 POINTS_VISEE = [(float(x), float(y)) for y in (250, 290, 330, 370, 410, 445) for x in (-110, 0, 110)]
@@ -581,11 +582,27 @@ class Trieur(Poste):
     def note(self, **champs):
         if self.rap: self.rap.note(**champs)
 
-    def ouvrir_a(self, mm):
+    def ouvrir_a(self, mm, vitesse=None):
         """Ouvre la pince à `mm` d'écart seulement (pas grande ouverte : elle toucherait les voisins)."""
         c = self.p.c; pos = LP.position_pour(mm, c.ouvert, c.ferme)
         c.bus.limiter_force(c.pince, PI.FORCE_MOUVEMENT); c.bus.tenir(c.pince)
-        self.dire(f'   Pince ouverte à {LP.ecart(pos, c.ouvert):.0f} mm : ' + c.bus.aller(c.pince, pos, charge_max=PI.CHARGE_BLOCAGE))
+        plus = {} if vitesse is None else {'vitesse': vitesse}
+        self.dire(f'   Pince ouverte à {LP.ecart(pos, c.ouvert):.0f} mm : ' + c.bus.aller(c.pince, pos, charge_max=PI.CHARGE_BLOCAGE, **plus))
+
+    def marge_de_lacher(self, socle, prise, voisins, largeur):
+        """De combien ouvrir la pince en plus de l'objet pour le lâcher : le plus large possible (jusqu'à 40 mm, 20 par côté)
+        SANS toucher les pièces voisines, et jamais moins de 20 mm. Trop serrée, une mâchoire accrochait l'objet en remontant
+        et le couchait ; trop large, elle pousserait les voisins (demande de Nicolas, 27/11/2026)."""
+        for marge in (40, 34, 28, 24):
+            if not OB.geste_libre(socle, [prise], voisins, self.p.c.hauteur, largeur + marge): return marge
+        return 20
+
+    def lacher_doucement(self, largeur, marge):
+        """Lâche un objet posé SANS le bousculer (les petits cylindres de Nicolas tombaient à l'ouverture, 27/11/2026) : la pince
+        s'entrouvre lentement de quelques millimètres, laisse l'objet se décoller du tapis des mâchoires et se poser, puis
+        s'ouvre, toujours lentement, à la largeur voulue."""
+        self.ouvrir_a(largeur + 6, VITESSE_LACHER); time.sleep(0.4)
+        self.ouvrir_a(largeur + marge, VITESSE_LACHER)
 
     def transport_libre(self, haut, prise):
         """Le trajet objet en main, de la remontée jusqu'à la pose, ne heurte rien ? Renvoie l'obstacle touché ou None."""
@@ -616,7 +633,8 @@ class Trieur(Poste):
         plan = p.preparer(*C.corriger(*spot, self.corrections), incl_pose, leve)
         if not plan: raise ErreurServo('Pose impossible à cet endroit.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
-        self.etape(p.descendre(), 'la pose'); self.ouvrir_a(2 * self.tenu[3] + 16)
+        self.etape(p.descendre(), 'la pose'); larg = 2 * self.tenu[3] - 4
+        self.lacher_doucement(larg, self.marge_de_lacher(plan[0]['socle'], plan[0], self.obstacles(self.objets_tri, self.objet_pris), larg)); time.sleep(0.3)
         self.etape(p.monter(), 'la remontée'); self.redresser(); p.repos(); self.tries[z] += 1; self.deposes[z].append(spot); self.tenu = None
         return True
 
