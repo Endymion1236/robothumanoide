@@ -191,3 +191,10 @@ la veille tout tombait juste. Leçon : devant un écart de CÔTÉ apparu d'un co
 au programme (bras tenu, on le fait pivoter à la main). Ces vis sont le point faible du socle : frein-filet à proposer.
 Pions du morpion de Nicolas : petits ronds de **28 × 40 mm** (raccourcis) ; lancer avec `--hauteur 40` (`trier_pions.bat`, `morpion_pions.bat`).
 Lâcher : ouverture rapide et large, décalage de 6 mm à droite (`--decale`), montée droite de 40 mm ; l'ouverture lente a été retirée.
+
+**Tête, décisions du 27/11/2026 (Nicolas)** : style poney peluche confirmé ; le cou s'essaie d'abord sur un **pied de table
+indépendant** (comme le socle du bras) ; ordre : cou, puis crâne, puis yeux et oreilles, puis tissu. **Nicolas n'a NI anneaux de
+LED, NI MG90S, NI ESP32** (contrairement à ce qu'écrit `tete-poney/LISEZ-MOI.md`) : à acheter, et à mesurer à réception avant
+de dessiner leurs logements. La C270 sert à la table : une deuxième webcam sera nécessaire pour la tête. Piste pour le cou :
+reprendre tel quel le socle tournant du bras (déjà monté et validé) pour « tourner », et ne dessiner que l'étage « hocher ».
+À demander avant de dessiner : nombre de roulements 6807 restants, vis M2,5 plus longues que 5,3 mm (les vis du moyeu se desserrent).
