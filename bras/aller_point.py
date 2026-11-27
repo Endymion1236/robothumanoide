@@ -77,7 +77,7 @@ class Pointeur:
         plan = self.preparer(X, Y, imposee)
         if plan and self.demander('   J\'y vais ? (o/n) ').strip().lower().startswith('o'): self.aller(*plan)
 
-    def descendre_au_contact(self, X, Y, pas_mm=4.0, remonte=4.0, plancher=-6.0, d_un_trait=14.0):
+    def descendre_au_contact(self, X, Y, pas_mm=4.0, remonte=4.0, plancher=-6.0, d_un_trait=14.0, rester=False):
         """Pour les objets BAS (1 à 2 cm, demande de Nicolas du 27/11/2026) : depuis la position de prise, où le bas de la pince est
         à 22 mm de la table par le calcul, la pince continue de descendre À LA VERTICALE du point (X, Y), par marches de 3 mm,
         en surveillant l'effort de l'épaule, du coude et du poignet. Dès que l'effort change d'un coup (les mâchoires touchent
@@ -105,7 +105,9 @@ class Pointeur:
             if not poser(a, f'Descente au contact : bas de la pince à {z - pas_mm - garde:.0f} mm par le calcul'): break
             z -= pas_mm; time.sleep(0.1); apres = effort()
             if max(abs(x - y) for x, y in zip(apres, avant)) >= B.SEUIL_CONTACT:
-                contact = True; poser(prec, f'Contact senti : je remonte de {remonte:.0f} mm'); z += pas_mm; break
+                contact = True
+                if rester: prec = a; break                                          # pose d'un objet : on reste appuyé, sans remonter
+                poser(prec, f'Contact senti : je remonte de {remonte:.0f} mm'); z += pas_mm; break
             avant, prec = apres, a
             # deuxième sécurité : la hauteur LUE sur les servos (ils s'arrêtent 1 à 2° sous la consigne : le bras est plus bas que
             # le calcul ne le dit). À 3 mm de la table d'après eux, on s'arrête même si aucun effort n'a été senti.
@@ -121,6 +123,17 @@ class Pointeur:
     def monter(self):
         if not self.haut: self.dire('   Vise d\'abord un point : v X Y'); return False
         return self.poser_bras(self.haut, 'Remontée')
+    def appuyer(self):
+        """Avant de lâcher un objet tenu : la pince descend encore un peu (6 mm d'un trait, puis des marches de 3 mm jusqu'à sentir
+        la table, 12 mm au plus) pour que l'objet soit APPUYÉ sur la table quand les mâchoires s'ouvrent. Posé au ras de la table
+        ou quelques millimètres au-dessus, un pion léger suivait la mâchoire qui s'ouvre et sortait de sa case (Nicolas,
+        27/11/2026 : « quand il a ouvert la pince, ça a poussé le pion à l'extérieur »). S'il touche avant, il glisse entre les
+        mâchoires (serrage à 20 %) : rien ne force."""
+        if not self.prise: return False
+        x, y, _, _ = G.ou_est_la_pince(**{k: self.prise[k] for k in ('socle', 'epaule', 'coude', 'flexion')}, hauteur_epaule=self.c.hauteur)
+        try: return self.descendre_au_contact(x, y, pas_mm=3.0, plancher=10.0, d_un_trait=16.0, rester=True)[0]
+        except ErreurServo: return False
+
     def monter_droit(self, hauteur=40.0, marche=20.0, decale=0.0):
         """Après avoir lâché un objet : la pince monte À LA VERTICALE de `hauteur` mm, sans changer d'inclinaison, avant la remontée
         habituelle. Celle-ci n'est pas verticale (épaule, coude et poignet tournent chacun vers leur angle d'arrivée, et quand le

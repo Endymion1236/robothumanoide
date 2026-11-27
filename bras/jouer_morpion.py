@@ -124,7 +124,7 @@ class Joueur(TR.Trieur):
         # Lâcher : pince ouverte le plus large possible sans toucher les pions voisins (à 10 mm de chaque côté, une mâchoire
         # accrochait le pion en remontant et le couchait : Nicolas, 27/11/2026).
         larg = max(largeur, 20.0)
-        self.lacher_doucement(larg, self.marge_de_lacher(pose[0]['socle'], pose[0], self.obstacles(objets, o), larg)); self.tenu = None; time.sleep(0.3)
+        self.lacher_doucement(larg, self.marge_de_lacher(pose[0]['socle'], pose[0], self.obstacles(objets, o), larg), appuyer=not leve); self.tenu = None; time.sleep(0.3)
         self.etape(p.monter(), 'la remontée'); p.repos()
         # contrôle : mon pion est-il bien dans sa case ?
         attendu = self.grille[:]; attendu[case] = M.CALIN; vu, _ = M.lire_plateau(self.regarder(), connue=attendu)

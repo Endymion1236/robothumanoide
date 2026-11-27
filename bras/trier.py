@@ -433,7 +433,7 @@ class Trieur(Poste):
                 plan2 = p.preparer(*q, ip, 0.0 if ip == incl_prise else LEVE_PENCHE)
                 if not plan2: raise ErreurServo('pose impossible (objet en main : O pour ouvrir, bras tenu)')
                 p.aller(*plan2); self.etape(p.prise is plan2[0], 'le transport'); self.etape(p.descendre(), 'la pose')
-                self.lacher_doucement(max(largeur, 20.0), 50, decale=0.0); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
+                self.lacher_doucement(max(largeur, 20.0), 50, decale=0.0, appuyer=(ip == incl_prise)); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
                 o = seul(); arrive = (o['X'], o['Y']); e = math.hypot(arrive[0] - pt[0], arrive[1] - pt[1])
                 if e > 90: raise ErreurServo(f'l\'objet est à {e:.0f} mm du point visé : il a roulé ou il est tombé. Rien n\'est enregistré pour ce point ; remets-le debout puis A.')
                 nouvelles = C.apprendre(nouvelles, arrive, q); erreurs.append(e); en_cours = None; rates = 0
@@ -625,11 +625,12 @@ class Trieur(Poste):
             if not OB.geste_libre(socle, [prise], voisins, self.p.c.hauteur, largeur + marge): return marge
         return 20
 
-    def lacher_doucement(self, largeur, marge, decale=None):
+    def lacher_doucement(self, largeur, marge, decale=None, appuyer=True):
         """Lâche un objet posé sans le bousculer : la pince s'ouvre LARGE et d'un coup (vitesse habituelle), puis se décale et
         monte tout droit. L'ouverture lente en deux temps, essayée le 27/11/2026, était pire : le pion, léger, restait collé au
         tapis de la mâchoire de droite et la suivait (apprentissage de Nicolas : tous les pions posés 4 à 6 cm trop à droite,
         puis couchés). Ouverte vite, la mâchoire se décolle du pion avant qu'il ait bougé."""
+        if appuyer: self.p.appuyer()                                # l'objet appuyé sur la table ne suit pas la mâchoire qui s'ouvre
         self.ouvrir_a(largeur + marge)
         time.sleep(0.2); self.p.monter_droit(decale=getattr(self, 'decale_lacher', DECALE_LACHER) if decale is None else decale)                    # puis tout droit vers le haut, avant la remontée habituelle (qui part en biais)
 
@@ -663,7 +664,7 @@ class Trieur(Poste):
         if not plan: raise ErreurServo('Pose impossible à cet endroit.')
         p.aller(*plan); self.etape(p.prise is plan[0], 'le transport')
         self.etape(p.descendre(), 'la pose'); larg = 2 * self.tenu[3] - 4
-        self.lacher_doucement(larg, self.marge_de_lacher(plan[0]['socle'], plan[0], self.obstacles(self.objets_tri, self.objet_pris), larg)); time.sleep(0.3)
+        self.lacher_doucement(larg, self.marge_de_lacher(plan[0]['socle'], plan[0], self.obstacles(self.objets_tri, self.objet_pris), larg), appuyer=not leve); time.sleep(0.3)
         self.etape(p.monter(), 'la remontée'); self.redresser(); p.repos(); self.tries[z] += 1; self.deposes[z].append(spot); self.tenu = None
         return True
 
