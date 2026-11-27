@@ -26,6 +26,7 @@ from viser_camera import sans_accents, FLECHES
 
 NIVEAUX = {'1': 'facile', '2': 'normal', '3': 'imbattable'}
 ANGLES_RESERVE = (28.0, 42.0, -28.0, -42.0)   # les 4 emplacements des pions de Câlin : 2 à droite et 2 à gauche du plateau (2 seulement jusqu'au 27/11/2026)
+LARGEUR_PION = 28.0                           # diamètre des pions de Câlin
 OUV_LARGE = 85.0                              # ouverture préférée pour prendre un pion (comme au tri) quand aucun voisin ne gêne
 OUV_PION = 68.0                               # ouverture de la pince pour prendre un pion de Ø 28 (40 mm de marge)
 AIDE = 'F = fond (table VIDE) | N = nouvelle partie | C = Calin commence | J = j ai joue | A = apprendre la visee (1 pion seul) | 1 2 3 = niveau | R repos | ESPACE = ARRET | Q quitter'
@@ -145,12 +146,12 @@ class Joueur(TR.Trieur):
         """Quel pion de la réserve prendre, et comment : (pion, visée, inclinaison de prise, point de pose, inclinaison de pose,
         levée) ou None. La pince doit poser avec l'inclinaison de la prise (à 15° près, le pion étant alors lâché 13 mm plus
         haut) : pour chaque pion, on cherche une inclinaison qui convient aux deux bouts du geste, sans rien heurter."""
-        h = self.p.c.hauteur; q = C.corriger(*cible, self.corrections); meilleurs = []
+        h = self.p.c.hauteur; q = TR.a_droite(C.corriger(*cible, self.corrections), TR.cote_pose(LARGEUR_PION)); meilleurs = []      # le pion tenu est contre la mâchoire fixe
         def possible(pt, incl, leve=0.0):
             try: return G.prise_et_approche(*pt, h, incl, leve)
             except G.HorsDePortee: return None
         for o in reserve:
-            visee = TR.a_droite(C.corriger(o['X'], o['Y'], self.corrections), getattr(self, 'decale_prise', 0.0)); obs = self.obstacles(objets, o)
+            visee = TR.a_droite(C.corriger(o['X'], o['Y'], self.corrections), getattr(self, 'decale_prise', 0.0) + TR.cote_prise(OUV_LARGE)); obs = self.obstacles(objets, o)
             for ip in inclinaisons_de_prise(self.hauteur):
                 pr = possible(visee, ip)
                 if not pr: continue
@@ -261,6 +262,7 @@ def main():
     ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS, help='hauteur des pions en mm (60 pour les objets d\'essai ; à donner si tu les as raccourcis)')
     ap.add_argument('--decale', type=float, default=TR.DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)')
     ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (négatif = gauche)')
+    ap.add_argument('--machoire-fixe', type=float, default=TR.MACHOIRE_FIXE, help='distance (mm) de la mâchoire FIXE à l\'axe du bras, positive à droite vu de derrière, négative à gauche, 0 = pince symétrique')
     ap.add_argument('--muet', action='store_true', help='Câlin écrit ses phrases sans les dire')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs'); a = ap.parse_args()
     reglage = T.charger()
@@ -271,7 +273,7 @@ def main():
     try: p = A.Pointeur()
     except ErreurServo as err: print('Impossible de commencer :', err); cam.release(); return 1
     t = Joueur(p, reglage, a.hauteur, niveau=a.niveau)
-    t.decale_lacher = a.decale; t.decale_prise = a.decale_prise
+    t.decale_lacher = a.decale; t.decale_prise = a.decale_prise; TR.MACHOIRE_FIXE = a.machoire_fixe
     servies = [len(cases_servies(sp, p.c.hauteur, t.corrections, a.hauteur)) for sp in t.spots()]
     t.dire(f'Pions de {a.hauteur:.0f} mm de haut' + (' (prise au contact, pince raide)' if a.hauteur < TR.OBJET_BAS else '') + f' ; depuis mes {len(servies)} ronds bleus, j\'atteins au moins {min(servies)} cases sur 9.')
     if not a.muet: t.parole = CV.Parole(a.voix_pc)
