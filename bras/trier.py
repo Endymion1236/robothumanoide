@@ -158,6 +158,13 @@ class Trieur(Poste):
         super().__init__(pointeur, reglage, attendre)
         self.hauteur, self.fond, self.objets, self.image = hauteur, None, [], None
         G.PERMISES = G.inclinaisons_pour(hauteur)                    # objets bas : la pince ne les saisit pas à plat
+        # Les corrections « de côté » enregistrées avant le 27/11/2026 au soir sont fausses (elles venaient de la mâchoire fixe,
+        # pas de la visée) : on ne garde que la distance, sans rien demander à Nicolas ni toucher à son fichier.
+        if '--visee-cote' not in sys.argv:
+            cote = [c for c in self.corrections if abs(c.get('da', 0.0)) > 1e-6]
+            if cote:
+                for c in cote: c['da'] = 0.0
+                self.dire(f'Corrections de visée : {len(cote)} point(s) avaient un écart de côté, je n\'en garde que la distance.')
         self.demande, self.reponse = threading.Event(), threading.Event()
         self.au_repos, self.tries, self.rates = True, {'petit': 0, 'gros': 0}, []
         self.plan_vocal, self.claude, self.modele_ia = None, None, 'claude-sonnet-5-5'

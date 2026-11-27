@@ -213,3 +213,6 @@ vérifier : 8 Go sur la version portable, en principe). Idées de Nicolas : Câl
 caméra dans les yeux, porte-cartes, aide humaine pour les gestes fins ; après le morpion : dés, puissance 4, petits chevaux) et
 IA hébergée chez lui plutôt que le cloud (piste : Ollama + petit modèle ouvert, option locale / cloud à ajouter dans
 `bras/consigne_vocale.py` et `tete/parler.py` ; rien de codé).
+Confirmé par Nicolas (photo du 27/11/2026 au soir) : mâchoire FIXE à droite, la mâchoire de gauche (sur le palonnier) pousse les
+objets dessus ; bras coudés, tapis antidérapant à gros relief qui se décolle en bas des deux mâchoires (à recoller à plat : il
+change la cote de 36 mm). Les anciennes corrections de côté (`da`) sont ignorées au chargement par `trier.py`.
