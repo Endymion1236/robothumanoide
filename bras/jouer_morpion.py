@@ -110,6 +110,7 @@ class Joueur(TR.Trieur):
             if not pr: raise ErreurServo('prise impossible')
             self.au_repos = False
             self.ouvrir_a(OUV_PION); p.aller(*pr); self.etape(p.prise is pr[0], 'l\'approche'); self.etape(p.descendre(), 'la descente')
+            if self.hauteur < TR.OBJET_BAS: p.descendre_au_contact(*visee)        # pion bas : les mâchoires descendent jusqu'à sentir la table
             tenu, largeur = self.serrer(); self.etape(p.monter(), 'la remontée')
             if tenu: break
             self.ouvrir_a(OUV_PION); self.dire('   Prise ratée : je recommence avec un autre regard.')
@@ -133,7 +134,7 @@ class Joueur(TR.Trieur):
     def spots(self):
         """Les deux emplacements de la réserve (calculés une fois) : de chaque côté du plateau, à la distance d'où un pion peut
         aller dans le plus de cases possible, correction de visée comprise."""
-        if getattr(self, '_spots', None) is None: self._spots = emplacements(self.p.c.hauteur, self.corrections)
+        if getattr(self, '_spots', None) is None: self._spots = emplacements(self.p.c.hauteur, self.corrections, self.hauteur)
         return self._spots
 
     def plan_du_coup(self, reserve, objets, cible):
@@ -146,7 +147,7 @@ class Joueur(TR.Trieur):
             except G.HorsDePortee: return None
         for o in reserve:
             visee = C.corriger(o['X'], o['Y'], self.corrections); obs = self.obstacles(objets, o)
-            for ip in G.INCLINAISONS:
+            for ip in inclinaisons_de_prise(self.hauteur):
                 pr = possible(visee, ip)
                 if not pr: continue
                 socle = G.angles_pour(*visee, None, h, ip)['socle']
@@ -208,10 +209,14 @@ class Joueur(TR.Trieur):
         for n, m in enumerate(reversed(self.messages[-3:])):
             V.ecrire(image, sans_accents(m)[:110], (10, haut - 14 - (n + 1) * pas), (0, 230, 255) if n == 0 else (190, 190, 190), 0.55)
 
-def cases_servies(pt, h_epaule, corrections):
+def inclinaisons_de_prise(hauteur_pion):
+    """Pion bas (moins de 40 mm) : seulement pince raide, pour que le bout des mâchoires arrive au ras de la table."""
+    return (-90.0, -75.0, -60.0) if hauteur_pion < TR.OBJET_BAS else G.INCLINAISONS
+
+def cases_servies(pt, h_epaule, corrections, hauteur_pion=O.HAUTEUR_OBJETS):
     """Les cases où peut aller un pion posé en `pt` (sans compter les voisins) : pose à l'inclinaison de la prise, à 15° près."""
     v = C.corriger(*pt, corrections); cases = set()
-    for ip in G.INCLINAISONS:
+    for ip in inclinaisons_de_prise(hauteur_pion):
         try: G.prise_et_approche(*v, h_epaule, ip)
         except G.HorsDePortee: continue
         for k in range(9):
@@ -222,11 +227,11 @@ def cases_servies(pt, h_epaule, corrections):
                 except G.HorsDePortee: pass
     return cases
 
-def emplacements(h_epaule, corrections):
+def emplacements(h_epaule, corrections, hauteur_pion=O.HAUTEUR_OBJETS):
     """Où poser les pions de Câlin : pour chaque côté, la distance au socle d'où un pion atteint le plus de cases."""
     out = []
     for a in ANGLES_RESERVE:
-        notes = [(len(cases_servies(G.point_dans_direction(a, R), h_epaule, corrections)), -abs(R - 380), R) for R in range(300, 451, 10)]
+        notes = [(len(cases_servies(G.point_dans_direction(a, R), h_epaule, corrections, hauteur_pion)), -abs(R - 380), R) for R in range(260, 451, 10)]
         out.append(G.point_dans_direction(a, max(notes)[2]))
     return out
 
@@ -241,6 +246,7 @@ def verifier_plateau(h_epaule, corrections):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--fenetre', type=int, default=700)
     ap.add_argument('--niveau', default='normal', choices=list(NIVEAUX.values()))
+    ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS, help='hauteur des pions en mm (60 pour les objets d\'essai ; à donner si tu les as raccourcis)')
     ap.add_argument('--muet', action='store_true', help='Câlin écrit ses phrases sans les dire')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs'); a = ap.parse_args()
     reglage = T.charger()
@@ -250,7 +256,9 @@ def main():
     cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280); cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
     try: p = A.Pointeur()
     except ErreurServo as err: print('Impossible de commencer :', err); cam.release(); return 1
-    t = Joueur(p, reglage, niveau=a.niveau)
+    t = Joueur(p, reglage, a.hauteur, niveau=a.niveau)
+    servies = [len(cases_servies(sp, p.c.hauteur, t.corrections, a.hauteur)) for sp in t.spots()]
+    t.dire(f'Pions de {a.hauteur:.0f} mm de haut' + (' (prise au contact, pince raide)' if a.hauteur < TR.OBJET_BAS else '') + f' ; depuis mes deux emplacements, j\'atteins {servies[0]} et {servies[1]} cases sur 9.')
     if not a.muet: t.parole = CV.Parole(a.voix_pc)
     hors = verifier_plateau(p.c.hauteur, t.corrections)
     if hors: t.dire(f'ATTENTION : les cases {", ".join(hors)} sont hors de portée de la pince (correction de visée comprise). Refais la visée (touche A de trier).')
