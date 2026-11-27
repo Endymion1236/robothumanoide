@@ -395,7 +395,11 @@ class Trieur(Poste):
         arret, en_cours = None, None
         try:
             while reste:
-                visee = C.corriger(o['X'], o['Y'], self.corrections)
+                # Pour PRENDRE, on se sert tout de suite de ce qui vient d'être appris : le pion est exactement là où la pince l'a posé,
+                # et le point appris à cet endroit y ramène la pince. Sans cela, sur les côtés (ronds bleus du morpion, hors de la
+                # zone apprise par le tri), la pince visait avec une correction devinée et se refermait à vide (Nicolas, 27/11/2026).
+                actuelles = nouvelles + [a for a in self.corrections if all(math.hypot(a['X'] - n['X'], a['Y'] - n['Y']) > 60 for n in nouvelles)]
+                visee = C.corriger(o['X'], o['Y'], actuelles)
                 try: incl_o = G.choisir_inclinaison(*visee, h)[0]
                 except G.HorsDePortee: raise ErreurServo('l\'objet est hors de portée : mets-le vers le milieu de la table, puis A')
                 cands = []
@@ -419,7 +423,7 @@ class Trieur(Poste):
                 tenu, largeur = self.serrer(); self.etape(p.monter(), 'la remontée')
                 if not tenu:
                     self.ouvrir_a(ouverture_prise(o)); p.repos(); rates += 1; reste.append(pt)
-                    if rates >= 3: raise ErreurServo('3 prises ratées : la correction actuelle est trop fausse pour démarrer. Fais UN point à la main dans viser_camera (flèches puis C) près de l\'objet, puis reviens faire A.')
+                    if rates >= 3: raise ErreurServo('3 prises ratées à cet endroit. Pose le pion AU MILIEU de la table (là où la visée est déjà apprise) et refais A : j\'irai vers les côtés de proche en proche. Si ça rate aussi au milieu, fais UN point à la main dans viser_camera (flèches puis C)')
                     self.dire('   Prise ratée : je regarde à nouveau.'); o = seul(); continue
                 plan2 = p.preparer(*q, ip, 0.0 if ip == incl_prise else LEVE_PENCHE)
                 if not plan2: raise ErreurServo('pose impossible (objet en main : O pour ouvrir, bras tenu)')
@@ -427,7 +431,7 @@ class Trieur(Poste):
                 self.lacher_doucement(max(largeur, 20.0), 50); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
                 o = seul(); arrive = (o['X'], o['Y']); e = math.hypot(arrive[0] - pt[0], arrive[1] - pt[1])
                 if e > 90: raise ErreurServo(f'l\'objet est à {e:.0f} mm du point visé : il a roulé ou il est tombé. Rien n\'est enregistré pour ce point ; remets-le debout puis A.')
-                nouvelles = C.apprendre(nouvelles, arrive, q); erreurs.append(e); en_cours = None
+                nouvelles = C.apprendre(nouvelles, arrive, q); erreurs.append(e); en_cours = None; rates = 0
                 self.dire(f'   Visé X {pt[0]:+.0f}, Y {pt[1]:.0f} → arrivé en X {arrive[0]:+.0f}, Y {arrive[1]:.0f} : {e:.0f} mm d\'écart ({C.en_clair(pt, arrive)}).')
         except ErreurServo as err: arret = str(err)
         self.visee_reste = list(reste) + ([en_cours] if en_cours and en_cours not in reste else [])
