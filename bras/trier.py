@@ -389,49 +389,60 @@ class Trieur(Poste):
         # points : les endroits à apprendre (le morpion donne ses 9 cases et ses 2 ronds bleus) ; sinon la grille du tri.
         reste = list(points) if points else [pt for pt in POINTS_VISEE if not dans_un_bac(*pt, self.bacs, 70.0)
                  and all(math.hypot(pt[0] - x, pt[1] - y) >= LOIN_DES_MARQUEURS for x, y in T.coins_table(self.reglage).values())]
+        self.visee_reprise = bool(getattr(self, 'visee_reste', None)) and all(pt in reste for pt in self.visee_reste)
+        if self.visee_reprise: reste = list(self.visee_reste); self.dire(f'Je reprends l\'apprentissage où il s\'était arrêté : {len(reste)} point(s) restants.')
         self.dire(f'J\'apprends la visée sur {len(reste)} points, avec cet objet. ESPACE pour arrêter.')
-        while reste:
-            visee = C.corriger(o['X'], o['Y'], self.corrections)
-            try: incl_o = G.choisir_inclinaison(*visee, h)[0]
-            except G.HorsDePortee: raise ErreurServo('l\'objet est hors de portée : mets-le vers le milieu de la table, puis A')
-            cands = []
-            for pt in reste:                                  # où le poser : même inclinaison si possible, sinon 15° d'écart, au plus près
-                q = C.corriger(*pt, self.corrections)
-                try:
-                    ip = G.choisir_inclinaison(*q, h)[0]
-                    if abs(ip - incl_o) > ECART_INCL:           # trop d'écart : on le pose là-bas avec l'inclinaison de la prise, si elle y passe
-                        G.prise_et_approche(*q, h, incl_o, 0.0); ip = incl_o; rang = 2
-                    else:
-                        rang = int(ip != incl_o); G.prise_et_approche(*q, h, ip, 0.0 if ip == incl_o else LEVE_PENCHE)
-                    cands.append((rang, abs(math.hypot(*pt) - math.hypot(o['X'], o['Y'])), pt, q, ip))
-                except G.HorsDePortee: continue
-            if not cands: self.dire(f'   Les {len(reste)} points restants ne sont pas atteignables d\'ici : je m\'arrête là.'); break
-            _, _, pt, q, ip = min(cands); reste.remove(pt); k += 1
-            self.dire(f'Point {k} : je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} pour le poser en X {pt[0]:+.0f}, Y {pt[1]:.0f}.')
-            plan = p.preparer(*visee)
-            if not plan: raise ErreurServo('prise impossible')
-            self.au_repos = False; incl_prise = p.incl
-            self.ouvrir_a(ouverture_prise(o)); p.aller(*plan); self.etape(p.prise is plan[0], 'l\'approche'); self.etape(p.descendre(), 'la descente')
-            tenu, largeur = self.serrer(); self.etape(p.monter(), 'la remontée')
-            if not tenu:
-                self.ouvrir_a(ouverture_prise(o)); p.repos(); rates += 1; reste.append(pt)
-                if rates >= 3: raise ErreurServo('3 prises ratées : la correction actuelle est trop fausse pour démarrer. Fais UN point à la main dans viser_camera (flèches puis C) près de l\'objet, puis reviens faire A.')
-                self.dire('   Prise ratée : je regarde à nouveau.'); o = seul(); continue
-            plan2 = p.preparer(*q, ip, 0.0 if ip == incl_prise else LEVE_PENCHE)
-            if not plan2: raise ErreurServo('pose impossible (objet en main : O pour ouvrir, bras tenu)')
-            p.aller(*plan2); self.etape(p.prise is plan2[0], 'le transport'); self.etape(p.descendre(), 'la pose')
-            self.lacher_doucement(max(largeur, 20.0), 50); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
-            o = seul(); arrive = (o['X'], o['Y']); e = math.hypot(arrive[0] - pt[0], arrive[1] - pt[1])
-            if e > 90: raise ErreurServo(f'l\'objet est à {e:.0f} mm du point visé : il a roulé ou il est tombé. Rien n\'est enregistré pour ce point ; remets-le debout puis A.')
-            nouvelles = C.apprendre(nouvelles, arrive, q); erreurs.append(e)
-            self.dire(f'   Visé X {pt[0]:+.0f}, Y {pt[1]:.0f} → arrivé en X {arrive[0]:+.0f}, Y {arrive[1]:.0f} : {e:.0f} mm d\'écart ({C.en_clair(pt, arrive)}).')
-        if len(nouvelles) < 4: self.dire(f'Seulement {len(nouvelles)} point(s) appris : il en faut 4. Les corrections ne changent pas.'); return
+        arret, en_cours = None, None
+        try:
+            while reste:
+                visee = C.corriger(o['X'], o['Y'], self.corrections)
+                try: incl_o = G.choisir_inclinaison(*visee, h)[0]
+                except G.HorsDePortee: raise ErreurServo('l\'objet est hors de portée : mets-le vers le milieu de la table, puis A')
+                cands = []
+                for pt in reste:                                  # où le poser : même inclinaison si possible, sinon 15° d'écart, au plus près
+                    q = C.corriger(*pt, self.corrections)
+                    try:
+                        ip = G.choisir_inclinaison(*q, h)[0]
+                        if abs(ip - incl_o) > ECART_INCL:           # trop d'écart : on le pose là-bas avec l'inclinaison de la prise, si elle y passe
+                            G.prise_et_approche(*q, h, incl_o, 0.0); ip = incl_o; rang = 2
+                        else:
+                            rang = int(ip != incl_o); G.prise_et_approche(*q, h, ip, 0.0 if ip == incl_o else LEVE_PENCHE)
+                        cands.append((rang, abs(math.hypot(*pt) - math.hypot(o['X'], o['Y'])), pt, q, ip))
+                    except G.HorsDePortee: continue
+                if not cands: self.dire(f'   Les {len(reste)} points restants ne sont pas atteignables d\'ici : je m\'arrête là.'); break
+                _, _, pt, q, ip = min(cands); reste.remove(pt); k += 1; en_cours = pt
+                self.dire(f'Point {k} : je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} pour le poser en X {pt[0]:+.0f}, Y {pt[1]:.0f}.')
+                plan = p.preparer(*visee)
+                if not plan: raise ErreurServo('prise impossible')
+                self.au_repos = False; incl_prise = p.incl
+                self.ouvrir_a(ouverture_prise(o)); p.aller(*plan); self.etape(p.prise is plan[0], 'l\'approche'); self.etape(p.descendre(), 'la descente')
+                tenu, largeur = self.serrer(); self.etape(p.monter(), 'la remontée')
+                if not tenu:
+                    self.ouvrir_a(ouverture_prise(o)); p.repos(); rates += 1; reste.append(pt)
+                    if rates >= 3: raise ErreurServo('3 prises ratées : la correction actuelle est trop fausse pour démarrer. Fais UN point à la main dans viser_camera (flèches puis C) près de l\'objet, puis reviens faire A.')
+                    self.dire('   Prise ratée : je regarde à nouveau.'); o = seul(); continue
+                plan2 = p.preparer(*q, ip, 0.0 if ip == incl_prise else LEVE_PENCHE)
+                if not plan2: raise ErreurServo('pose impossible (objet en main : O pour ouvrir, bras tenu)')
+                p.aller(*plan2); self.etape(p.prise is plan2[0], 'le transport'); self.etape(p.descendre(), 'la pose')
+                self.lacher_doucement(max(largeur, 20.0), 50); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
+                o = seul(); arrive = (o['X'], o['Y']); e = math.hypot(arrive[0] - pt[0], arrive[1] - pt[1])
+                if e > 90: raise ErreurServo(f'l\'objet est à {e:.0f} mm du point visé : il a roulé ou il est tombé. Rien n\'est enregistré pour ce point ; remets-le debout puis A.')
+                nouvelles = C.apprendre(nouvelles, arrive, q); erreurs.append(e); en_cours = None
+                self.dire(f'   Visé X {pt[0]:+.0f}, Y {pt[1]:.0f} → arrivé en X {arrive[0]:+.0f}, Y {arrive[1]:.0f} : {e:.0f} mm d\'écart ({C.en_clair(pt, arrive)}).')
+        except ErreurServo as err: arret = str(err)
+        self.visee_reste = list(reste) + ([en_cours] if en_cours and en_cours not in reste else [])
+        # Arrêt en route (pion tombé, reflet, prise ratée, ESPACE) : ce qui est appris est GARDÉ, et le prochain A reprend aux points
+        # restants (Nicolas, 27/11/2026 : « dès qu'il y a la moindre erreur ça s'arrête et il faut tout recommencer »).
+        if not nouvelles:
+            if arret: self.dire(f'Arrêt : {arret}. Rien d\'appris cette fois ; remets le pion debout, seul, puis A.')
+            return
         C.FICHIER.with_name('correction_point_avant.json').write_text(__import__('json').dumps(self.corrections, indent=1), encoding='utf-8')
-        # 8 points mesurés ou plus : ils remplacent tout. Moins : on garde aussi les anciens points qui sont loin des nouveaux.
-        gardes = [] if len(nouvelles) >= 8 and not points else [a for a in self.corrections if all(math.hypot(a['X'] - n['X'], a['Y'] - n['Y']) > 60 for n in nouvelles)]
+        complet = not arret and not points and len(nouvelles) >= 8 and not getattr(self, 'visee_reprise', False)
+        gardes = [] if complet else [a for a in self.corrections if all(math.hypot(a['X'] - n['X'], a['Y'] - n['Y']) > 60 for n in nouvelles)]
         self.corrections = nouvelles + gardes; C.enregistrer(self.corrections)
-        self.dire(f'Visée apprise sur {len(nouvelles)} points{f" ({len(gardes)} anciens gardés)" if gardes else ""}. Avec les corrections qu\'il avait AU DÉPART, l\'écart était de {sum(erreurs) / len(erreurs):.0f} mm en moyenne '
-                  f'(pire : {max(erreurs):.0f} mm). Refais A : l\'écart mesuré sera celui des nouvelles corrections.')
+        bilan = f'{len(nouvelles)} point(s) appris et enregistrés, écart moyen {sum(erreurs) / len(erreurs):.0f} mm avec les corrections d\'avant (pire : {max(erreurs):.0f} mm).'
+        if arret: self.dire(f'Arrêt : {arret}. {bilan} Il reste {len(self.visee_reste)} point(s) : remets le pion debout, SEUL sur la table (F si un reflet gêne), puis A : je reprends où j\'en étais.')
+        else: self.visee_reste = []; self.dire(f'Visée apprise. {bilan} Refais A pour mesurer l\'écart avec les nouvelles corrections.')
 
     def tourner(self, angle):
         """Tourne la pince sur elle-même (bras en l'air, au repos ou au-dessus du point). La pose se fera pince tournée aussi."""
