@@ -41,7 +41,6 @@ ECART_DEPOT = 50.0                                                # mm entre deu
 # retombe droit tout seul (il ne bascule qu'au-delà de 23° pour la barre, 25° pour le petit rond, par le calcul).
 ECART_INCL = 15.0
 DECALE_LACHER = 6.0                                               # mm : après un lâcher, la pince se décale vers sa droite avant de monter (--decale ; 0 = non)
-VITESSE_LACHER = 90                                               # pas/s : ouverture lente pour lâcher (300 d'habitude)
 LEVE_PENCHE = 13.0                                                # mm : 32 (demi-longueur de la barre) × sin 15° + 5 de marge
 # Points où le bras pose l'objet pour apprendre sa visée (touche A) : devant le socle, entre les marqueurs.
 POINTS_VISEE = [(float(x), float(y)) for y in (250, 290, 330, 370, 410, 445) for x in (-110, 0, 110)]
@@ -600,11 +599,11 @@ class Trieur(Poste):
         return 20
 
     def lacher_doucement(self, largeur, marge):
-        """Lâche un objet posé SANS le bousculer (les petits cylindres de Nicolas tombaient à l'ouverture, 27/11/2026) : la pince
-        s'entrouvre lentement de quelques millimètres, laisse l'objet se décoller du tapis des mâchoires et se poser, puis
-        s'ouvre, toujours lentement, à la largeur voulue."""
-        self.ouvrir_a(largeur + 6, VITESSE_LACHER); time.sleep(0.4)
-        self.ouvrir_a(largeur + marge, VITESSE_LACHER)
+        """Lâche un objet posé sans le bousculer : la pince s'ouvre LARGE et d'un coup (vitesse habituelle), puis se décale et
+        monte tout droit. L'ouverture lente en deux temps, essayée le 27/11/2026, était pire : le pion, léger, restait collé au
+        tapis de la mâchoire de droite et la suivait (apprentissage de Nicolas : tous les pions posés 4 à 6 cm trop à droite,
+        puis couchés). Ouverte vite, la mâchoire se décolle du pion avant qu'il ait bougé."""
+        self.ouvrir_a(largeur + marge)
         time.sleep(0.2); self.p.monter_droit(decale=getattr(self, 'decale_lacher', DECALE_LACHER))                    # puis tout droit vers le haut, avant la remontée habituelle (qui part en biais)
 
     def transport_libre(self, haut, prise):
