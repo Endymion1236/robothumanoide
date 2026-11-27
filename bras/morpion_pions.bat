@@ -1,5 +1,8 @@
 @echo off
-rem Morpion avec les pions raccourcis de Nicolas (28 x 40 mm) : double-clic, rien a taper.
-rem Pour changer un reglage : clic droit sur ce fichier, Modifier, puis changer les nombres de la ligne du dessous.
+rem Morpion avec les reglages de Nicolas : double-clic, rien a taper.
+rem Pour changer un reglage : double-clic sur REGLAGES.bat (il ouvre mes_reglages.bat dans le Bloc-notes).
 cd /d "%~dp0"
-call jouer_morpion.bat --hauteur 40 --decale 6 --decale-prise 0 %*
+if not exist mes_reglages.bat copy /y reglages_modele.bat mes_reglages.bat >nul
+call mes_reglages.bat
+echo Reglages : pions de %HAUTEUR% mm, machoire fixe a %MACHOIRE_FIXE% mm, decalage au lacher %DECALE% mm, retouche de prise %DECALE_PRISE% mm.
+call jouer_morpion.bat --hauteur %HAUTEUR% --decale %DECALE% --machoire-fixe %MACHOIRE_FIXE% --decale-prise %DECALE_PRISE% %*
