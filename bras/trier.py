@@ -433,10 +433,16 @@ class Trieur(Poste):
                 plan2 = p.preparer(*q, ip, 0.0 if ip == incl_prise else LEVE_PENCHE)
                 if not plan2: raise ErreurServo('pose impossible (objet en main : O pour ouvrir, bras tenu)')
                 p.aller(*plan2); self.etape(p.prise is plan2[0], 'le transport'); self.etape(p.descendre(), 'la pose')
-                self.lacher_doucement(max(largeur, 20.0), 50); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
+                self.lacher_doucement(max(largeur, 20.0), 50, decale=0.0); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
                 o = seul(); arrive = (o['X'], o['Y']); e = math.hypot(arrive[0] - pt[0], arrive[1] - pt[1])
                 if e > 90: raise ErreurServo(f'l\'objet est à {e:.0f} mm du point visé : il a roulé ou il est tombé. Rien n\'est enregistré pour ce point ; remets-le debout puis A.')
                 nouvelles = C.apprendre(nouvelles, arrive, q); erreurs.append(e); en_cours = None; rates = 0
+                # On n'apprend que la DISTANCE (plus près / plus loin). L'écart de côté n'est pas fiable : les mâchoires s'ouvrent
+                # justement de côté, et un pion léger qui suit une mâchoire de 2 cm au lâcher était appris comme une erreur de
+                # visée de 2 cm ; la pince visait ensuite à gauche et sa mâchoire de droite frôlait le pion (fichier de
+                # corrections de Nicolas du 27/11/2026 : 15 à 33 mm de côté partout, 0 la veille). --visee-cote pour l'apprendre.
+                if not getattr(self, 'visee_cote', False):
+                    for n in nouvelles: n['da'] = 0.0
                 self.dire(f'   Visé X {pt[0]:+.0f}, Y {pt[1]:.0f} → arrivé en X {arrive[0]:+.0f}, Y {arrive[1]:.0f} : {e:.0f} mm d\'écart ({C.en_clair(pt, arrive)}).')
         except ErreurServo as err: arret = str(err)
         self.visee_reste = list(reste) + ([en_cours] if en_cours and en_cours not in reste else [])
@@ -619,13 +625,13 @@ class Trieur(Poste):
             if not OB.geste_libre(socle, [prise], voisins, self.p.c.hauteur, largeur + marge): return marge
         return 20
 
-    def lacher_doucement(self, largeur, marge):
+    def lacher_doucement(self, largeur, marge, decale=None):
         """Lâche un objet posé sans le bousculer : la pince s'ouvre LARGE et d'un coup (vitesse habituelle), puis se décale et
         monte tout droit. L'ouverture lente en deux temps, essayée le 27/11/2026, était pire : le pion, léger, restait collé au
         tapis de la mâchoire de droite et la suivait (apprentissage de Nicolas : tous les pions posés 4 à 6 cm trop à droite,
         puis couchés). Ouverte vite, la mâchoire se décolle du pion avant qu'il ait bougé."""
         self.ouvrir_a(largeur + marge)
-        time.sleep(0.2); self.p.monter_droit(decale=getattr(self, 'decale_lacher', DECALE_LACHER))                    # puis tout droit vers le haut, avant la remontée habituelle (qui part en biais)
+        time.sleep(0.2); self.p.monter_droit(decale=getattr(self, 'decale_lacher', DECALE_LACHER) if decale is None else decale)                    # puis tout droit vers le haut, avant la remontée habituelle (qui part en biais)
 
     def transport_libre(self, haut, prise):
         """Le trajet objet en main, de la remontée jusqu'à la pose, ne heurte rien ? Renvoie l'obstacle touché ou None."""
@@ -833,7 +839,7 @@ def ecouter_consignes(t, a):
     except Exception as err: t.dire(f'L\'écoute s\'est arrêtée ({type(err).__name__} : {err}). Les touches marchent toujours.')
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (si la mâchoire de droite arrive trop près de l\'objet ; négatif = gauche)'); ap.add_argument('--decale', type=float, default=DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)'); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
+    ap = argparse.ArgumentParser(); ap.add_argument('--visee-cote', action='store_true', help='touche A : apprendre aussi l\'écart de côté (par défaut, seulement la distance)'); ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (si la mâchoire de droite arrive trop près de l\'objet ; négatif = gauche)'); ap.add_argument('--decale', type=float, default=DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)'); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
     ap.add_argument('--fenetre', type=int, default=700)
     ap.add_argument('--voix', action='store_true', help='écouter le micro : « range les ronds à gauche », « stop »')
     ap.add_argument('--clavier', action='store_true', help='taper les consignes dans cette fenêtre noire au lieu de les dire')
@@ -854,7 +860,7 @@ def main():
     except ErreurServo as err: print('Impossible de commencer :', err); cam.release(); return 1
     try: verifier_zones(p.c.hauteur)
     except G.HorsDePortee as e: print('Une zone de dépôt est hors de portée :', e); cam.release(); return A.terminer(p)
-    t = Trieur(p, reglage, a.hauteur); t.decale_lacher = a.decale; t.decale_prise = a.decale_prise; ech = {'v': 1.0}
+    t = Trieur(p, reglage, a.hauteur); t.decale_lacher = a.decale; t.decale_prise = a.decale_prise; t.visee_cote = a.visee_cote; ech = {'v': 1.0}
     t.modele_ia = {'sonnet': 'claude-sonnet-5-5', 'opus': 'claude-opus-5-5'}[a.ia]
     if (a.voix or a.clavier) and not a.muet: t.parole = CV.Parole(a.voix_pc)
     if a.voix or a.clavier:
