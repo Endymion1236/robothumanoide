@@ -26,6 +26,7 @@ from viser_camera import sans_accents, FLECHES
 
 NIVEAUX = {'1': 'facile', '2': 'normal', '3': 'imbattable'}
 ANGLES_RESERVE = (33.0, -33.0)                # les deux emplacements des pions de Câlin : à droite et à gauche du plateau
+OUV_LARGE = 85.0                              # ouverture préférée pour prendre un pion (comme au tri) quand aucun voisin ne gêne
 OUV_PION = 68.0                               # ouverture de la pince pour prendre un pion de Ø 28 (40 mm de marge)
 AIDE = 'F = fond (table VIDE) | N = nouvelle partie | C = Calin commence | J = j ai joue | A = apprendre la visee (1 pion seul) | 1 2 3 = niveau | R repos | ESPACE = ARRET | Q quitter'
 
@@ -105,11 +106,11 @@ class Joueur(TR.Trieur):
             _, reserve = M.lire_plateau(objets, spots=self.spots())
             plan = self.plan_du_coup(reserve, objets, cible)
             if plan is None: self.parler_et_dire(M.phrase('plus_de_pion')); self.dire('Quand c\'est fait, appuie sur J : je rejoue.'); return
-            o, visee, ip, q, iq, leve = plan
+            o, visee, ip, q, iq, leve, ouv = plan
             pr = p.preparer(*visee, ip)
             if not pr: raise ErreurServo('prise impossible')
             self.au_repos = False
-            self.ouvrir_a(OUV_PION); p.aller(*pr); self.etape(p.prise is pr[0], 'l\'approche'); self.etape(p.descendre(), 'la descente')
+            self.ouvrir_a(ouv); p.aller(*pr); self.etape(p.prise is pr[0], 'l\'approche'); self.etape(p.descendre(), 'la descente')
             if self.hauteur < TR.OBJET_BAS: p.descendre_au_contact(*visee)        # pion bas : les mâchoires descendent jusqu'à sentir la table
             tenu, largeur = self.serrer(); self.etape(p.monter(), 'la remontée')
             if tenu: break
@@ -154,7 +155,8 @@ class Joueur(TR.Trieur):
                 pr = possible(visee, ip)
                 if not pr: continue
                 socle = G.angles_pour(*visee, None, h, ip)['socle']
-                if OB.geste_libre(socle, [TR.REPOS, pr[1], pr[0]], obs, h, OUV_PION): continue      # la pince ouverte toucherait un voisin
+                ouv = next((w for w in (OUV_LARGE, OUV_PION) if not OB.geste_libre(socle, [TR.REPOS, pr[1], pr[0]], obs, h, w)), None)   # la plus large qui ne touche aucun voisin
+                if ouv is None: continue
                 for iq, leve in ((ip, 0.0), (ip - TR.ECART_INCL, TR.LEVE_PENCHE), (ip + TR.ECART_INCL, TR.LEVE_PENCHE)):
                     if not -90.0 <= iq <= 0.0: continue
                     po = possible(q, iq, leve)
@@ -162,7 +164,7 @@ class Joueur(TR.Trieur):
                     socle2 = G.angles_pour(*q, None, h, iq)['socle']
                     tenu = (ip, G.hauteur_prise(ip), self.hauteur, 16.0)
                     if OB.geste_libre(socle2, [TR.REPOS, po[1], po[0]], obs, h, 0.0, tenu): continue              # le pion tenu toucherait un pion du plateau
-                    meilleurs.append((leve > 0, abs(ip), math.hypot(o['X'] - cible[0], o['Y'] - cible[1]), id(o), (o, visee, ip, q, iq, leve)))
+                    meilleurs.append((leve > 0, abs(ip), math.hypot(o['X'] - cible[0], o['Y'] - cible[1]), id(o), (o, visee, ip, q, iq, leve, ouv)))
         return min(meilleurs)[-1] if meilleurs else None
 
     # ---- touches et écran ----
