@@ -149,7 +149,7 @@ class Joueur(TR.Trieur):
             try: return G.prise_et_approche(*pt, h, incl, leve)
             except G.HorsDePortee: return None
         for o in reserve:
-            visee = C.corriger(o['X'], o['Y'], self.corrections); obs = self.obstacles(objets, o)
+            visee = TR.a_droite(C.corriger(o['X'], o['Y'], self.corrections), getattr(self, 'decale_prise', 0.0)); obs = self.obstacles(objets, o)
             for ip in inclinaisons_de_prise(self.hauteur):
                 pr = possible(visee, ip)
                 if not pr: continue
@@ -258,6 +258,7 @@ def main():
     ap.add_argument('--niveau', default='normal', choices=list(NIVEAUX.values()))
     ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS, help='hauteur des pions en mm (60 pour les objets d\'essai ; à donner si tu les as raccourcis)')
     ap.add_argument('--decale', type=float, default=TR.DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)')
+    ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (négatif = gauche)')
     ap.add_argument('--muet', action='store_true', help='Câlin écrit ses phrases sans les dire')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs'); a = ap.parse_args()
     reglage = T.charger()
@@ -268,7 +269,7 @@ def main():
     try: p = A.Pointeur()
     except ErreurServo as err: print('Impossible de commencer :', err); cam.release(); return 1
     t = Joueur(p, reglage, a.hauteur, niveau=a.niveau)
-    t.decale_lacher = a.decale
+    t.decale_lacher = a.decale; t.decale_prise = a.decale_prise
     servies = [len(cases_servies(sp, p.c.hauteur, t.corrections, a.hauteur)) for sp in t.spots()]
     t.dire(f'Pions de {a.hauteur:.0f} mm de haut' + (' (prise au contact, pince raide)' if a.hauteur < TR.OBJET_BAS else '') + f' ; depuis mes deux emplacements, j\'atteins {servies[0]} et {servies[1]} cases sur 9.')
     if not a.muet: t.parole = CV.Parole(a.voix_pc)

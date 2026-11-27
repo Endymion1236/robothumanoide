@@ -103,6 +103,11 @@ REPOS = {'epaule': EP.REPOS, 'coude': 0.0, 'flexion': 0.0}
 # le contrôle des obstacles en tient compte). Nicolas, 26/11/2026 : avec + 30 mm, une mâchoire tombait sur le gros rond (il ne
 # restait que 15 à 20 mm de chaque côté pour l'erreur de visée) ; sa pince s'ouvre à 133 mm.
 MARGE_OUVERTURE, OUVERTURE_MAX = 55.0, 115.0
+def a_droite(pt, mm):
+    """Le point `pt` décalé de `mm` vers la droite du bras (vu de derrière, perpendiculairement à sa direction)."""
+    R = math.hypot(*pt)
+    return (pt[0] + mm * pt[1] / R, pt[1] - mm * pt[0] / R) if mm and R > 1 else tuple(pt)
+
 def ouverture_prise(o, roulis=0.0):
     larg = o.get('etroit', o['largeur']) if roulis else o['largeur']                      # pince tournée : en travers de l'objet
     return min(OUVERTURE_MAX, max(larg, 30.0) + MARGE_OUVERTURE)
@@ -399,7 +404,7 @@ class Trieur(Poste):
                 # et le point appris à cet endroit y ramène la pince. Sans cela, sur les côtés (ronds bleus du morpion, hors de la
                 # zone apprise par le tri), la pince visait avec une correction devinée et se refermait à vide (Nicolas, 27/11/2026).
                 actuelles = nouvelles + [a for a in self.corrections if all(math.hypot(a['X'] - n['X'], a['Y'] - n['Y']) > 60 for n in nouvelles)]
-                visee = C.corriger(o['X'], o['Y'], actuelles)
+                visee = a_droite(C.corriger(o['X'], o['Y'], actuelles), getattr(self, 'decale_prise', 0.0))
                 try: incl_o = G.choisir_inclinaison(*visee, h)[0]
                 except G.HorsDePortee: raise ErreurServo('l\'objet est hors de portée : mets-le vers le milieu de la table, puis A')
                 cands = []
@@ -514,7 +519,7 @@ class Trieur(Poste):
         if self.rap:
             n = self.rap.nouvel_essai(o); self.rap.note(longueur_vue=o['longueur']); self.rap.photo(f'objet_{n:02d}_avant', self.image, self.annoter(self.image, o))
         if voisin < ECART_MIN: self.dire(f'Attention : l\'objet en X {o["X"]:+.0f} Y {o["Y"]:.0f} a un voisin à {voisin:.0f} mm, la pince pourrait le toucher.')
-        visee = C.corriger(o['X'], o['Y'], self.corrections)
+        visee = a_droite(C.corriger(o['X'], o['Y'], self.corrections), getattr(self, 'decale_prise', 0.0))
         self.dire(f'Je prends l\'objet en X {o["X"]:+.0f}, Y {o["Y"]:.0f} (vu {o["largeur"]:.0f} mm de large).')
         bas = self.hauteur < OBJET_BAS; raide = None
         if bas:                                   # objet bas : pince la plus raide possible (−90°, sinon −75°, sinon −60°), puis descente au contact
@@ -828,7 +833,7 @@ def ecouter_consignes(t, a):
     except Exception as err: t.dire(f'L\'écoute s\'est arrêtée ({type(err).__name__} : {err}). Les touches marchent toujours.')
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--decale', type=float, default=DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)'); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
+    ap = argparse.ArgumentParser(); ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (si la mâchoire de droite arrive trop près de l\'objet ; négatif = gauche)'); ap.add_argument('--decale', type=float, default=DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)'); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
     ap.add_argument('--fenetre', type=int, default=700)
     ap.add_argument('--voix', action='store_true', help='écouter le micro : « range les ronds à gauche », « stop »')
     ap.add_argument('--clavier', action='store_true', help='taper les consignes dans cette fenêtre noire au lieu de les dire')
@@ -849,7 +854,7 @@ def main():
     except ErreurServo as err: print('Impossible de commencer :', err); cam.release(); return 1
     try: verifier_zones(p.c.hauteur)
     except G.HorsDePortee as e: print('Une zone de dépôt est hors de portée :', e); cam.release(); return A.terminer(p)
-    t = Trieur(p, reglage, a.hauteur); t.decale_lacher = a.decale; ech = {'v': 1.0}
+    t = Trieur(p, reglage, a.hauteur); t.decale_lacher = a.decale; t.decale_prise = a.decale_prise; ech = {'v': 1.0}
     t.modele_ia = {'sonnet': 'claude-sonnet-5-5', 'opus': 'claude-opus-5-5'}[a.ia]
     if (a.voix or a.clavier) and not a.muet: t.parole = CV.Parole(a.voix_pc)
     if a.voix or a.clavier:
