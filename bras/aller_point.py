@@ -77,7 +77,7 @@ class Pointeur:
         plan = self.preparer(X, Y, imposee)
         if plan and self.demander('   J\'y vais ? (o/n) ').strip().lower().startswith('o'): self.aller(*plan)
 
-    def descendre_au_contact(self, X, Y, pas_mm=3.0, remonte=3.0, plancher=-6.0):
+    def descendre_au_contact(self, X, Y, pas_mm=4.0, remonte=4.0, plancher=-6.0, d_un_trait=14.0):
         """Pour les objets BAS (1 à 2 cm, demande de Nicolas du 27/11/2026) : depuis la position de prise, où le bas de la pince est
         à 22 mm de la table par le calcul, la pince continue de descendre À LA VERTICALE du point (X, Y), par marches de 3 mm,
         en surveillant l'effort de l'épaule, du coude et du poignet. Dès que l'effort change d'un coup (les mâchoires touchent
@@ -88,13 +88,22 @@ class Pointeur:
         c = self.c; incl = self.incl; z0 = G.hauteur_prise(incl); garde = z0 - (B.MARGE_TABLE + 2.0)      # du milieu des mâchoires à leur point le plus bas
         poser = lambda a, nom: c._bouger([(c.epaule, E.position(a['epaule'], c.haut)), (c.coude, MILIEU + c.sc * pas(a['coude'])), (c.flexion, MILIEU + c.sf * pas(a['flexion']))], nom)
         effort = lambda: [sum(c.bus.etat(i)['charge'] for _ in range(3)) / 3 for i in (c.epaule, c.coude, c.flexion)]
-        time.sleep(0.2); avant = effort(); z, prec, contact = z0, dict(self.prise), False
+        # Pour ne pas y passer des heures (Nicolas, 27/11/2026) : la première partie se fait D'UN TRAIT, jusqu'à 14 mm de la table par
+        # le calcul (le bras fléchit de 3 à 8 mm : il reste de la marge), puis des marches de 4 mm, 2 lectures d'effort au lieu de 3,
+        # 0,1 s de pause au lieu de 0,2 : 3 marches au plus dans le cas courant, environ 2 secondes en tout.
+        effort = lambda: [sum(c.bus.etat(i)['charge'] for _ in range(2)) / 2 for i in (c.epaule, c.coude, c.flexion)]
+        z, prec, contact = z0, dict(self.prise), False
+        try:
+            a = G.angles_pour(X, Y, garde + d_un_trait, c.hauteur, incl)
+            if poser(a, f'Descente rapide : bas de la pince à {d_un_trait:.0f} mm par le calcul'): z, prec = garde + d_un_trait, a
+        except G.HorsDePortee: pass
+        time.sleep(0.1); avant = effort()
         while z - pas_mm - garde >= plancher:
             if c.arret.is_set(): break
             try: a = G.angles_pour(X, Y, z - pas_mm, c.hauteur, incl)
             except G.HorsDePortee: break
             if not poser(a, f'Descente au contact : bas de la pince à {z - pas_mm - garde:.0f} mm par le calcul'): break
-            z -= pas_mm; time.sleep(0.2); apres = effort()
+            z -= pas_mm; time.sleep(0.1); apres = effort()
             if max(abs(x - y) for x, y in zip(apres, avant)) >= B.SEUIL_CONTACT:
                 contact = True; poser(prec, f'Contact senti : je remonte de {remonte:.0f} mm'); z += pas_mm; break
             avant, prec = apres, a

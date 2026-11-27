@@ -644,8 +644,9 @@ table, parce que le bras fléchit. Pour les objets bas, on fait autrement :
 1. lancer le tri en donnant la hauteur des objets : `trier.bat --hauteur 15` (ou `trier_voix.bat --hauteur 15`) ;
    sous 40 mm, le programme passe en « objets bas » ;
 2. la pince se met la plus raide possible au-dessus de l'objet (pointée vers le bas, sinon penchée de 75° ou 60°) ;
-3. elle descend à la verticale par marches de 3 mm en surveillant l'effort de l'épaule, du coude et du poignet ;
-4. dès que l'effort change d'un coup (les mâchoires touchent la table), elle remonte de 3 mm et serre.
+3. elle descend à la verticale : d'un trait jusqu'à 14 mm de la table (par le calcul), puis par marches de 4 mm en surveillant
+   l'effort de l'épaule, du coude et du poignet (3 marches au plus dans le cas courant : environ 2 secondes de plus qu'une prise ordinaire) ;
+4. dès que l'effort change d'un coup (les mâchoires touchent la table), elle remonte de 4 mm et serre.
    Deuxième sécurité : si aucun effort n'est senti, elle s'arrête quand les servos se lisent à 3 mm de la table.
 
 Les objets bas doivent être entre 21 et 37 cm du socle environ (là où la pince peut se mettre raide). Tous les objets d'un
