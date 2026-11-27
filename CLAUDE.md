@@ -207,3 +207,9 @@ l'axe du bras : `MACHOIRE_FIXE = 36` mm dans `bras/trier.py` (cote du dessin, `-
 Ne plus jamais parler d'engrenages ni de « dent sautée » pour cette pince. À mesurer par Nicolas : distance de la face de la
 mâchoire fixe à l'axe de l'avant-bras. La touche A n'apprend que la distance (pas le côté), 4 ronds bleus au morpion, le pion est
 appuyé sur la table avant l'ouverture.
+
+**PC de Nicolas (dit le 27/11/2026) : portable avec RTX 5070 et 32 Go de mémoire vive** (mémoire de la carte graphique à faire
+vérifier : 8 Go sur la version portable, en principe). Idées de Nicolas : Câlin joueur de jeux de société (caméra au-dessus,
+caméra dans les yeux, porte-cartes, aide humaine pour les gestes fins ; après le morpion : dés, puissance 4, petits chevaux) et
+IA hébergée chez lui plutôt que le cloud (piste : Ollama + petit modèle ouvert, option locale / cloud à ajouter dans
+`bras/consigne_vocale.py` et `tete/parler.py` ; rien de codé).
