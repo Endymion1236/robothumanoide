@@ -27,7 +27,7 @@ from viser_camera import sans_accents, FLECHES
 NIVEAUX = {'1': 'facile', '2': 'normal', '3': 'imbattable'}
 ANGLES_RESERVE = (33.0, -33.0)                # les deux emplacements des pions de Câlin : à droite et à gauche du plateau
 OUV_PION = 68.0                               # ouverture de la pince pour prendre un pion de Ø 28 (40 mm de marge)
-AIDE = 'F = fond (table VIDE) | N = nouvelle partie | C = Calin commence | J = j ai joue | 1 2 3 = niveau | R repos | ESPACE = ARRET | Q quitter'
+AIDE = 'F = fond (table VIDE) | N = nouvelle partie | C = Calin commence | J = j ai joue | A = apprendre la visee (1 pion seul) | 1 2 3 = niveau | R repos | ESPACE = ARRET | Q quitter'
 
 class Joueur(TR.Trieur):
     def __init__(self, pointeur, reglage, hauteur=O.HAUTEUR_OBJETS, attendre=False, niveau='normal'):
@@ -52,7 +52,7 @@ class Joueur(TR.Trieur):
     def nouvelle_partie(self, calin_commence):
         if self.occupe: self.dire('Le bras est occupé : attends, ou ESPACE.'); return
         if self.fond is None: self.dire('Il faut d\'abord la photo du fond : table VIDE (sans pion), bras au repos, touche F.'); return
-        g, reserve = M.lire_plateau(self.objets)
+        g, reserve = M.lire_plateau(self.objets, spots=self.spots())
         if any(g): self.dire('Il reste des pions sur le plateau : vide les 9 cases, puis N.'); return
         if not reserve: self.dire('Il me faut au moins un petit pion sur un des deux ronds bleus (ma réserve).'); return
         self.grille, self.en_jeu, self.stable, self.averti = [M.VIDE] * 9, True, None, None
@@ -63,7 +63,7 @@ class Joueur(TR.Trieur):
     def surveiller(self, forcer=False):
         """Appelé à chaque image : quand c'est à Nicolas, on attend que le plateau ne bouge plus (1,2 s) puis on cherche son coup."""
         if not self.en_jeu or self.tour != M.NICOLAS or self.occupe or not self.au_repos or not self.vus: return
-        vu, _ = M.lire_plateau(self.objets)
+        vu, _ = M.lire_plateau(self.objets, connue=self.grille)
         if vu != self.stable: self.stable, self.depuis = vu, time.time(); return
         if not forcer and time.time() - self.depuis < 1.2: return
         if getattr(O.trouver, 'lumiere', None): return                           # une main ou une ombre dans le champ : on attend
@@ -102,7 +102,7 @@ class Joueur(TR.Trieur):
         cible = M.centre_case(case)
         for essai in range(2):
             p.repos(); self.redresser(); objets = self.regarder()
-            _, reserve = M.lire_plateau(objets)
+            _, reserve = M.lire_plateau(objets, spots=self.spots())
             plan = self.plan_du_coup(reserve, objets, cible)
             if plan is None: self.parler_et_dire(M.phrase('plus_de_pion')); self.dire('Quand c\'est fait, appuie sur J : je rejoue.'); return
             o, visee, ip, q, iq, leve = plan
@@ -126,12 +126,12 @@ class Joueur(TR.Trieur):
         self.lacher_doucement(larg, self.marge_de_lacher(pose[0]['socle'], pose[0], self.obstacles(objets, o), larg)); self.tenu = None; time.sleep(0.3)
         self.etape(p.monter(), 'la remontée'); p.repos()
         # contrôle : mon pion est-il bien dans sa case ?
-        vu, _ = M.lire_plateau(self.regarder()); attendu = self.grille[:]; attendu[case] = M.CALIN
+        attendu = self.grille[:]; attendu[case] = M.CALIN; vu, _ = M.lire_plateau(self.regarder(), connue=attendu)
         self.grille = attendu; self.dire(f'   {M.dessin(self.grille)}')
         if vu[case] != M.CALIN: self.parler_et_dire(M.phrase('rate', c=M.nom_case(case)))
         if self.fin_de_partie(): return
         self.tour, self.stable = M.NICOLAS, None
-        reste = M.lire_plateau(self.objets)[1]
+        reste = M.lire_plateau(self.objets, spots=self.spots())[1]
         self.parler_et_dire(M.phrase('a_toi') + ('' if reste else ' Et remets-moi un pion sur un rond bleu, s\'il te plaît.'))
 
     def spots(self):
@@ -180,7 +180,14 @@ class Joueur(TR.Trieur):
             def repos():
                 self.p.repos(); self.redresser(); self.au_repos = True
             self._lancer('retour au repos', repos); return True
-        if kk in ('t', 'a', 'o', 'd', 'm', 'e', 's', 'i', 'l', 'u', '\r', '\n') or k in FLECHES: return True
+        if kk == 'a':
+            if self.fond is None: self.dire('Il faut d\'abord la photo du fond : table VIDE, bras au repos, touche F.'); return True
+            if self.en_jeu: self.dire('Partie en cours : finis-la (ou vide le plateau), puis A.'); return True
+            def geste():
+                try: self.apprendre_visee([*self.spots(), *(M.centre_case(k) for k in range(9))])
+                finally: self.au_repos = True
+            self._lancer('apprentissage de la visée du morpion', geste); return True
+        if kk in ('t', 'o', 'd', 'm', 'e', 's', 'i', 'l', 'u', '\r', '\n') or k in FLECHES: return True
         return TR.Poste.touche(self, k)
 
     def clic(self, x, y): pass

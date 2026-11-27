@@ -63,15 +63,24 @@ def choisir_coup(g, niveau='normal', hasard=random):
     meilleur = max(notes.values())
     return hasard.choice([k for k, v in notes.items() if v == meilleur])
 
-def lire_plateau(objets, centre=CENTRE):
-    """Ce que la caméra voit : (grille de 9 cases, réserve). Un objet à moins de 30 mm du centre d'une case est un pion posé
-    (petit = Câlin, gros = Nicolas). Les PETITS objets hors des cases sont la réserve de Câlin. Deux pions dans une case : '?'."""
+RAYON_RESERVE = 45.0                          # un objet à moins de 45 mm d'un rond bleu est un pion de Câlin, quelle que soit sa largeur vue
+def lire_plateau(objets, centre=CENTRE, spots=(), connue=None):
+    """Ce que la caméra voit : (grille de 9 cases, réserve). Un objet à moins de 30 mm du centre d'une case est un pion posé.
+    À qui est-il ? Pendant une partie (`connue` = la grille que Câlin a en tête), on ne se fie plus à la largeur vue : une case
+    déjà occupée garde son propriétaire, et un pion apparu dans une case vide est celui de Nicolas (Câlin sait où il a posé les
+    siens). Sans partie en cours : petit = Câlin, gros = Nicolas.
+    La réserve de Câlin : tout objet posé sur un de ses ronds bleus (`spots`), même si la caméra le voit trop large — sur les
+    côtés de la table, loin de la caméra, un petit rond penche et paraît gros (Nicolas, 27/11/2026 : « il a beaucoup de mal à
+    reconnaître les pions sur le côté ») — et, comme avant, tout PETIT objet hors du plateau. Deux pions dans une case : '?'."""
     g, reserve = [VIDE] * 9, []
     for o in objets:
         k = min(range(9), key=lambda c: math.hypot(o['X'] - centre_case(c, centre)[0], o['Y'] - centre_case(c, centre)[1]))
         cx, cy = centre_case(k, centre); petit = est_petit(o)
-        if math.hypot(o['X'] - cx, o['Y'] - cy) <= RAYON_CASE: g[k] = '?' if g[k] else (CALIN if petit else NICOLAS)
-        elif petit and not (abs(o['X'] - centre[0]) < 1.5 * CASE + 15 and abs(o['Y'] - centre[1]) < 1.5 * CASE + 15): reserve.append(o)
+        hors = not (abs(o['X'] - centre[0]) < 1.5 * CASE + 15 and abs(o['Y'] - centre[1]) < 1.5 * CASE + 15)
+        if math.hypot(o['X'] - cx, o['Y'] - cy) <= RAYON_CASE:
+            qui = (connue[k] or NICOLAS) if connue is not None else (CALIN if petit else NICOLAS)
+            g[k] = '?' if g[k] else qui
+        elif hors and (petit or any(math.hypot(o['X'] - x, o['Y'] - y) <= RAYON_RESERVE for x, y in spots)): reserve.append(o)
     return g, reserve
 
 def coup_de_nicolas(avant, vu):

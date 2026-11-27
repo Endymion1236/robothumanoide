@@ -373,7 +373,7 @@ class Trieur(Poste):
             if fini and apres: self.dire(f'Câlin : {apres}'); self.parler(apres)
         self._lancer('tri à la voix', geste)
 
-    def apprendre_visee(self):
+    def apprendre_visee(self, points=None):
         """Le bras apprend SEUL où il arrive vraiment (demande de Nicolas, 26/11/2026 : « quand il rate, il n'apprend pas »).
         Il prend l'unique objet de la table, le pose sur un point choisi, recule, et la caméra regarde où l'objet est vraiment :
         l'écart entre le point visé et l'endroit où l'objet se retrouve est la correction de visée de cet endroit. Puis il le
@@ -386,7 +386,8 @@ class Trieur(Poste):
             if len(objs) != 1: raise ErreurServo(f'pour apprendre la visée, il faut UN SEUL objet sur la table (un rond de préférence), j\'en vois {len(objs)}')
             return objs[0]
         o = seul(); nouvelles, erreurs, rates, k = [], [], 0, 0
-        reste = [pt for pt in POINTS_VISEE if not dans_un_bac(*pt, self.bacs, 70.0)
+        # points : les endroits à apprendre (le morpion donne ses 9 cases et ses 2 ronds bleus) ; sinon la grille du tri.
+        reste = list(points) if points else [pt for pt in POINTS_VISEE if not dans_un_bac(*pt, self.bacs, 70.0)
                  and all(math.hypot(pt[0] - x, pt[1] - y) >= LOIN_DES_MARQUEURS for x, y in T.coins_table(self.reglage).values())]
         self.dire(f'J\'apprends la visée sur {len(reste)} points, avec cet objet. ESPACE pour arrêter.')
         while reste:
@@ -419,7 +420,7 @@ class Trieur(Poste):
             plan2 = p.preparer(*q, ip, 0.0 if ip == incl_prise else LEVE_PENCHE)
             if not plan2: raise ErreurServo('pose impossible (objet en main : O pour ouvrir, bras tenu)')
             p.aller(*plan2); self.etape(p.prise is plan2[0], 'le transport'); self.etape(p.descendre(), 'la pose')
-            self.lacher_doucement(max(largeur, 20.0), 40); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
+            self.lacher_doucement(max(largeur, 20.0), 50); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
             o = seul(); arrive = (o['X'], o['Y']); e = math.hypot(arrive[0] - pt[0], arrive[1] - pt[1])
             if e > 90: raise ErreurServo(f'l\'objet est à {e:.0f} mm du point visé : il a roulé ou il est tombé. Rien n\'est enregistré pour ce point ; remets-le debout puis A.')
             nouvelles = C.apprendre(nouvelles, arrive, q); erreurs.append(e)
@@ -427,7 +428,7 @@ class Trieur(Poste):
         if len(nouvelles) < 4: self.dire(f'Seulement {len(nouvelles)} point(s) appris : il en faut 4. Les corrections ne changent pas.'); return
         C.FICHIER.with_name('correction_point_avant.json').write_text(__import__('json').dumps(self.corrections, indent=1), encoding='utf-8')
         # 8 points mesurés ou plus : ils remplacent tout. Moins : on garde aussi les anciens points qui sont loin des nouveaux.
-        gardes = [] if len(nouvelles) >= 8 else [a for a in self.corrections if all(math.hypot(a['X'] - n['X'], a['Y'] - n['Y']) > 60 for n in nouvelles)]
+        gardes = [] if len(nouvelles) >= 8 and not points else [a for a in self.corrections if all(math.hypot(a['X'] - n['X'], a['Y'] - n['Y']) > 60 for n in nouvelles)]
         self.corrections = nouvelles + gardes; C.enregistrer(self.corrections)
         self.dire(f'Visée apprise sur {len(nouvelles)} points{f" ({len(gardes)} anciens gardés)" if gardes else ""}. Avec les corrections qu\'il avait AU DÉPART, l\'écart était de {sum(erreurs) / len(erreurs):.0f} mm en moyenne '
                   f'(pire : {max(erreurs):.0f} mm). Refais A : l\'écart mesuré sera celui des nouvelles corrections.')
@@ -591,10 +592,10 @@ class Trieur(Poste):
         self.dire(f'   Pince ouverte à {LP.ecart(pos, c.ouvert):.0f} mm : ' + c.bus.aller(c.pince, pos, charge_max=PI.CHARGE_BLOCAGE, **plus))
 
     def marge_de_lacher(self, socle, prise, voisins, largeur):
-        """De combien ouvrir la pince en plus de l'objet pour le lâcher : le plus large possible (jusqu'à 40 mm, 20 par côté)
+        """De combien ouvrir la pince en plus de l'objet pour le lâcher : le plus large possible (jusqu'à 50 mm, 25 par côté)
         SANS toucher les pièces voisines, et jamais moins de 20 mm. Trop serrée, une mâchoire accrochait l'objet en remontant
         et le couchait ; trop large, elle pousserait les voisins (demande de Nicolas, 27/11/2026)."""
-        for marge in (40, 34, 28, 24):
+        for marge in (50, 40, 34, 28, 24):
             if not OB.geste_libre(socle, [prise], voisins, self.p.c.hauteur, largeur + marge): return marge
         return 20
 
