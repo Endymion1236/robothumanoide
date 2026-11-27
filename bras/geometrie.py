@@ -90,17 +90,27 @@ def prise_et_approche(X, Y, hauteur_epaule=179.0, inclinaison=0.0, leve=0.0):
         erreur = erreur or HorsDePortee('la descente passerait trop près de la table')
     raise HorsDePortee(f'pas de position d\'approche ({erreur})')
 
+PERMISES = None                # inclinaisons permises pour SAISIR (None = toutes) : réglé par le tri selon la hauteur des objets
+def inclinaisons_pour(hauteur_objet):
+    """Les inclinaisons de pince qui peuvent saisir un objet de cette hauteur. À plat, le bas des mâchoires passe à 27 mm de la
+    table : sur un pion de 40 mm, elles ne tiennent que les 13 mm du haut et se referment à vide (apprentissage de Nicolas du
+    27/11/2026 : 3 prises ratées de suite, pince à plat, pion de 28 × 40). Sous 50 mm de haut : pince inclinée de 45° au moins,
+    le bout des mâchoires descend alors à 22 mm. Sous 40 mm : pince raide (60° et plus), avec descente au contact."""
+    if hauteur_objet < 40.0: return (-60.0, -75.0, -90.0)
+    if hauteur_objet < 50.0: return (-45.0, -60.0, -75.0, -90.0)
+    return None
+
 def choisir_inclinaison(X, Y, hauteur_epaule=179.0, imposee=None, leve=0.0):
     """Choisit l'inclinaison de la pince pour saisir en (X, Y) : la plus à plat qui marche (0°, puis −15°, −30°… jusqu'à −90°).
     `imposee` : n'essayer que celle-là. Renvoie (inclinaison, prise, approche) ou lève HorsDePortee (la raison donnée est celle de la
     pince à plat si le point est loin, celle de la pince pointée vers le bas s'il est près)."""
     erreurs = {}
-    for incl in (INCLINAISONS if imposee is None else (float(imposee),)):
+    for incl in ((PERMISES or INCLINAISONS) if imposee is None else (float(imposee),)):
         try: return (incl,) + prise_et_approche(X, Y, hauteur_epaule, incl, leve)
         except HorsDePortee as e: erreurs[incl] = e
     if imposee is not None: raise erreurs[float(imposee)]
-    pres = 'trop près' in str(erreurs[0]) or 'coude' in str(erreurs[0])
-    raise HorsDePortee(f"{erreurs[-90] if pres else erreurs[0]} ; aucune inclinaison de la pince ne convient")
+    plat = erreurs[max(erreurs)]; pres = 'trop près' in str(plat) or 'coude' in str(plat)
+    raise HorsDePortee(f"{erreurs[min(erreurs)] if pres else plat} ; aucune inclinaison de la pince ne convient")
 
 def au_dessus(angles, leve=25.0):
     """La position d'approche : la même, épaule relevée de `leve` degrés, le poignet compensant pour garder la pince à plat.

@@ -220,8 +220,8 @@ class Joueur(TR.Trieur):
             V.ecrire(image, sans_accents(m)[:110], (10, haut - 14 - (n + 1) * pas), (0, 230, 255) if n == 0 else (190, 190, 190), 0.55)
 
 def inclinaisons_de_prise(hauteur_pion):
-    """Pion bas (moins de 40 mm) : seulement pince raide, pour que le bout des mâchoires arrive au ras de la table."""
-    return (-90.0, -75.0, -60.0) if hauteur_pion < TR.OBJET_BAS else G.INCLINAISONS
+    """Pion bas : seulement pince inclinée (moins de 50 mm) ou raide (moins de 40 mm), pour que le bout des mâchoires le tienne."""
+    return G.inclinaisons_pour(hauteur_pion) or G.INCLINAISONS
 
 def cases_servies(pt, h_epaule, corrections, hauteur_pion=O.HAUTEUR_OBJETS):
     """Les cases où peut aller un pion posé en `pt` (sans compter les voisins) : pose à l'inclinaison de la prise, à 15° près."""

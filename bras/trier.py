@@ -140,6 +140,7 @@ class Trieur(Poste):
     def __init__(self, pointeur, reglage, hauteur=O.HAUTEUR_OBJETS, attendre=False):
         super().__init__(pointeur, reglage, attendre)
         self.hauteur, self.fond, self.objets, self.image = hauteur, None, [], None
+        G.PERMISES = G.inclinaisons_pour(hauteur)                    # objets bas : la pince ne les saisit pas à plat
         self.demande, self.reponse = threading.Event(), threading.Event()
         self.au_repos, self.tries, self.rates = True, {'petit': 0, 'gros': 0}, []
         self.plan_vocal, self.claude, self.modele_ia = None, None, 'claude-sonnet-5-5'
