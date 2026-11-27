@@ -13,7 +13,15 @@ import math, random
 CASE = 70.0                                   # mm : côté d'une case
 CENTRE = (0.0, 350.0)                         # centre du plateau sur la table (X, Y), devant le socle
 RAYON_CASE = 30.0                             # un pion compte dans une case s'il est à moins de 30 mm de son centre
-SEUIL_PION = 37.0                             # largeur vue (mm) : en dessous, pion de Câlin (Ø 28 vu ≈ 30) ; au-dessus, pion de Nicolas (vu ≈ 45)
+SEUIL_PION = 37.0                             # largeur vue (mm), utilisée seulement si la largeur étroite manque
+SEUIL_ETROIT = 28.0                           # largeur ÉTROITE au pied (mm) : en dessous, pion de Câlin ; au-dessus, pion de Nicolas
+def est_petit(o):
+    """Un pion de Câlin (petit rond de 28) ou un pion de Nicolas ? La « largeur vue » gonfle avec l'ombre et le penché : un petit
+    rond a été vu de 29 à 39 mm (partie de Nicolas du 27/11/2026 : ses petits ronds, pris pour des gros, n'étaient pas reconnus
+    comme pions de Câlin). La largeur étroite au pied, penché retiré, sépare mieux : 20 à 24 mm pour le petit rond, 31 mm et
+    plus pour le gros rond, le carré et l'hexagone (photos des tris du 26/11/2026)."""
+    e = o.get('etroit')
+    return e < SEUIL_ETROIT if e is not None else o['largeur'] < SEUIL_PION
 LIGNES = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)]
 VIDE, CALIN, NICOLAS = '', 'C', 'N'
 
@@ -61,7 +69,7 @@ def lire_plateau(objets, centre=CENTRE):
     g, reserve = [VIDE] * 9, []
     for o in objets:
         k = min(range(9), key=lambda c: math.hypot(o['X'] - centre_case(c, centre)[0], o['Y'] - centre_case(c, centre)[1]))
-        cx, cy = centre_case(k, centre); petit = o['largeur'] < SEUIL_PION
+        cx, cy = centre_case(k, centre); petit = est_petit(o)
         if math.hypot(o['X'] - cx, o['Y'] - cy) <= RAYON_CASE: g[k] = '?' if g[k] else (CALIN if petit else NICOLAS)
         elif petit and not (abs(o['X'] - centre[0]) < 1.5 * CASE + 15 and abs(o['Y'] - centre[1]) < 1.5 * CASE + 15): reserve.append(o)
     return g, reserve

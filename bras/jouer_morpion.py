@@ -195,8 +195,10 @@ class Joueur(TR.Trieur):
                 elif v == M.NICOLAS: cv2.drawMarker(image, pt(x, y), (0, 0, 255), cv2.MARKER_TILTED_CROSS, 44, 3)
             for x, y in self.spots():
                 cv2.circle(image, pt(x, y), 26, bleu, 2); V.ecrire(image, 'pion de Calin', pt(x - 40, y - 34), (255, 200, 80), 0.45)
-            for o in self.objets:
-                cv2.circle(image, pt(o['X'], o['Y']), 5, (0, 255, 255) if o['largeur'] < M.SEUIL_PION else (0, 140, 255), -1)
+            for o in self.objets:                                                # chaque pièce vue : à qui elle est, et la mesure qui le décide
+                petit = M.est_petit(o); coul = (0, 255, 255) if petit else (0, 140, 255); q = pt(o['X'], o['Y'])
+                cv2.circle(image, q, 5, coul, -1)
+                V.ecrire(image, ('Calin ' if petit else 'toi ') + f'{o.get("etroit", o["largeur"]):.0f}', (q[0] + 8, q[1] + 6), coul, 0.45)
         haut = image.shape[0]; pas = int(30 * haut / 720)
         etat = ('Calin joue... ESPACE = ARRET' if self.occupe else 'Photo du fond manquante : table VIDE, bras au repos, touche F' if self.fond is None
                 else 'A toi : pose un gros pion dans une case, puis retire ta main' if self.en_jeu and self.tour == M.NICOLAS
