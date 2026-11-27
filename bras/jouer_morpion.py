@@ -25,7 +25,7 @@ from servos import ErreurServo
 from viser_camera import sans_accents, FLECHES
 
 NIVEAUX = {'1': 'facile', '2': 'normal', '3': 'imbattable'}
-ANGLES_RESERVE = (33.0, -33.0)                # les deux emplacements des pions de Câlin : à droite et à gauche du plateau
+ANGLES_RESERVE = (28.0, 42.0, -28.0, -42.0)   # les 4 emplacements des pions de Câlin : 2 à droite et 2 à gauche du plateau (2 seulement jusqu'au 27/11/2026)
 OUV_LARGE = 85.0                              # ouverture préférée pour prendre un pion (comme au tri) quand aucun voisin ne gêne
 OUV_PION = 68.0                               # ouverture de la pince pour prendre un pion de Ø 28 (40 mm de marge)
 AIDE = 'F = fond (table VIDE) | N = nouvelle partie | C = Calin commence | J = j ai joue | A = apprendre la visee (1 pion seul) | 1 2 3 = niveau | R repos | ESPACE = ARRET | Q quitter'
@@ -55,7 +55,7 @@ class Joueur(TR.Trieur):
         if self.fond is None: self.dire('Il faut d\'abord la photo du fond : table VIDE (sans pion), bras au repos, touche F.'); return
         g, reserve = M.lire_plateau(self.objets, spots=self.spots())
         if any(g): self.dire('Il reste des pions sur le plateau : vide les 9 cases, puis N.'); return
-        if not reserve: self.dire('Il me faut au moins un petit pion sur un des deux ronds bleus (ma réserve).'); return
+        if not reserve: self.dire('Il me faut au moins un pion sur un rond bleu (ma réserve) : je ne prends que ceux-là, les autres sont trop loin pour ma pince.'); return
         self.grille, self.en_jeu, self.stable, self.averti = [M.VIDE] * 9, True, None, None
         self.dire(f'Nouvelle partie, niveau {self.niveau}.')
         if calin_commence: self.parler_et_dire(M.phrase('debut_calin')); self.tour = M.CALIN; self.lancer_coup()
@@ -72,7 +72,7 @@ class Joueur(TR.Trieur):
         if souci:
             if souci != self.averti: self.averti = souci; self.parler_et_dire(M.phrase('triche', raison=souci))
             return
-        self.averti = None
+        if self.averti: self.averti = None; self.parler_et_dire('C\'est bon, merci ! À toi de jouer.'); return      # le souci est réglé : on le dit, sinon Nicolas croit que rien n\'est reconnu
         if case is None:
             if forcer: self.dire('Je ne vois pas de nouveau pion dans une case (à moins de 3 cm de son centre).')
             return
@@ -273,7 +273,7 @@ def main():
     t = Joueur(p, reglage, a.hauteur, niveau=a.niveau)
     t.decale_lacher = a.decale; t.decale_prise = a.decale_prise
     servies = [len(cases_servies(sp, p.c.hauteur, t.corrections, a.hauteur)) for sp in t.spots()]
-    t.dire(f'Pions de {a.hauteur:.0f} mm de haut' + (' (prise au contact, pince raide)' if a.hauteur < TR.OBJET_BAS else '') + f' ; depuis mes deux emplacements, j\'atteins {servies[0]} et {servies[1]} cases sur 9.')
+    t.dire(f'Pions de {a.hauteur:.0f} mm de haut' + (' (prise au contact, pince raide)' if a.hauteur < TR.OBJET_BAS else '') + f' ; depuis mes {len(servies)} ronds bleus, j\'atteins au moins {min(servies)} cases sur 9.')
     if not a.muet: t.parole = CV.Parole(a.voix_pc)
     hors = verifier_plateau(p.c.hauteur, t.corrections)
     if hors: t.dire(f'ATTENTION : les cases {", ".join(hors)} sont hors de portée de la pince (correction de visée comprise). Refais la visée (touche A de trier).')
