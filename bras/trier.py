@@ -107,7 +107,7 @@ MARGE_OUVERTURE, OUVERTURE_MAX = 55.0, 115.0
 # l'avant-bras, il est plaqué contre la mâchoire fixe. Le programme croyait la pince symétrique, d'où toute la journée du
 # 27/11/2026 : mâchoire de droite trop près à la prise, pion posé 2 cm à droite du point visé, mâchoire qui accroche en
 # remontant, et un faux « écart de côté » de 17 à 33 mm appris par la touche A (moyenne 22 = 36 − 28/2).
-MACHOIRE_FIXE = 36.0                                              # mm : face de la mâchoire fixe, à DROITE de l'axe du bras vu de derrière (négatif = à gauche, 0 = pince symétrique). Cote du dessin, à confirmer par mesure.
+MACHOIRE_FIXE = 32.0                                              # mm : face de la mâchoire fixe, à DROITE de l'axe du bras vu de derrière (négatif = à gauche, 0 = pince symétrique). Mesuré par Nicolas le 27/11/2026 : « on dirait 32 » (36 au dessin, tapis épais).
 def cote_prise(ouverture):
     """Pour SAISIR : de combien décaler la visée vers la droite pour que l'objet soit au MILIEU de la pince ouverte."""
     return math.copysign(ouverture / 2 - abs(MACHOIRE_FIXE), MACHOIRE_FIXE) if MACHOIRE_FIXE else 0.0

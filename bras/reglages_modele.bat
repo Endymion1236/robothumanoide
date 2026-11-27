@@ -10,7 +10,7 @@ set HAUTEUR=40
 
 rem Distance, en mm, entre la machoire FIXE (celle de droite, tapis compris) et le milieu de l'avant-bras.
 rem A la prise : la machoire de DROITE passe trop pres du pion -> baisse de 3. Celle de GAUCHE trop pres -> monte de 3.
-set MACHOIRE_FIXE=36
+set MACHOIRE_FIXE=32
 
 rem Apres avoir lache un pion, la pince s'ecarte de ce nombre de mm vers la droite avant de remonter.
 rem Le pion accroche encore a droite en remontant -> monte a 10. Il est bouscule -> baisse a 3 ou 0.

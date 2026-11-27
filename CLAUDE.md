@@ -201,7 +201,7 @@ reprendre tel quel le socle tournant du bras (déjà monté et validé) pour « 
 
 **27/11/2026, cause de fond des ratés de la journée : la pince montée est la V4, SANS engrenages, avec UNE MÂCHOIRE FIXE (à droite
 vu de derrière, d'après tous les symptômes : à confirmer) et une mobile.** L'objet serré est plaqué contre la mâchoire fixe, pas sur
-l'axe du bras : `MACHOIRE_FIXE = 36` mm dans `bras/trier.py` (cote du dessin, `--machoire-fixe`, négatif si elle est à gauche,
+l'axe du bras : `MACHOIRE_FIXE = 32` mm dans `bras/trier.py` (mesuré par Nicolas le 27/11/2026, 36 au dessin ; `--machoire-fixe`, négatif si elle est à gauche,
 0 = pince symétrique). Conséquences codées : à la prise la visée est décalée pour centrer l'objet dans la pince ouverte
 (`cote_prise`), à la pose elle est décalée de 36 − largeur/2 (`cote_pose`), au lâcher la pince s'écarte vers la droite (`--decale`).
 Ne plus jamais parler d'engrenages ni de « dent sautée » pour cette pince. À mesurer par Nicolas : distance de la face de la
