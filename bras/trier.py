@@ -418,7 +418,7 @@ class Trieur(Poste):
             plan2 = p.preparer(*q, ip, 0.0 if ip == incl_prise else LEVE_PENCHE)
             if not plan2: raise ErreurServo('pose impossible (objet en main : O pour ouvrir, bras tenu)')
             p.aller(*plan2); self.etape(p.prise is plan2[0], 'le transport'); self.etape(p.descendre(), 'la pose')
-            self.ouvrir_a(max(largeur, 20.0) + 20); self.etape(p.monter(), 'la remontée'); p.repos()
+            self.lacher_doucement(max(largeur, 20.0), 40); time.sleep(0.3); self.etape(p.monter(), 'la remontée'); p.repos()    # seul sur la table : ouverture large, rien à côté
             o = seul(); arrive = (o['X'], o['Y']); e = math.hypot(arrive[0] - pt[0], arrive[1] - pt[1])
             if e > 90: raise ErreurServo(f'l\'objet est à {e:.0f} mm du point visé : il a roulé ou il est tombé. Rien n\'est enregistré pour ce point ; remets-le debout puis A.')
             nouvelles = C.apprendre(nouvelles, arrive, q); erreurs.append(e)
@@ -603,6 +603,7 @@ class Trieur(Poste):
         s'ouvre, toujours lentement, à la largeur voulue."""
         self.ouvrir_a(largeur + 6, VITESSE_LACHER); time.sleep(0.4)
         self.ouvrir_a(largeur + marge, VITESSE_LACHER)
+        time.sleep(0.2); self.p.monter_droit()                    # puis tout droit vers le haut, avant la remontée habituelle (qui part en biais)
 
     def transport_libre(self, haut, prise):
         """Le trajet objet en main, de la remontée jusqu'à la pose, ne heurte rien ? Renvoie l'obstacle touché ou None."""
@@ -617,7 +618,7 @@ class Trieur(Poste):
         inclinaison : c'est toujours possible, il venait de là), ouvre, remonte, revient au repos."""
         p, c = self.p, self.p.c
         p.aller(*self.plan_prise); self.etape(p.prise is self.plan_prise[0], 'le retour au point de prise')
-        self.etape(p.descendre(), 'la descente'); self.ouvrir_a(2 * self.tenu[3] + 16); self.tenu = None
+        self.etape(p.descendre(), 'la descente'); self.lacher_doucement(2 * self.tenu[3] - 4, 20); self.tenu = None
         self.etape(p.monter(), 'la remontée'); self.redresser(); p.repos()
 
     def poser(self, z, incl, largeur):

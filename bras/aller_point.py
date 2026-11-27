@@ -121,6 +121,25 @@ class Pointeur:
     def monter(self):
         if not self.haut: self.dire('   Vise d\'abord un point : v X Y'); return False
         return self.poser_bras(self.haut, 'Remontée')
+    def monter_droit(self, hauteur=40.0, marche=20.0):
+        """Après avoir lâché un objet : la pince monte À LA VERTICALE de `hauteur` mm, sans changer d'inclinaison, avant la remontée
+        habituelle. Celle-ci n'est pas verticale (épaule, coude et poignet tournent chacun vers leur angle d'arrivée, et quand le
+        bras a fléchi l'épaule se relève d'abord SEULE de 15° : la pince avance alors de 3 cm en penchant) : une mâchoire
+        accrochait le petit cylindre qu'elle venait de poser et le couchait (Nicolas, 27/11/2026 : « quand le bras remonte »).
+        On part de la position de prise calculée, on monte vers le haut : pas de contrôle de garde de table à faire."""
+        c = self.c
+        if not self.prise or getattr(self, 'incl', None) is None: return False
+        x, y, z, incl = G.ou_est_la_pince(**{k: self.prise[k] for k in ('socle', 'epaule', 'coude', 'flexion')}, hauteur_epaule=c.hauteur)
+        fait, dz = False, marche
+        while dz <= hauteur + 0.1 and not c.arret.is_set():
+            try: a = G.angles_pour(x, y, z + dz, c.hauteur, incl)
+            except G.HorsDePortee: break
+            if abs(a['socle'] - self.prise['socle']) > 1.0: break                       # pas la même solution : on laisse la remontée habituelle
+            try: c._verifier(a['epaule'], a['coude'], a['flexion'])
+            except ErreurServo: break
+            if not c._bouger([(c.epaule, E.position(a['epaule'], c.haut)), (c.coude, MILIEU + c.sc * pas(a['coude'])), (c.flexion, MILIEU + c.sf * pas(a['flexion']))], f'Montée droite de {dz:.0f} mm'): break
+            fait = True; dz += marche
+        self.vider(); return fait
     def glisser(self, X, Y, en_bas):
         """Petit déplacement de la pince vers un point voisin (X, Y), sans changer son inclinaison ni remonter : socle, épaule,
         coude et poignet bougent ensemble. en_bas : la pince est descendue sur le point (sinon elle est à l'approche)."""
