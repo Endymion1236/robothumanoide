@@ -184,3 +184,10 @@ Ordre d'impression conseillé : le berceau d'abord, pour y essayer le servo.
 **Le même jour** : tri validé sur le bras (pince étalonnée, bacs, voix avec Claude qui reconnaît les formes sur photo, humour),
 apprentissage automatique de la visée (touche A, « poser et regarder »), plan de montage des phalanges, poulie du doigt à fentes.
 Bacs de Nicolas : centres vers X ±385, Y 200-250, bord ≈ 14-18 cm. Sa pince s'ouvre à 133 mm.
+
+**27/11/2026 : le socle avait pris du jeu** (les 4 vis M2,5 du moyeu sur le palonnier du servo n° 1, 5,3 mm sous tête, s'étaient
+desserrées ; Nicolas les a resserrées). Symptôme : tous les objets posés 4 à 6 cm de côté, visée « de pire en pire », alors que
+la veille tout tombait juste. Leçon : devant un écart de CÔTÉ apparu d'un coup, faire vérifier le jeu du socle AVANT de toucher
+au programme (bras tenu, on le fait pivoter à la main). Ces vis sont le point faible du socle : frein-filet à proposer.
+Pions du morpion de Nicolas : petits ronds de **28 × 40 mm** (raccourcis) ; lancer avec `--hauteur 40` (`trier_pions.bat`, `morpion_pions.bat`).
+Lâcher : ouverture rapide et large, décalage de 6 mm à droite (`--decale`), montée droite de 40 mm ; l'ouverture lente a été retirée.
