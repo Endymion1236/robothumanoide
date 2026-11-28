@@ -25,7 +25,7 @@ from servos import ErreurServo
 from viser_camera import sans_accents, FLECHES
 
 NIVEAUX = {'1': 'facile', '2': 'normal', '3': 'imbattable'}
-ANGLES_RESERVE = (28.0, 42.0, -28.0, -42.0)   # les 4 emplacements des pions de Câlin : 2 à droite et 2 à gauche du plateau (2 seulement jusqu'au 27/11/2026)
+ANGLES_RESERVE = (32.0, 46.0, -32.0, -46.0)   # les 4 ronds bleus : 2 à droite et 2 à gauche. À 28° et 42°, le rond intérieur était trop près du plateau : une grosse pièce de Nicolas dans la colonne voisine empêchait la pince d'y descendre (calcul sur sa partie du 28/11/2026)
 LARGEUR_PION = 28.0                           # diamètre des pions de Câlin
 OUV_LARGE = 85.0                              # ouverture préférée pour prendre un pion (comme au tri) quand aucun voisin ne gêne
 OUV_PION = 68.0                               # ouverture de la pince pour prendre un pion de Ø 28 (40 mm de marge)
