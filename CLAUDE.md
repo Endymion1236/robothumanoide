@@ -225,3 +225,4 @@ arrêt d'urgence qui coupe les moteurs seuls ; petit ordinateur à bord + portab
 objet bas, une COLONNE qui monte et descend plutôt qu'un buste qui se penche (stabilité) ; pour rouler seul : lidar 2D, base
 large et lourde en bas, vitesse de marche lente. À demander avant tout dessin : sols et seuils du club-house, hauteurs à
 atteindre (table, sol ?), largeur des portes.
+**Décidé par Nicolas le 28/11/2026 : une COLONNE qui monte et descend (pas de buste qui se penche) ; on finit d'abord le morpion.**
