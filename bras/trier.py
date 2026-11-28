@@ -478,6 +478,16 @@ class Trieur(Poste):
         if arret: self.dire(f'Arrêt : {arret}. {bilan} Il reste {len(self.visee_reste)} point(s) : remets le pion debout, SEUL sur la table (F si un reflet gêne), puis A : je reprends où j\'en étais.')
         else: self.visee_reste = []; self.dire(f'Visée apprise. {bilan} Refais A pour mesurer l\'écart avec les nouvelles corrections.')
 
+    def fond_a_confirmer(self):
+        """Touche F alors que des objets sont encore vus : on prévient au lieu de photographier. Un fond pris avec des pions sur la
+        table les rend invisibles là où ils sont, et fait apparaître des « fantômes » dès qu'on les déplace (Nicolas, 27 et
+        28/11/2026 : pion sur son rond bleu non vu, étiquettes sur du vide). Un deuxième F dans les 8 secondes force la photo
+        (cas d'un reflet pris pour un objet, table réellement vide)."""
+        if self.fond is None or not self.objets or time.time() - getattr(self, '_f_demande', 0.0) < 8.0: self._f_demande = 0.0; return False
+        self._f_demande = time.time()
+        self.dire(f'Je vois encore {len(self.objets)} objet(s) sur la table : retire TOUT (pions et réserve compris), puis F. Si la table est vraiment vide, appuie encore une fois sur F.')
+        return True
+
     def tourner(self, angle):
         """Tourne la pince sur elle-même (bras en l'air, au repos ou au-dessus du point). La pose se fera pince tournée aussi."""
         c = self.p.c; c._poignet(angle); self.p.vider(); self.p.roulis_permis = abs(angle) > 15
@@ -735,7 +745,9 @@ class Trieur(Poste):
 
     def touche(self, k):
         kk = chr(k).lower() if 0 < k < 128 else ''
-        if kk == 'f': self.photo_fond(); return True
+        if kk == 'f':
+            if self.fond_a_confirmer(): return True
+            self.photo_fond(); return True
         if kk in ('t', '1'):
             if self.fond is None: self.dire('Il faut d\'abord la photo du fond : table VIDE, bras au repos, touche F.'); return True
             self.rates = []

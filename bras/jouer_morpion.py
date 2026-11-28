@@ -187,6 +187,7 @@ class Joueur(TR.Trieur):
     def touche(self, k):
         kk = chr(k).lower() if 0 < k < 128 else ''
         if kk == 'f':
+            if self.fond_a_confirmer(): return True
             self.photo_fond(); self.en_jeu = False; return True
         if kk in ('n', 'c'): self.nouvelle_partie(kk == 'c'); return True
         if kk == 'j':
