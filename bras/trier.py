@@ -859,7 +859,7 @@ def ecouter_consignes(t, a):
     except Exception as err: t.dire(f'L\'écoute s\'est arrêtée ({type(err).__name__} : {err}). Les touches marchent toujours.')
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--appui', type=float, default=12.0, help='avant de lâcher, la pince descend encore de ce nombre de mm au plus pour appuyer l\'objet sur la table (0 = aucun appui)'); ap.add_argument('--machoire-fixe', type=float, default=MACHOIRE_FIXE, help='distance (mm) de la mâchoire FIXE à l\'axe du bras, positive si elle est à droite vu de derrière, négative à gauche, 0 pour une pince symétrique'); ap.add_argument('--visee-cote', action='store_true', help='touche A : apprendre aussi l\'écart de côté (par défaut, seulement la distance)'); ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (si la mâchoire de droite arrive trop près de l\'objet ; négatif = gauche)'); ap.add_argument('--decale', type=float, default=DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)'); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
+    ap = argparse.ArgumentParser(); ap.add_argument('--reglages', action='store_true', help='lire les réglages de la pince et des pions dans mes_reglages.txt (double-clic dessus pour les modifier)'); ap.add_argument('--appui', type=float, default=12.0, help='avant de lâcher, la pince descend encore de ce nombre de mm au plus pour appuyer l\'objet sur la table (0 = aucun appui)'); ap.add_argument('--machoire-fixe', type=float, default=MACHOIRE_FIXE, help='distance (mm) de la mâchoire FIXE à l\'axe du bras, positive si elle est à droite vu de derrière, négative à gauche, 0 pour une pince symétrique'); ap.add_argument('--visee-cote', action='store_true', help='touche A : apprendre aussi l\'écart de côté (par défaut, seulement la distance)'); ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (si la mâchoire de droite arrive trop près de l\'objet ; négatif = gauche)'); ap.add_argument('--decale', type=float, default=DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)'); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
     ap.add_argument('--fenetre', type=int, default=700)
     ap.add_argument('--voix', action='store_true', help='écouter le micro : « range les ronds à gauche », « stop »')
     ap.add_argument('--clavier', action='store_true', help='taper les consignes dans cette fenêtre noire au lieu de les dire')
@@ -871,6 +871,10 @@ def main():
     ap.add_argument('--muet', action='store_true', help='Câlin répond à l\'écran seulement, sans voix')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs')
     ap.add_argument('--ia', default='sonnet', choices=['sonnet', 'opus']); a = ap.parse_args()
+    if a.reglages:                                                           # les valeurs du fichier remplacent celles par défaut
+        import reglages as RG
+        opts, texte = RG.charger(); print(texte)
+        for k, v in opts.items(): setattr(a, k, v)
     reglage = T.charger()
     if not reglage: print('Réglage de la table introuvable : lance d\'abord camera\\regler_table.bat'); return 1
     cam = cv2.VideoCapture(a.camera, cv2.CAP_DSHOW) if sys.platform == 'win32' else cv2.VideoCapture(a.camera)
