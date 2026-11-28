@@ -226,3 +226,12 @@ objet bas, une COLONNE qui monte et descend plutôt qu'un buste qui se penche (s
 large et lourde en bas, vitesse de marche lente. À demander avant tout dessin : sols et seuils du club-house, hauteurs à
 atteindre (table, sol ?), largeur des portes.
 **Décidé par Nicolas le 28/11/2026 : une COLONNE qui monte et descend (pas de buste qui se penche) ; on finit d'abord le morpion.**
+
+**Commandé par Nicolas le 28/11/2026 (rien de reçu ni de mesuré)** : 3 anneaux WS2812B de 12 LED, Ø ≈ 50 mm d'après l'annonce
+(trou ≈ 34 mm : pupille au centre) ; 4 micro-servos Miuzei MF90 (9 g, pignons métal, 4,8-6 V, type MG90S) ; 3 cartes ESP32
+WROOM-32 à 38 broches, USB-C, CP2102 ; bloc d'alimentation fermé LEICKE 12 V 10 A, fiche 5,5 × 2,5 mm, avec un adaptateur jack
+vers bornier à vis. Non confirmé : la webcam (UGREEN FineCam Lite à mise au point automatique, ou une 2e C270) et la carte
+d'extension à borniers (il en fallait une pour ESP32 WROOM 38 broches, PAS celle pour ESP32-S3 44 broches qu'il avait trouvée).
+À réception : tout mesurer avant de dessiner (anneaux : Ø extérieur, Ø du trou, épaisseur, fils soudés ou non ; servos : boîtier,
+pattes, axe, câble) ; alimentation : mesurer 12 V et repérer le + au multimètre AVANT de câbler, arriver sur le BORNIER de la
+carte Waveshare avec du fil de 1 mm² au moins. LED et micro-servos en 5 V par un convertisseur à part, jamais sur le 12 V.
