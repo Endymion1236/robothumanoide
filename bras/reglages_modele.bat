@@ -18,3 +18,7 @@ set DECALE=6
 
 rem Retouche de la visee de prise, en mm vers la droite (negatif = vers la gauche). Laisse 0 en temps normal.
 set DECALE_PRISE=0
+
+rem Avant de lacher un pion, la pince descend encore de ce nombre de mm au plus pour l'appuyer sur la table.
+rem Le pion est pose trop pres ou trop loin dans sa case, ou il est ecrase -> essaie 6, puis 0 (aucun appui).
+set APPUI=12

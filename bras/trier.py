@@ -649,7 +649,7 @@ class Trieur(Poste):
         monte tout droit. L'ouverture lente en deux temps, essayée le 27/11/2026, était pire : le pion, léger, restait collé au
         tapis de la mâchoire de droite et la suivait (apprentissage de Nicolas : tous les pions posés 4 à 6 cm trop à droite,
         puis couchés). Ouverte vite, la mâchoire se décolle du pion avant qu'il ait bougé."""
-        if appuyer: self.p.appuyer()                                # l'objet appuyé sur la table ne suit pas la mâchoire qui s'ouvre
+        if appuyer: self.p.appuyer(getattr(self, 'appui', 12.0))                                # l'objet appuyé sur la table ne suit pas la mâchoire qui s'ouvre
         self.ouvrir_a(largeur + marge)
         time.sleep(0.2); self.p.monter_droit(decale=getattr(self, 'decale_lacher', DECALE_LACHER) if decale is None else decale)                    # puis tout droit vers le haut, avant la remontée habituelle (qui part en biais)
 
@@ -859,7 +859,7 @@ def ecouter_consignes(t, a):
     except Exception as err: t.dire(f'L\'écoute s\'est arrêtée ({type(err).__name__} : {err}). Les touches marchent toujours.')
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--machoire-fixe', type=float, default=MACHOIRE_FIXE, help='distance (mm) de la mâchoire FIXE à l\'axe du bras, positive si elle est à droite vu de derrière, négative à gauche, 0 pour une pince symétrique'); ap.add_argument('--visee-cote', action='store_true', help='touche A : apprendre aussi l\'écart de côté (par défaut, seulement la distance)'); ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (si la mâchoire de droite arrive trop près de l\'objet ; négatif = gauche)'); ap.add_argument('--decale', type=float, default=DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)'); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
+    ap = argparse.ArgumentParser(); ap.add_argument('--appui', type=float, default=12.0, help='avant de lâcher, la pince descend encore de ce nombre de mm au plus pour appuyer l\'objet sur la table (0 = aucun appui)'); ap.add_argument('--machoire-fixe', type=float, default=MACHOIRE_FIXE, help='distance (mm) de la mâchoire FIXE à l\'axe du bras, positive si elle est à droite vu de derrière, négative à gauche, 0 pour une pince symétrique'); ap.add_argument('--visee-cote', action='store_true', help='touche A : apprendre aussi l\'écart de côté (par défaut, seulement la distance)'); ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (si la mâchoire de droite arrive trop près de l\'objet ; négatif = gauche)'); ap.add_argument('--decale', type=float, default=DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)'); ap.add_argument('--camera', type=int, default=1); ap.add_argument('--hauteur', type=float, default=O.HAUTEUR_OBJETS)
     ap.add_argument('--fenetre', type=int, default=700)
     ap.add_argument('--voix', action='store_true', help='écouter le micro : « range les ronds à gauche », « stop »')
     ap.add_argument('--clavier', action='store_true', help='taper les consignes dans cette fenêtre noire au lieu de les dire')
@@ -880,7 +880,7 @@ def main():
     except ErreurServo as err: print('Impossible de commencer :', err); cam.release(); return 1
     try: verifier_zones(p.c.hauteur)
     except G.HorsDePortee as e: print('Une zone de dépôt est hors de portée :', e); cam.release(); return A.terminer(p)
-    t = Trieur(p, reglage, a.hauteur); t.decale_lacher = a.decale; t.decale_prise = a.decale_prise; globals().update(MACHOIRE_FIXE=a.machoire_fixe); t.visee_cote = a.visee_cote; ech = {'v': 1.0}
+    t = Trieur(p, reglage, a.hauteur); t.decale_lacher = a.decale; t.decale_prise = a.decale_prise; t.appui = a.appui; globals().update(MACHOIRE_FIXE=a.machoire_fixe); t.visee_cote = a.visee_cote; ech = {'v': 1.0}
     t.modele_ia = {'sonnet': 'claude-sonnet-5-5', 'opus': 'claude-opus-5-5'}[a.ia]
     if (a.voix or a.clavier) and not a.muet: t.parole = CV.Parole(a.voix_pc)
     if a.voix or a.clavier:

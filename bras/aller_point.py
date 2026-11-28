@@ -123,15 +123,15 @@ class Pointeur:
     def monter(self):
         if not self.haut: self.dire('   Vise d\'abord un point : v X Y'); return False
         return self.poser_bras(self.haut, 'Remontée')
-    def appuyer(self):
+    def appuyer(self, mm=12.0):
         """Avant de lâcher un objet tenu : la pince descend encore un peu (6 mm d'un trait, puis des marches de 3 mm jusqu'à sentir
         la table, 12 mm au plus) pour que l'objet soit APPUYÉ sur la table quand les mâchoires s'ouvrent. Posé au ras de la table
         ou quelques millimètres au-dessus, un pion léger suivait la mâchoire qui s'ouvre et sortait de sa case (Nicolas,
         27/11/2026 : « quand il a ouvert la pince, ça a poussé le pion à l'extérieur »). S'il touche avant, il glisse entre les
         mâchoires (serrage à 20 %) : rien ne force."""
-        if not self.prise: return False
+        if not self.prise or mm < 1: return False
         x, y, _, _ = G.ou_est_la_pince(**{k: self.prise[k] for k in ('socle', 'epaule', 'coude', 'flexion')}, hauteur_epaule=self.c.hauteur)
-        try: return self.descendre_au_contact(x, y, pas_mm=3.0, plancher=10.0, d_un_trait=16.0, rester=True)[0]
+        try: return self.descendre_au_contact(x, y, pas_mm=3.0, plancher=22.0 - mm, d_un_trait=22.0 - min(mm, 6.0), rester=True)[0]      # mm : descente totale au plus (--appui)
         except ErreurServo: return False
 
     def monter_droit(self, hauteur=40.0, marche=20.0, decale=0.0):

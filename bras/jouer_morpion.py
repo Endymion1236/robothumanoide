@@ -263,6 +263,7 @@ def main():
     ap.add_argument('--decale', type=float, default=TR.DECALE_LACHER, help='après un lâcher, décalage de la pince vers sa droite avant de monter, en mm (négatif = gauche, 0 = aucun)')
     ap.add_argument('--decale-prise', type=float, default=0.0, help='pour SAISIR, la pince vise ce nombre de mm plus à droite (négatif = gauche)')
     ap.add_argument('--machoire-fixe', type=float, default=TR.MACHOIRE_FIXE, help='distance (mm) de la mâchoire FIXE à l\'axe du bras, positive à droite vu de derrière, négative à gauche, 0 = pince symétrique')
+    ap.add_argument('--appui', type=float, default=12.0, help='avant de lâcher, la pince descend encore de ce nombre de mm au plus pour appuyer l\'objet sur la table (0 = aucun appui)')
     ap.add_argument('--muet', action='store_true', help='Câlin écrit ses phrases sans les dire')
     ap.add_argument('--voix-pc', action='store_true', help='voix de Windows au lieu d\'ElevenLabs'); a = ap.parse_args()
     reglage = T.charger()
@@ -273,7 +274,7 @@ def main():
     try: p = A.Pointeur()
     except ErreurServo as err: print('Impossible de commencer :', err); cam.release(); return 1
     t = Joueur(p, reglage, a.hauteur, niveau=a.niveau)
-    t.decale_lacher = a.decale; t.decale_prise = a.decale_prise; TR.MACHOIRE_FIXE = a.machoire_fixe
+    t.decale_lacher = a.decale; t.decale_prise = a.decale_prise; t.appui = a.appui; TR.MACHOIRE_FIXE = a.machoire_fixe
     servies = [len(cases_servies(sp, p.c.hauteur, t.corrections, a.hauteur)) for sp in t.spots()]
     t.dire(f'Pions de {a.hauteur:.0f} mm de haut' + (' (prise au contact, pince raide)' if a.hauteur < TR.OBJET_BAS else '') + f' ; depuis mes {len(servies)} ronds bleus, j\'atteins au moins {min(servies)} cases sur 9.')
     if not a.muet: t.parole = CV.Parole(a.voix_pc)
