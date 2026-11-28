@@ -68,7 +68,14 @@ class Joueur(TR.Trieur):
         vu, _ = M.lire_plateau(self.objets, connue=self.grille)
         if vu != self.stable: self.stable, self.depuis = vu, time.time(); return
         if not forcer and time.time() - self.depuis < 1.2: return
-        if getattr(O.trouver, 'lumiere', None): return                           # une main ou une ombre dans le champ : on attend
+        # Une main ou une ombre SUR LE PLATEAU : on attend. Ailleurs sur la table (un pion couché près de la réserve, une tache de
+        # soleil), ça ne doit pas empêcher de lire le coup : la partie restait bloquée sans rien dire (Nicolas, 28/11/2026).
+        d = 1.5 * M.CASE + 40
+        gene = [l for l in (getattr(O.trouver, 'lumiere', None) or []) if abs(l[0] - M.CENTRE[0]) < d and abs(l[1] - M.CENTRE[1]) < d]
+        if gene:
+            if time.time() - self.depuis > 4 and self.averti != 'ombre':
+                self.averti = 'ombre'; self.dire('Quelque chose de grand couvre le plateau (main, ombre, objet trop gros pour un pion) : je ne lis pas ton coup. Dégage le plateau.')
+            return
         case, souci = M.coup_de_nicolas(self.grille, vu)
         if souci:
             if souci != self.averti: self.averti = souci; self.parler_et_dire(M.phrase('triche', raison=souci))
@@ -225,6 +232,8 @@ class Joueur(TR.Trieur):
                 elif v == M.NICOLAS: cv2.drawMarker(image, pt(x, y), (0, 0, 255), cv2.MARKER_TILTED_CROSS, 44, 3)
             for x, y in self.spots():
                 cv2.circle(image, pt(x, y), 26, bleu, 2); V.ecrire(image, 'pion de Calin', pt(x - 40, y - 34), (255, 200, 80), 0.45)
+            for X, Y, _ in (getattr(O.trouver, 'lumiere', None) or []):              # ce que la caméra voit mais ne compte pas comme un objet
+                q = pt(X, Y); cv2.circle(image, q, 8, (80, 80, 255), 2); V.ecrire(image, 'trop gros : pas un pion', (q[0] + 10, q[1] + 6), (80, 80, 255), 0.45)
             for o in self.objets:                                                # chaque pièce vue : à qui elle est, et la mesure qui le décide
                 petit = M.est_petit(o); coul = (0, 255, 255) if petit else (0, 140, 255); q = pt(o['X'], o['Y'])
                 cv2.circle(image, q, 5, coul, -1)
