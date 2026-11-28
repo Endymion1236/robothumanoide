@@ -57,7 +57,7 @@ class Joueur(TR.Trieur):
         g, reserve = M.lire_plateau(self.objets, spots=self.spots())
         if any(g): self.dire('Il reste des pions sur le plateau : vide les 9 cases, puis N.'); return
         if not reserve: self.dire('Il me faut au moins un pion sur un rond bleu (ma réserve) : je ne prends que ceux-là, les autres sont trop loin pour ma pince.'); return
-        self.grille, self.en_jeu, self.stable, self.averti = [M.VIDE] * 9, True, None, None
+        self.grille, self.en_jeu, self.stable, self.averti = [M.VIDE] * 9, True, None, None; self.coup_prevu = None
         self.dire(f'Nouvelle partie, niveau {self.niveau}.')
         if calin_commence: self.parler_et_dire(M.phrase('debut_calin')); self.tour = M.CALIN; self.lancer_coup()
         else: self.parler_et_dire(M.phrase('debut_nicolas')); self.tour = M.NICOLAS
@@ -97,16 +97,27 @@ class Joueur(TR.Trieur):
 
     def jouer_un_coup(self):
         p, c = self.p, self.p.c; h = c.hauteur
-        case = M.choisir_coup(self.grille, self.niveau)
-        bloque = any(M.gagnant(self.grille[:k] + [M.NICOLAS] + self.grille[k + 1:]) == M.NICOLAS for k in [case])
-        gagne = M.gagnant(self.grille[:case] + [M.CALIN] + self.grille[case + 1:]) == M.CALIN
-        self.parler_et_dire(M.phrase('gagne' if gagne else 'bloque' if bloque else 'coup', c=M.nom_case(case)))
+        case = getattr(self, 'coup_prevu', None)
+        if case is not None and self.grille[case]: case = None
+        if case is None:                                                       # nouveau coup : on le choisit et on l'annonce une seule fois
+            case = self.coup_prevu = M.choisir_coup(self.grille, self.niveau)
+            bloque = any(M.gagnant(self.grille[:k] + [M.NICOLAS] + self.grille[k + 1:]) == M.NICOLAS for k in [case])
+            gagne = M.gagnant(self.grille[:case] + [M.CALIN] + self.grille[case + 1:]) == M.CALIN
+            self.parler_et_dire(M.phrase('gagne' if gagne else 'bloque' if bloque else 'coup', c=M.nom_case(case)))
         cible = M.centre_case(case)
         for essai in range(2):
             p.repos(); self.redresser(); objets = self.regarder()
+            # Nicolas a posé le pion pour moi (je le lui avais demandé) : le coup est joué.
+            if M.lire_plateau(objets, connue=self.grille)[0][case]:
+                self.parler_et_dire(M.phrase('merci_aide', c=M.nom_case(case))); return self.apres_mon_coup(case)
             _, reserve = M.lire_plateau(objets, spots=self.spots())
             plan = self.plan_du_coup(reserve, objets, cible)
-            if plan is None: self.parler_et_dire(M.phrase('plus_de_pion')); self.dire('Quand c\'est fait, appuie sur J : je rejoue.'); return
+            if plan is None:
+                # Pas de pion sur un rond bleu, ou la case est entourée de pièces que la pince toucherait (plateau presque
+                # plein, gros objets : partie de Nicolas du 28/11/2026, « il me dit qu'il n'a plus de pion » alors qu'il en
+                # restait deux). Dans ce cas Câlin demande de l'aide au lieu de prétendre que sa réserve est vide.
+                self.parler_et_dire(M.phrase('aide' if reserve else 'plus_de_pion', c=M.nom_case(case)))
+                self.dire('Quand c\'est fait, appuie sur J.'); return
             o, visee, ip, q, iq, leve, ouv = plan
             pr = p.preparer(*visee, ip)
             if not pr: raise ErreurServo('prise impossible')
@@ -129,8 +140,12 @@ class Joueur(TR.Trieur):
         self.etape(p.monter(), 'la remontée'); p.repos()
         # contrôle : mon pion est-il bien dans sa case ?
         attendu = self.grille[:]; attendu[case] = M.CALIN; vu, _ = M.lire_plateau(self.regarder(), connue=attendu)
-        self.grille = attendu; self.dire(f'   {M.dessin(self.grille)}')
         if vu[case] != M.CALIN: self.parler_et_dire(M.phrase('rate', c=M.nom_case(case)))
+        self.apres_mon_coup(case)
+
+    def apres_mon_coup(self, case):
+        """Mon pion est en `case` (posé par moi, ou par Nicolas à ma demande) : on note, et c'est à Nicolas."""
+        self.grille[case] = M.CALIN; self.coup_prevu = None; self.dire(f'   {M.dessin(self.grille)}')
         if self.fin_de_partie(): return
         self.tour, self.stable = M.NICOLAS, None
         reste = M.lire_plateau(self.objets, spots=self.spots())[1]

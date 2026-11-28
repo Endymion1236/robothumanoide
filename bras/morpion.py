@@ -112,6 +112,8 @@ PHRASES = {
     'nul': ['Match nul ! On est aussi têtus l\'un que l\'autre.', 'Égalité. Comme deux poneys devant la même carotte.'],
     'a_toi': ['À toi.', 'À ton tour.', 'C\'est à toi de jouer.'],
     'rate': ['Oups, je l\'ai mal posé. Tu peux remettre mon pion en case {c} ?', 'Raté ! Mon pion devrait être en case {c} : un coup de main ?'],
+    'aide': ['Je n\'arrive pas à poser en case {c} sans bousculer un voisin. Tu peux y mettre un de mes pions pour moi ?', 'La case {c} est trop entourée pour ma pince. Un coup de main ? Pose-y un de mes pions, s\'il te plaît.', 'Case {c} : trop serré pour moi, je ne suis qu\'un bras ! Tu poses mon pion ?'],
+    'merci_aide': ['Merci ! Mon pion est en case {c}.', 'Merci pour le coup de main, case {c} !'],
     'plus_de_pion': ['Je n\'ai pas de pion à prendre : pose-m\'en un petit sur un rond bleu.', 'Ma réserve est vide ! Un petit pion sur un rond bleu, et je joue.'],
     'triche': ['Hé ! {raison}.', 'Minute : {raison}.'],
 }
