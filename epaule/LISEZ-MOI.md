@@ -219,7 +219,7 @@ Les deux moitiés du bras ont une cuvette ronde côté plateau : son plafond s'i
 | Vis M3 × 30 | 4 | entretoises du haut du bras : au fond de puits de 13 mm dans la moitié haute (tournevis fin) ; 5 mm de prise dans la moitié basse |
 | Vis Ø 2,6 × 9 fournies avec le servo | 8 à 16 | disques du servo (4 par disque suffisent pour un premier essai) |
 
-### Montage, dans l'ordre (plan illustré à faire quand les pièces seront validées)
+### Montage, dans l'ordre — **plan illustré : `sortie/plan_montage_epaule_3095.pdf`** (`plan_montage_3095.py`, 8 étapes, 28/11/2026)
 1. **Avant tout : le servo seul sur la carte**, pour changer son numéro (neuf, il a sans doute le n° 1 du socle) et régler ses
    butées. Vérifier le 12 V sur l'étiquette. Limiter le couple dans le programme : ce servo est trois fois plus fort.
 2. Inserts : 4 dans le socle du berceau (par la face qui touche le mur), 2 sur le dessus des joues, 4 dans la moitié basse.

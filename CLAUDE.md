@@ -235,3 +235,8 @@ d'extension à borniers (il en fallait une pour ESP32 WROOM 38 broches, PAS cell
 À réception : tout mesurer avant de dessiner (anneaux : Ø extérieur, Ø du trou, épaisseur, fils soudés ou non ; servos : boîtier,
 pattes, axe, câble) ; alimentation : mesurer 12 V et repérer le + au multimètre AVANT de câbler, arriver sur le BORNIER de la
 carte Waveshare avec du fil de 1 mm² au moins. LED et micro-servos en 5 V par un convertisseur à part, jamais sur le 12 V.
+
+**28/11/2026 : Nicolas a imprimé le berceau du STS3095 et les deux moitiés du haut du bras ; PAS la bride ni le bâti.** Plan de
+montage illustré fait : `epaule/sortie/plan_montage_epaule_3095.pdf` (`epaule/plan_montage_3095.py`, 8 étapes). Sans bride ni
+bâti : montage à blanc sur la table et essais À LA MAIN seulement. Avant tout mouvement au moteur : bride, bâti, bloc 12 V 10 A,
+numéro du servo changé (neuf = n° 1 sans doute), butées et limite de couple. Servo à 2048 = haut du bras à l'horizontale.
