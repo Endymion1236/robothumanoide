@@ -216,3 +216,12 @@ IA hébergée chez lui plutôt que le cloud (piste : Ollama + petit modèle ouve
 Confirmé par Nicolas (photo du 27/11/2026 au soir) : mâchoire FIXE à droite, la mâchoire de gauche (sur le palonnier) pousse les
 objets dessus ; bras coudés, tapis antidérapant à gros relief qui se décolle en bas des deux mâchoires (à recoller à plat : il
 change la cote de 36 mm). Les anciennes corrections de côté (`da`) sont ignorées au chargement par `trier.py`.
+
+**Robot complet, souhaits de Nicolas (28/11/2026)** : deux bras, tête, **base roulante qui se déplace SEULE dans le club-house**,
+et possibilité d'**attraper des objets plus bas** (il pensait « se pencher en avant »). Conseils donnés, rien de décidé ni de
+dessiné : rester sur secteur tant que ça ne roule pas (12 V, 10-15 A dès le STS3095, ≈ 30 A pour le robot complet) ; pour rouler,
+batterie LiFePO4 12 V (vérifier que les servos « 12 V » supportent ≈ 14 V) ; une carte Waveshare par bras, fusible par branche,
+arrêt d'urgence qui coupe les moteurs seuls ; petit ordinateur à bord + portable en Wi-Fi pour l'IA ; pour descendre vers un
+objet bas, une COLONNE qui monte et descend plutôt qu'un buste qui se penche (stabilité) ; pour rouler seul : lidar 2D, base
+large et lourde en bas, vitesse de marche lente. À demander avant tout dessin : sols et seuils du club-house, hauteurs à
+atteindre (table, sol ?), largeur des portes.
